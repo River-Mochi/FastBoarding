@@ -12,6 +12,7 @@ namespace BoardingTime
     using Game.Vehicles;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using Unity.Collections;
     using Unity.Entities;
     using PrefabRef = Game.Prefabs.PrefabRef;
@@ -82,13 +83,7 @@ namespace BoardingTime
                     return;
                 }
 
-                if (!m_LoggedActive)
-                {
-                    m_LoggedActive = true;
-                    LogUtils.Info(
-                        Mod.s_Log,
-                        () => $"Cancel late boarders active. interval={GetUpdateInterval(SystemUpdatePhase.GameSimulation)} frames, cap={MaxCancellationsPerUpdate} per update. {BoardingRuntimeSettings.DescribeForLog()}");
-                }
+                LogActiveOnce();
 
                 if (IsPlayerUsingTool())
                 {
@@ -290,6 +285,21 @@ namespace BoardingTime
             return activeTool != null && activeTool != m_DefaultToolSystem;
         }
 
+        [Conditional("DEBUG")]
+        private void LogActiveOnce()
+        {
+            if (m_LoggedActive)
+            {
+                return;
+            }
+
+            m_LoggedActive = true;
+            LogUtils.Info(
+                Mod.s_Log,
+                () => $"Cancel late boarders active. interval={GetUpdateInterval(SystemUpdatePhase.GameSimulation)} frames, cap={MaxCancellationsPerUpdate} per update. {BoardingRuntimeSettings.DescribeForLog()}");
+        }
+
+        [Conditional("DEBUG")]
         private void LogPassSummary(uint frame, PassStats stats, string reason)
         {
             m_TotalCanceled += stats.Canceled;

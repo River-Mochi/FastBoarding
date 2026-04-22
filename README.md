@@ -39,7 +39,7 @@ If a passenger assigned to that vehicle still is not ready, the mod can cancel t
 
 ### Credits
 - River-Mochi mod author
-- Original inspiration came from `All Aboard` mod.
+- Inspiration and thanks to bcallender's All Aboard mod.
 
 
 All Aboard solved the problem inside the vehicle AI itself. It changed the exact “should this bus/train keep waiting?” logic,

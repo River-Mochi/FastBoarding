@@ -154,7 +154,7 @@ namespace BoardingTime
                 { TransitWaitStatus.KeyReportWorstLineEntity, "Worst line entity: {0}" },
                 { TransitWaitStatus.KeyReportWorstLineWaypointAverage, "Worst line waypoint avg: {0} with {1} waiting" },
                 { TransitWaitStatus.KeyReportTopWorstStopsHeader, "Top {0} worst stops by average wait:" },
-                { TransitWaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | avg {2} | waiting {3} | stop entity {4} | line {5} | line entity {6} | waypoint {7}" },
+                { TransitWaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | avg {2} | waiting {3} | stop entity {4} | waypoint entity {5} | line entity {6} | line hint {7}" },
                 { TransitWaitStatus.KeyReportLateGroups, "Late group passengers left alone: {0} passengers in {1} groups on {2} vehicles" },
                 { TransitWaitStatus.KeyReportNone, "none" },
                 { TransitWaitStatus.KeyReportUnknown, "(unknown)" },

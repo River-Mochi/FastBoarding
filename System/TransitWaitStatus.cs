@@ -337,15 +337,15 @@ namespace BoardingTime
                 TransitWaitStatusSystem.WorstStopSnapshot stop = family.TopWorstStops[i];
                 sb.AppendLine(FormatReport(
                     KeyReportTopWorstStopLine,
-                    "{0}. {1} | avg {2} | waiting {3} | stop entity {4} | line {5} | line entity {6} | waypoint {7}",
+                    "{0}. {1} | avg {2} | waiting {3} | stop entity {4} | waypoint entity {5} | line entity {6} | line hint {7}",
                     LocaleUtils.FormatN0(i + 1),
                     TextOrUnknown(stop.StopName),
                     FormatDuration(stop.AverageWaitSeconds),
                     LocaleUtils.FormatN0(stop.WaitingPassengers),
                     EntityText(stop.StopEntity),
-                    TextOrUnknown(stop.LineName),
+                    EntityText(stop.WaypointEntity),
                     EntityText(stop.LineEntity),
-                    EntityText(stop.WaypointEntity)));
+                    TextOrUnknown(stop.LineName)));
             }
         }
 

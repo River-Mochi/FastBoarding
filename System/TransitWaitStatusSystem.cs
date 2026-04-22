@@ -709,7 +709,15 @@ namespace BoardingTime
                 return NormalizeWhitespace(name);
             }
 
-            return NormalizeWhitespace(m_NameSystem.GetDebugName(lineEntity));
+            string debugName = NormalizeWhitespace(m_NameSystem.GetDebugName(lineEntity));
+            return IsGenericLineToolName(debugName)
+                ? string.Empty
+                : debugName;
+        }
+
+        private static bool IsGenericLineToolName(string name)
+        {
+            return name.EndsWith(" Line Tool", System.StringComparison.OrdinalIgnoreCase);
         }
 
         private static string SimplifyStopName(string name, TransportType transportType)

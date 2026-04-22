@@ -26,12 +26,12 @@ namespace BoardingTime
                 return false;
             }
 
-            if (!log.isLevelEnabled(Level.Warn))
+            if (!IsLevelEnabled(log, Level.Warn))
             {
                 return false;
             }
 
-            string fullKey = log.name + "|" + key;
+            string fullKey = GetLogName(log) + "|" + key;
 
             lock (s_WarnOnceLock)
             {
@@ -67,7 +67,7 @@ namespace BoardingTime
                 return;
             }
 
-            if (!log.isLevelEnabled(level))
+            if (!IsLevelEnabled(log, level))
             {
                 return;
             }
@@ -98,7 +98,7 @@ namespace BoardingTime
         {
             try
             {
-                if (log != null && log.isLevelEnabled(level))
+                if (log != null && IsLevelEnabled(log, level))
                 {
                     AppendDirect(log, level, message, null);
                 }
@@ -143,17 +143,50 @@ namespace BoardingTime
 
         private static string GetLogPath(ILog log)
         {
-            if (!string.IsNullOrEmpty(log.logPath))
+            try
             {
-                return log.logPath;
-            }
+                if (!string.IsNullOrEmpty(log.logPath))
+                {
+                    return log.logPath;
+                }
 
-            if (string.IsNullOrEmpty(log.name))
+                string logName = GetLogName(log);
+                if (string.IsNullOrEmpty(logName))
+                {
+                    return string.Empty;
+                }
+
+                return Path.Combine(LogManager.kDefaultLogPath, logName + ".log");
+            }
+            catch
             {
-                return string.Empty;
+                return Path.Combine(LogManager.kDefaultLogPath, Mod.ModId + ".log");
             }
+        }
 
-            return Path.Combine(LogManager.kDefaultLogPath, log.name + ".log");
+        private static string GetLogName(ILog log)
+        {
+            try
+            {
+                return string.IsNullOrEmpty(log.name) ? Mod.ModId : log.name;
+            }
+            catch
+            {
+                return Mod.ModId;
+            }
+        }
+
+        private static bool IsLevelEnabled(ILog log, Level level)
+        {
+            try
+            {
+                return log.isLevelEnabled(level);
+            }
+            catch
+            {
+                // If Colossal logging state is in flux, prefer keeping direct-file logging alive.
+                return true;
+            }
         }
 
         private static string GetLevelName(Level level)
