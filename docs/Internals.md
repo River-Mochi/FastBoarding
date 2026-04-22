@@ -14,7 +14,7 @@ This is a map for the mod. It records the important assumptions from decompiled 
 
 | File | Role | Runs during city simulation? |
 | --- | --- | --- |
-| `System/TransportStopTuningSystem.cs` | One-shot retune of passenger `TransportStopData` prefab components after speed sliders change. | Only briefly after load or slider changes. |
+| `System/TransportStopTuningSystem.cs` | One-shot retune of passenger `TransportStopData` prefab components after speed sliders change. At `1x`, untouched prefabs are skipped; only previously marked FB prefabs are restored. | Only briefly after load or slider changes. |
 | `System/LateBoarderCancelSystem.cs` | Optional beta pass that lets solo not-ready passengers miss a vehicle after vanilla departure time. | Yes, only while toggle is enabled. |
 | `System/Status/TransitWaitStatus.cs` | Cached UI-facing text and detailed log report formatting. | No per-frame simulation work; called by Options UI/status buttons. |
 | `System/Status/TransitWaitStatusSystem.cs` | On-demand ECS snapshot builder for wait stats and late group diagnostics. | Only when Options UI requests status/report. |
@@ -65,6 +65,8 @@ tunedStop.m_BoardingTime = authoringStop.m_BoardingTime / speedMultiplier
 
 The important detail is that the calculation always starts from the authoring `TransportStop` prefab values, not from the last tuned `TransportStopData`.
 - avoids cumulative scaling when players move sliders repeatedly.
+
+At `1x`, FB uses a strict no-op rule: if a stop prefab has no `TransportStopTuningMarker`, the system does not write `TransportStopData`. If the marker exists, FB restores vanilla authoring values and removes the marker.
 
 ## Cancel Late Boarders
 

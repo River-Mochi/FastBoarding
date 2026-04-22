@@ -62,6 +62,14 @@ namespace FastBoarding
                 }
 
                 int speedFactor = GetSpeedFactor(authoringStop.m_TransportType);
+                bool hasMarker = EntityManager.HasComponent<TransportStopTuningMarker>(prefabEntity);
+
+                if (speedFactor == Setting.DefaultSpeedFactor && !hasMarker)
+                {
+                    // Strict vanilla/no-op path: leave untouched stop prefabs alone at 1x.
+                    continue;
+                }
+
                 float speedMultiplier = speedFactor;
                 // Authoring loading factor is stored as delta-from-1; runtime tuning uses the effective value.
                 var baseEffectiveLoading = math.max(0f, 1f + authoringStop.m_LoadingFactor);
@@ -71,26 +79,26 @@ namespace FastBoarding
                 // Higher loading factor helps passengers board faster; lower boarding time shortens dwell.
                 tunedStop.m_LoadingFactor = baseEffectiveLoading * speedMultiplier - 1f;
                 tunedStop.m_BoardingTime = authoringStop.m_BoardingTime / speedMultiplier;
-                EntityManager.SetComponentData(prefabEntity, tunedStop);
-                updatedPrefabs++;
 
                 if (speedFactor == Setting.DefaultSpeedFactor)
                 {
-                    // Vanilla slider value removes our marker so saved data stays clean.
-                    if (EntityManager.HasComponent<TransportStopTuningMarker>(prefabEntity))
-                    {
-                        EntityManager.RemoveComponent<TransportStopTuningMarker>(prefabEntity);
-                    }
+                    // Restore only prefabs we previously marked, then remove our marker.
+                    EntityManager.SetComponentData(prefabEntity, tunedStop);
+                    EntityManager.RemoveComponent<TransportStopTuningMarker>(prefabEntity);
+                    updatedPrefabs++;
                 }
                 else
                 {
+                    EntityManager.SetComponentData(prefabEntity, tunedStop);
+                    updatedPrefabs++;
+
                     var marker = new TransportStopTuningMarker
                     {
                         m_LoadingFactor = tunedStop.m_LoadingFactor,
                         m_BoardingTime = tunedStop.m_BoardingTime
                     };
 
-                    if (EntityManager.HasComponent<TransportStopTuningMarker>(prefabEntity))
+                    if (hasMarker)
                     {
                         var currentMarker = EntityManager.GetComponentData<TransportStopTuningMarker>(prefabEntity);
                         if (math.abs(currentMarker.m_LoadingFactor - marker.m_LoadingFactor) > FloatEpsilon ||
