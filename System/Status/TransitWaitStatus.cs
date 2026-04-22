@@ -42,6 +42,8 @@ namespace FastBoarding
         public const string KeyReportNone = "FB_REPORT_NONE";
         public const string KeyReportUnknown = "FB_REPORT_UNKNOWN";
 
+        private const int ReportHeaderWidth = 60;
+
         public static int RefreshIntervalSeconds { get; set; } = 15;
 
         public static string BusSummary { get; private set; } = string.Empty;
@@ -188,9 +190,10 @@ namespace FastBoarding
                 // Keep this verbose output in the log, not the cramped Options UI row.
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine();
-                sb.AppendLine(Localize(KeyReportTitle, "========== [FB] TRANSIT BOARDING STATUS REPORT =========="));
-                sb.AppendLine(FormatReport(KeyReportSettings, "Settings: {0}", BoardingRuntimeSettings.DescribeForLog()));
-                sb.AppendLine(Localize(KeyReportNote, "Note: Worst line is a hint from the highest-wait waypoint at the worst stop."));
+                AppendSectionHeader(sb, Localize(KeyReportTitle, "Fast Boarding transit status report"));
+                AppendField(sb, "Generated local", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                AppendField(sb, "Settings", BoardingRuntimeSettings.DescribeForLog());
+                AppendField(sb, "Note", Localize(KeyReportNote, "Worst line is a hint from the highest-wait waypoint at the worst stop."));
 
                 AppendFamilyReport(sb, "Bus", snapshot.Bus, s_BusLateBoardersToday);
                 AppendFamilyReport(sb, "Tram", snapshot.Tram, s_TramLateBoardersToday);
@@ -200,7 +203,7 @@ namespace FastBoarding
                 AppendFamilyReport(sb, "Ship", snapshot.Ship, s_ShipLateBoardersToday);
                 AppendFamilyReport(sb, "Airplane", snapshot.Air, s_AirLateBoardersToday);
 
-                sb.AppendLine("==========================================================");
+                AppendDivider(sb);
 
                 LogUtils.Info(Mod.s_Log, () => sb.ToString());
             }
@@ -279,26 +282,24 @@ namespace FastBoarding
             long lateBoardersCanceledToday)
         {
             sb.AppendLine();
-            sb.AppendLine(FormatReport(KeyReportFamilyHeader, "--- {0} ---", label));
+            AppendSectionHeader(sb, FormatReport(KeyReportFamilyHeader, "{0}", label));
 
             if (family.StopCount == 0)
             {
-                sb.AppendLine(FormatReport(KeyReportServedStops, "Served stops: {0}", "0"));
+                AppendField(sb, "Served stops", "0");
                 sb.AppendLine(Localize(KeyNoStopsFound, "No stops found."));
                 return;
             }
 
-            sb.AppendLine(FormatReport(KeyReportServedStops, "Served stops: {0}", LocaleUtils.FormatN0(family.StopCount)));
-            sb.AppendLine(FormatReport(KeyReportStopsWithWaiting, "Stops with waiting passengers: {0}", LocaleUtils.FormatN0(family.ActiveQueueStops)));
-            sb.AppendLine(FormatReport(KeyReportWaitingPassengers, "Waiting passengers: {0}", LocaleUtils.FormatN0(family.WaitingPassengers)));
-            sb.AppendLine(FormatReport(KeyReportAverageWait, "Average wait: {0}", FormatDuration(family.AverageWaitSeconds)));
-            sb.AppendLine(FormatReport(KeyReportLateBoardersSkipped, "Late boarders skipped today: {0}", LocaleUtils.FormatN0(lateBoardersCanceledToday)));
-            sb.AppendLine(FormatReport(
-                KeyReportLateGroups,
-                "Late group passengers left alone: {0} passengers in {1} groups on {2} vehicles",
-                LocaleUtils.FormatN0(family.LateGroupPassengers),
-                LocaleUtils.FormatN0(family.LateGroupGroups),
-                LocaleUtils.FormatN0(family.LateGroupVehicles)));
+            AppendField(sb, "Served stops", LocaleUtils.FormatN0(family.StopCount));
+            AppendField(sb, "Stops with waiting", LocaleUtils.FormatN0(family.ActiveQueueStops));
+            AppendField(sb, "Waiting passengers", LocaleUtils.FormatN0(family.WaitingPassengers));
+            AppendField(sb, "Average wait", FormatDuration(family.AverageWaitSeconds));
+            AppendField(sb, "Late boarders skipped today", LocaleUtils.FormatN0(lateBoardersCanceledToday));
+            AppendField(
+                sb,
+                "Late group passengers left alone",
+                $"{LocaleUtils.FormatN0(family.LateGroupPassengers)} passengers in {LocaleUtils.FormatN0(family.LateGroupGroups)} groups on {LocaleUtils.FormatN0(family.LateGroupVehicles)} vehicles");
 
             if (family.WaitingPassengers <= 0)
             {
@@ -306,17 +307,18 @@ namespace FastBoarding
                 return;
             }
 
-            sb.AppendLine(FormatReport(KeyReportWorstStopAverageWait, "Worst stop avg wait: {0}", FormatDuration(family.WorstStopWaitSeconds)));
-            sb.AppendLine(FormatReport(KeyReportWorstStopName, "Worst stop name: {0}", TextOrUnknown(family.WorstStopName)));
-            sb.AppendLine(FormatReport(KeyReportWorstStopEntity, "Worst stop entity: {0}", EntityText(family.WorstStopEntity)));
-            sb.AppendLine(FormatReport(KeyReportWorstWaypointEntity, "Worst waypoint entity: {0}", EntityText(family.WorstWaypointEntity)));
-            sb.AppendLine(FormatReport(KeyReportWorstLineHint, "Worst line hint: {0}", TextOrUnknown(family.WorstLineName)));
-            sb.AppendLine(FormatReport(KeyReportWorstLineEntity, "Worst line entity: {0}", EntityText(family.WorstLineEntity)));
-            sb.AppendLine(FormatReport(
-                KeyReportWorstLineWaypointAverage,
-                "Worst line waypoint avg: {0} with {1} waiting",
-                FormatDuration(family.WorstLineWaitSeconds),
-                LocaleUtils.FormatN0(family.WorstLineWaitingPassengers)));
+            sb.AppendLine();
+            AppendSubHeader(sb, "Worst stop");
+            AppendField(sb, "Average wait", FormatDuration(family.WorstStopWaitSeconds));
+            AppendField(sb, "Name", TextOrUnknown(family.WorstStopName));
+            AppendField(sb, "Stop entity", EntityText(family.WorstStopEntity));
+            AppendField(sb, "Waypoint entity", EntityText(family.WorstWaypointEntity));
+            AppendField(sb, "Line hint", TextOrUnknown(family.WorstLineName));
+            AppendField(sb, "Line entity", EntityText(family.WorstLineEntity));
+            AppendField(
+                sb,
+                "Worst line waypoint avg",
+                $"{FormatDuration(family.WorstLineWaitSeconds)} with {LocaleUtils.FormatN0(family.WorstLineWaitingPassengers)} waiting");
 
             AppendTopWorstStops(sb, family);
         }
@@ -328,26 +330,52 @@ namespace FastBoarding
                 return;
             }
 
-            sb.AppendLine(FormatReport(
+            sb.AppendLine();
+            AppendSubHeader(sb, FormatReport(
                 KeyReportTopWorstStopsHeader,
-                "Top {0} worst stops by average wait:",
-                LocaleUtils.FormatN0(family.TopWorstStops.Length)));
+                "Top {0} worst stops by average wait",
+                LocaleUtils.FormatN0(family.TopWorstStops.Length)).TrimEnd(':'));
 
             for (int i = 0; i < family.TopWorstStops.Length; i++)
             {
                 TransitWaitStatusSystem.WorstStopSnapshot stop = family.TopWorstStops[i];
-                sb.AppendLine(FormatReport(
-                    KeyReportTopWorstStopLine,
-                    "{0}. {1} | avg {2} | waiting {3} | stop entity {4} | waypoint entity {5} | line entity {6} | line hint {7}",
-                    LocaleUtils.FormatN0(i + 1),
-                    TextOrUnknown(stop.StopName),
-                    FormatDuration(stop.AverageWaitSeconds),
-                    LocaleUtils.FormatN0(stop.WaitingPassengers),
-                    EntityText(stop.StopEntity),
-                    EntityText(stop.WaypointEntity),
-                    EntityText(stop.LineEntity),
-                    TextOrUnknown(stop.LineName)));
+                sb.AppendLine($"{LocaleUtils.FormatN0(i + 1)}. {TextOrUnknown(stop.StopName)}");
+                AppendField(sb, "   Average wait", FormatDuration(stop.AverageWaitSeconds));
+                AppendField(sb, "   Waiting", LocaleUtils.FormatN0(stop.WaitingPassengers));
+                AppendField(sb, "   Stop entity", EntityText(stop.StopEntity));
+                AppendField(sb, "   Waypoint entity", EntityText(stop.WaypointEntity));
+                AppendField(sb, "   Line entity", EntityText(stop.LineEntity));
+                AppendField(sb, "   Line hint", TextOrUnknown(stop.LineName));
             }
+        }
+
+        private static void AppendSectionHeader(StringBuilder sb, string title)
+        {
+            AppendDivider(sb);
+            sb.AppendLine(title);
+            AppendDivider(sb);
+        }
+
+        private static void AppendSubHeader(StringBuilder sb, string title)
+        {
+            sb.AppendLine("-- " + title + " --");
+        }
+
+        private static void AppendDivider(StringBuilder sb)
+        {
+            sb.AppendLine(new string('=', ReportHeaderWidth));
+        }
+
+        private static void AppendField(StringBuilder sb, string label, string value)
+        {
+            sb.Append(label);
+            if (label.Length < 32)
+            {
+                sb.Append('.', 32 - label.Length);
+            }
+
+            sb.Append(": ");
+            sb.AppendLine(value);
         }
 
         private static string EntityText(Entity entity)
