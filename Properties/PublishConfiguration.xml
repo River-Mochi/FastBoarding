@@ -1,0 +1,75 @@
+<Publish>
+	<!--Id must be set in order to update existed mod. it is not required for publishing mod for the first time-->
+	<ModId Value=""/>
+	<!--Name of the mod to display to players-->
+	<DisplayName Value="Faster Boarding"/>
+	<!--Short description of the mod-->
+	<ShortDescription Value="Limits total time transit waits at stops; tardy passengers can miss the vehicle instead of causing endless boarding."/>
+	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
+	<!--LongDescription Value="This is a long description" /-->
+	<LongDescription>
+## Faster Boarding [Beta]
+
+Safer public transit boarding tweaks.
+move more people by transit, reduce blocked stops, reduce private car demand indirectly
+Instead of replacing the transportAIsystems, this build focuses on two smaller behaviors:
+
+- **Prefab stop tuning** for road, rail, water, and air transit
+- **Optional late-boarder cancellation** so passengers can miss a vehicle instead of holding it forever
+
+### What the sliders do
+
+Tune boarding speeds for:
+
+- Bus
+- Rail (train, tram, subway)
+- Water (ship, ferry)
+- Air
+
+Higher values shorten dwell time by increasing stop loading speed and adjusting the boarding-time estimate used by the game.
+
+### Optional experimental behavior
+
+When **Cancel Late Boarders** is enabled, passengers who are still not ready after departure time can be dropped from that vehicle's boarding process.
+The goal is for the vehicle to leave and for those passengers to wait for the next one instead of blocking the line.
+
+### Notes
+
+- This is intended to be a lighter approach than replacing the vanilla transport AI systems.
+- Group boarding is handled conservatively to avoid splitting groups across platform and vehicle.
+- Safe to remove anytime.
+- No Harmony patches.
+
+
+### Credits
+- RiverMochi (mod author)
+- Original inspiration from bcallender's All Aboard mod
+
+</LongDescription>
+	<!--Thumbnail-->
+	<Thumbnail Value="Properties/Thumbnail.png"/>
+	<!--Screenshot, can be set multiple times-->
+	<Screenshot Value="Properties/unbunched-trains.png"/>
+	<Screenshot Value="Properties/before-mod.png"/>
+	<Screenshot Value="Properties/after-mod.png"/>
+	<!--Tag, can be set multiple times-->
+	<Tag Value=""/>
+	<!--Link to the forum post where the mod can be discussed-->
+	<ForumLink Value=""/>
+	<!--Version of the mod-->
+	<ModVersion Value="1.0.1"/>
+	<!--Recommended version of the base game to use the mod-->
+	<GameVersion Value="1.5.*"/>
+	<!--Dependency for the mod, can be set multiple times-->
+	<Dependency Id=""/>
+	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
+	<ChangeLog>
+- Reworked the mod into a standard CS2 Mod.cs + Setting.cs + LocaleEN.cs layout
+- Added per-family boarding speed sliders for bus, rail, water, and air
+- Added optional experimental late-boarder cancellation
+- Restored required publish configuration structure and publish profile files
+</ChangeLog>
+	<!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->
+	<ExternalLink Type="github" Url="https://github.com/River-Mochi/BoardingTime"/>
+	<ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2"/>
+</Publish>

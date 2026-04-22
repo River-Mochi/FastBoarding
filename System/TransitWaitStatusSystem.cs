@@ -1,0 +1,758 @@
+// File: System/TransitWaitStatusSystem.cs
+// Purpose: Builds transit wait snapshots on demand for the Options UI status group.
+
+namespace BoardingTime
+{
+    using System;
+    using System.Collections.Generic;
+    using Game;
+    using Game.Common;
+    using Game.Creatures;
+    using Game.Prefabs;
+    using Game.Routes;
+    using Game.Simulation;
+    using Game.Tools;
+    using Game.UI;
+    using Game.Vehicles;
+    using Unity.Collections;
+    using Unity.Entities;
+
+    public sealed partial class TransitWaitStatusSystem : GameSystemBase
+    {
+        private const int TopWorstStopCount = 5;
+
+        public readonly struct WorstStopSnapshot
+        {
+            public WorstStopSnapshot(
+                string stopName,
+                Entity stopEntity,
+                Entity waypointEntity,
+                Entity lineEntity,
+                string lineName,
+                int averageWaitSeconds,
+                long waitingPassengers,
+                int lineWaitSeconds,
+                int lineWaitingPassengers)
+            {
+                StopName = stopName ?? string.Empty;
+                StopEntity = stopEntity;
+                WaypointEntity = waypointEntity;
+                LineEntity = lineEntity;
+                LineName = lineName ?? string.Empty;
+                AverageWaitSeconds = averageWaitSeconds;
+                WaitingPassengers = waitingPassengers;
+                LineWaitSeconds = lineWaitSeconds;
+                LineWaitingPassengers = lineWaitingPassengers;
+            }
+
+            public string StopName { get; }
+
+            public Entity StopEntity { get; }
+
+            public Entity WaypointEntity { get; }
+
+            public Entity LineEntity { get; }
+
+            public string LineName { get; }
+
+            public int AverageWaitSeconds { get; }
+
+            public long WaitingPassengers { get; }
+
+            public int LineWaitSeconds { get; }
+
+            public int LineWaitingPassengers { get; }
+        }
+
+        public readonly struct FamilySnapshot
+        {
+            public FamilySnapshot(
+                int stopCount,
+                int activeQueueStops,
+                long waitingPassengers,
+                int averageWaitSeconds,
+                int worstStopWaitSeconds,
+                string worstStopName,
+                Entity worstStopEntity,
+                Entity worstWaypointEntity,
+                Entity worstLineEntity,
+                string worstLineName,
+                int worstLineWaitSeconds,
+                int worstLineWaitingPassengers,
+                int lateGroupPassengers,
+                int lateGroupGroups,
+                int lateGroupVehicles,
+                WorstStopSnapshot[] topWorstStops)
+            {
+                StopCount = stopCount;
+                ActiveQueueStops = activeQueueStops;
+                WaitingPassengers = waitingPassengers;
+                AverageWaitSeconds = averageWaitSeconds;
+                WorstStopWaitSeconds = worstStopWaitSeconds;
+                WorstStopName = worstStopName ?? string.Empty;
+                WorstStopEntity = worstStopEntity;
+                WorstWaypointEntity = worstWaypointEntity;
+                WorstLineEntity = worstLineEntity;
+                WorstLineName = worstLineName ?? string.Empty;
+                WorstLineWaitSeconds = worstLineWaitSeconds;
+                WorstLineWaitingPassengers = worstLineWaitingPassengers;
+                LateGroupPassengers = lateGroupPassengers;
+                LateGroupGroups = lateGroupGroups;
+                LateGroupVehicles = lateGroupVehicles;
+                TopWorstStops = topWorstStops ?? Array.Empty<WorstStopSnapshot>();
+            }
+
+            public int StopCount { get; }
+
+            public int ActiveQueueStops { get; }
+
+            public long WaitingPassengers { get; }
+
+            public int AverageWaitSeconds { get; }
+
+            public int WorstStopWaitSeconds { get; }
+
+            public string WorstStopName { get; }
+
+            public Entity WorstStopEntity { get; }
+
+            public Entity WorstWaypointEntity { get; }
+
+            public Entity WorstLineEntity { get; }
+
+            public string WorstLineName { get; }
+
+            public int WorstLineWaitSeconds { get; }
+
+            public int WorstLineWaitingPassengers { get; }
+
+            public int LateGroupPassengers { get; }
+
+            public int LateGroupGroups { get; }
+
+            public int LateGroupVehicles { get; }
+
+            public WorstStopSnapshot[] TopWorstStops { get; }
+        }
+
+        public readonly struct Snapshot
+        {
+            public Snapshot(
+                FamilySnapshot bus,
+                FamilySnapshot train,
+                FamilySnapshot tram,
+                FamilySnapshot subway,
+                FamilySnapshot ship,
+                FamilySnapshot ferry,
+                FamilySnapshot air)
+            {
+                Bus = bus;
+                Train = train;
+                Tram = tram;
+                Subway = subway;
+                Ship = ship;
+                Ferry = ferry;
+                Air = air;
+            }
+
+            public FamilySnapshot Bus { get; }
+
+            public FamilySnapshot Train { get; }
+
+            public FamilySnapshot Tram { get; }
+
+            public FamilySnapshot Subway { get; }
+
+            public FamilySnapshot Ship { get; }
+
+            public FamilySnapshot Ferry { get; }
+
+            public FamilySnapshot Air { get; }
+        }
+
+        private struct LateGroupStats
+        {
+            public int Passengers;
+
+            public int Groups;
+
+            public int Vehicles;
+        }
+
+        private struct StopAggregate
+        {
+            public long WaitingPassengers;
+
+            public long WeightedWaitSeconds;
+
+            public string Name;
+
+            public Entity WorstWaypointEntity;
+
+            public Entity WorstLineEntity;
+
+            public string WorstLineName;
+
+            public int WorstLineWaitSeconds;
+
+            public int WorstLineWaitingPassengers;
+        }
+
+        private EntityQuery m_WaitingWaypointQuery;
+        private EntityQuery m_BoardingVehicleQuery;
+        private NameSystem m_NameSystem = null!;
+        private SimulationSystem m_SimulationSystem = null!;
+
+        protected override void OnCreate()
+        {
+            base.OnCreate();
+            m_NameSystem = World.GetOrCreateSystemManaged<NameSystem>();
+            m_SimulationSystem = World.GetOrCreateSystemManaged<SimulationSystem>();
+
+            m_WaitingWaypointQuery = SystemAPI.QueryBuilder()
+                .WithAll<WaitingPassengers, Connected, Owner>()
+                .WithNone<Deleted, Destroyed, Temp, Overridden>()
+                .Build();
+
+            m_BoardingVehicleQuery = SystemAPI.QueryBuilder()
+                .WithAll<Game.Vehicles.PublicTransport, Passenger>()
+                .WithNone<Deleted, Destroyed, Temp, Overridden>()
+                .Build();
+        }
+
+        protected override void OnUpdate()
+        {
+            // Intentionally empty: snapshot work only runs when the Options UI asks for it.
+        }
+
+        public Snapshot BuildSnapshot()
+        {
+            // Vanilla wait data lives on line waypoints, not on the stop entities themselves.
+            // We group those waypoint queues back onto the connected stop so the UI reads like a stop report.
+            Dictionary<Entity, StopAggregate> busStops = new Dictionary<Entity, StopAggregate>();
+            Dictionary<Entity, StopAggregate> trainStops = new Dictionary<Entity, StopAggregate>();
+            Dictionary<Entity, StopAggregate> tramStops = new Dictionary<Entity, StopAggregate>();
+            Dictionary<Entity, StopAggregate> subwayStops = new Dictionary<Entity, StopAggregate>();
+            Dictionary<Entity, StopAggregate> shipStops = new Dictionary<Entity, StopAggregate>();
+            Dictionary<Entity, StopAggregate> ferryStops = new Dictionary<Entity, StopAggregate>();
+            Dictionary<Entity, StopAggregate> airStops = new Dictionary<Entity, StopAggregate>();
+            LateGroupStats busLateGroups = default;
+            LateGroupStats trainLateGroups = default;
+            LateGroupStats tramLateGroups = default;
+            LateGroupStats subwayLateGroups = default;
+            LateGroupStats shipLateGroups = default;
+            LateGroupStats ferryLateGroups = default;
+            LateGroupStats airLateGroups = default;
+
+            using NativeArray<Entity> waypointEntities = m_WaitingWaypointQuery.ToEntityArray(Allocator.Temp);
+            using NativeArray<WaitingPassengers> waitingData = m_WaitingWaypointQuery.ToComponentDataArray<WaitingPassengers>(Allocator.Temp);
+            using NativeArray<Connected> connectedData = m_WaitingWaypointQuery.ToComponentDataArray<Connected>(Allocator.Temp);
+            using NativeArray<Owner> ownerData = m_WaitingWaypointQuery.ToComponentDataArray<Owner>(Allocator.Temp);
+
+            // Each waypoint belongs to a transit line and points back to its served stop/terminal.
+            for (int i = 0; i < waypointEntities.Length; i++)
+            {
+                if (!TryGetTransportType(ownerData[i].m_Owner, out TransportType transportType))
+                {
+                    continue;
+                }
+
+                Entity stopEntity = connectedData[i].m_Connected != Entity.Null
+                    ? connectedData[i].m_Connected
+                    : waypointEntities[i];
+
+                switch (transportType)
+                {
+                    case TransportType.Bus:
+                        AccumulateStop(busStops, stopEntity, waypointEntities[i], ownerData[i].m_Owner, transportType, waitingData[i]);
+                        break;
+                    case TransportType.Train:
+                        AccumulateStop(trainStops, stopEntity, waypointEntities[i], ownerData[i].m_Owner, transportType, waitingData[i]);
+                        break;
+                    case TransportType.Tram:
+                        AccumulateStop(tramStops, stopEntity, waypointEntities[i], ownerData[i].m_Owner, transportType, waitingData[i]);
+                        break;
+                    case TransportType.Subway:
+                        AccumulateStop(subwayStops, stopEntity, waypointEntities[i], ownerData[i].m_Owner, transportType, waitingData[i]);
+                        break;
+                    case TransportType.Ship:
+                        AccumulateStop(shipStops, stopEntity, waypointEntities[i], ownerData[i].m_Owner, transportType, waitingData[i]);
+                        break;
+                    case TransportType.Ferry:
+                        AccumulateStop(ferryStops, stopEntity, waypointEntities[i], ownerData[i].m_Owner, transportType, waitingData[i]);
+                        break;
+                    case TransportType.Airplane:
+                        AccumulateStop(airStops, stopEntity, waypointEntities[i], ownerData[i].m_Owner, transportType, waitingData[i]);
+                        break;
+                }
+            }
+
+            BuildLateGroupStats(
+                ref busLateGroups,
+                ref trainLateGroups,
+                ref tramLateGroups,
+                ref subwayLateGroups,
+                ref shipLateGroups,
+                ref ferryLateGroups,
+                ref airLateGroups);
+
+            FamilySnapshot bus = BuildFamilySnapshot(busStops, busLateGroups);
+            FamilySnapshot train = BuildFamilySnapshot(trainStops, trainLateGroups);
+            FamilySnapshot tram = BuildFamilySnapshot(tramStops, tramLateGroups);
+            FamilySnapshot subway = BuildFamilySnapshot(subwayStops, subwayLateGroups);
+            FamilySnapshot ship = BuildFamilySnapshot(shipStops, shipLateGroups);
+            FamilySnapshot ferry = BuildFamilySnapshot(ferryStops, ferryLateGroups);
+            FamilySnapshot air = BuildFamilySnapshot(airStops, airLateGroups);
+
+            return new Snapshot(bus, train, tram, subway, ship, ferry, air);
+        }
+
+        private void AccumulateStop(
+            Dictionary<Entity, StopAggregate> stops,
+            Entity stopEntity,
+            Entity waypointEntity,
+            Entity lineEntity,
+            TransportType transportType,
+            WaitingPassengers waiting)
+        {
+            if (!stops.TryGetValue(stopEntity, out StopAggregate aggregate))
+            {
+                aggregate = new StopAggregate
+                {
+                    Name = ResolveStopName(stopEntity, transportType),
+                    WorstWaypointEntity = Entity.Null,
+                    WorstLineEntity = Entity.Null,
+                    WorstLineName = string.Empty
+                };
+            }
+
+            aggregate.WaitingPassengers += waiting.m_Count;
+            aggregate.WeightedWaitSeconds += (long)waiting.m_Count * waiting.m_AverageWaitingTime;
+
+            if (waiting.m_Count > 0 && waiting.m_AverageWaitingTime > aggregate.WorstLineWaitSeconds)
+            {
+                // Keep a line/waypoint hint for the detailed log report.
+                aggregate.WorstWaypointEntity = waypointEntity;
+                aggregate.WorstLineEntity = lineEntity;
+                aggregate.WorstLineName = ResolveLineName(lineEntity);
+                aggregate.WorstLineWaitSeconds = waiting.m_AverageWaitingTime;
+                aggregate.WorstLineWaitingPassengers = waiting.m_Count;
+            }
+
+            stops[stopEntity] = aggregate;
+        }
+
+        private FamilySnapshot BuildFamilySnapshot(Dictionary<Entity, StopAggregate> stops, LateGroupStats lateGroupStats)
+        {
+            int activeQueueStops = 0;
+            long waitingPassengers = 0;
+            long weightedWaitSeconds = 0;
+            int worstStopWaitSeconds = 0;
+            string worstStopName = string.Empty;
+            Entity worstStopEntity = Entity.Null;
+            Entity worstWaypointEntity = Entity.Null;
+            Entity worstLineEntity = Entity.Null;
+            string worstLineName = string.Empty;
+            int worstLineWaitSeconds = 0;
+            int worstLineWaitingPassengers = 0;
+            List<WorstStopSnapshot> topWorstStops = new List<WorstStopSnapshot>(TopWorstStopCount);
+
+            foreach (KeyValuePair<Entity, StopAggregate> pair in stops)
+            {
+                Entity stopEntity = pair.Key;
+                StopAggregate aggregate = pair.Value;
+                waitingPassengers += aggregate.WaitingPassengers;
+                weightedWaitSeconds += aggregate.WeightedWaitSeconds;
+
+                if (aggregate.WaitingPassengers <= 0)
+                {
+                    continue;
+                }
+
+                activeQueueStops++;
+                int stopAverageWaitSeconds = (int)(aggregate.WeightedWaitSeconds / aggregate.WaitingPassengers);
+                InsertWorstStop(
+                    topWorstStops,
+                    new WorstStopSnapshot(
+                        aggregate.Name,
+                        stopEntity,
+                        aggregate.WorstWaypointEntity,
+                        aggregate.WorstLineEntity,
+                        aggregate.WorstLineName,
+                        stopAverageWaitSeconds,
+                        aggregate.WaitingPassengers,
+                        aggregate.WorstLineWaitSeconds,
+                        aggregate.WorstLineWaitingPassengers));
+
+                if (stopAverageWaitSeconds > worstStopWaitSeconds)
+                {
+                    // Worst stop is based on stop-level average, not just one line waypoint.
+                    worstStopWaitSeconds = stopAverageWaitSeconds;
+                    worstStopName = aggregate.Name;
+                    worstStopEntity = stopEntity;
+                    worstWaypointEntity = aggregate.WorstWaypointEntity;
+                    worstLineEntity = aggregate.WorstLineEntity;
+                    worstLineName = aggregate.WorstLineName;
+                    worstLineWaitSeconds = aggregate.WorstLineWaitSeconds;
+                    worstLineWaitingPassengers = aggregate.WorstLineWaitingPassengers;
+                }
+            }
+
+            int averageWaitSeconds = waitingPassengers > 0
+                ? (int)(weightedWaitSeconds / waitingPassengers)
+                : 0;
+
+            return new FamilySnapshot(
+                stops.Count,
+                activeQueueStops,
+                waitingPassengers,
+                averageWaitSeconds,
+                worstStopWaitSeconds,
+                worstStopName,
+                worstStopEntity,
+                worstWaypointEntity,
+                worstLineEntity,
+                worstLineName,
+                worstLineWaitSeconds,
+                worstLineWaitingPassengers,
+                lateGroupStats.Passengers,
+                lateGroupStats.Groups,
+                lateGroupStats.Vehicles,
+                topWorstStops.ToArray());
+        }
+
+        private static void InsertWorstStop(List<WorstStopSnapshot> topWorstStops, WorstStopSnapshot candidate)
+        {
+            int insertAt = topWorstStops.Count;
+            for (int i = 0; i < topWorstStops.Count; i++)
+            {
+                WorstStopSnapshot existing = topWorstStops[i];
+                bool candidateIsWorse =
+                    candidate.AverageWaitSeconds > existing.AverageWaitSeconds ||
+                    (candidate.AverageWaitSeconds == existing.AverageWaitSeconds &&
+                     candidate.WaitingPassengers > existing.WaitingPassengers);
+
+                if (candidateIsWorse)
+                {
+                    insertAt = i;
+                    break;
+                }
+            }
+
+            topWorstStops.Insert(insertAt, candidate);
+
+            if (topWorstStops.Count > TopWorstStopCount)
+            {
+                topWorstStops.RemoveAt(topWorstStops.Count - 1);
+            }
+        }
+
+        private void BuildLateGroupStats(
+            ref LateGroupStats bus,
+            ref LateGroupStats train,
+            ref LateGroupStats tram,
+            ref LateGroupStats subway,
+            ref LateGroupStats ship,
+            ref LateGroupStats ferry,
+            ref LateGroupStats air)
+        {
+            uint frame = m_SimulationSystem.frameIndex;
+            HashSet<Entity> busGroups = new HashSet<Entity>();
+            HashSet<Entity> trainGroups = new HashSet<Entity>();
+            HashSet<Entity> tramGroups = new HashSet<Entity>();
+            HashSet<Entity> subwayGroups = new HashSet<Entity>();
+            HashSet<Entity> shipGroups = new HashSet<Entity>();
+            HashSet<Entity> ferryGroups = new HashSet<Entity>();
+            HashSet<Entity> airGroups = new HashSet<Entity>();
+
+            // This is a point-in-time diagnostic for the log report, not a gameplay mutation.
+            m_BoardingVehicleQuery.CompleteDependency();
+            using NativeArray<Entity> vehicles = m_BoardingVehicleQuery.ToEntityArray(Allocator.Temp);
+
+            for (int i = 0; i < vehicles.Length; i++)
+            {
+                Entity vehicleEntity = vehicles[i];
+                if (!EntityManager.Exists(vehicleEntity) ||
+                    !EntityManager.HasComponent<Game.Vehicles.PublicTransport>(vehicleEntity) ||
+                    !EntityManager.HasBuffer<Passenger>(vehicleEntity))
+                {
+                    continue;
+                }
+
+                Game.Vehicles.PublicTransport publicTransport = EntityManager.GetComponentData<Game.Vehicles.PublicTransport>(vehicleEntity);
+                if ((publicTransport.m_State & PublicTransportFlags.Boarding) == 0 ||
+                    frame < publicTransport.m_DepartureFrame)
+                {
+                    continue;
+                }
+
+                if (!TryGetVehicleTransportType(vehicleEntity, out TransportType transportType))
+                {
+                    continue;
+                }
+
+                DynamicBuffer<Passenger> passengers = EntityManager.GetBuffer<Passenger>(vehicleEntity);
+                int lateGroupPassengersForVehicle = 0;
+                HashSet<Entity> groupsForVehicle = GetGroupSet(transportType, busGroups, trainGroups, tramGroups, subwayGroups, shipGroups, ferryGroups, airGroups);
+
+                for (int j = 0; j < passengers.Length; j++)
+                {
+                    Entity passenger = passengers[j].m_Passenger;
+                    if (!IsLateGroupPassenger(vehicleEntity, passenger, out Entity groupKey))
+                    {
+                        continue;
+                    }
+
+                    lateGroupPassengersForVehicle++;
+                    groupsForVehicle.Add(groupKey);
+                }
+
+                if (lateGroupPassengersForVehicle <= 0)
+                {
+                    continue;
+                }
+
+                AddLateGroupPassengers(
+                    transportType,
+                    lateGroupPassengersForVehicle,
+                    ref bus,
+                    ref train,
+                    ref tram,
+                    ref subway,
+                    ref ship,
+                    ref ferry,
+                    ref air);
+            }
+
+            bus.Groups = busGroups.Count;
+            train.Groups = trainGroups.Count;
+            tram.Groups = tramGroups.Count;
+            subway.Groups = subwayGroups.Count;
+            ship.Groups = shipGroups.Count;
+            ferry.Groups = ferryGroups.Count;
+            air.Groups = airGroups.Count;
+        }
+
+        private bool IsLateGroupPassenger(Entity vehicleEntity, Entity passenger, out Entity groupKey)
+        {
+            groupKey = Entity.Null;
+            if (!EntityManager.Exists(passenger) ||
+                EntityManager.HasComponent<Deleted>(passenger) ||
+                EntityManager.HasComponent<Destroyed>(passenger) ||
+                EntityManager.HasComponent<Temp>(passenger) ||
+                EntityManager.HasComponent<Overridden>(passenger) ||
+                !EntityManager.HasComponent<CurrentVehicle>(passenger))
+            {
+                return false;
+            }
+
+            CurrentVehicle currentVehicle = EntityManager.GetComponentData<CurrentVehicle>(passenger);
+            if (currentVehicle.m_Vehicle != vehicleEntity ||
+                (currentVehicle.m_Flags & CreatureVehicleFlags.Ready) != 0)
+            {
+                return false;
+            }
+
+            if (EntityManager.HasComponent<GroupMember>(passenger))
+            {
+                groupKey = EntityManager.GetComponentData<GroupMember>(passenger).m_Leader;
+                return true;
+            }
+
+            if (EntityManager.HasBuffer<GroupCreature>(passenger))
+            {
+                groupKey = passenger;
+                return true;
+            }
+
+            return false;
+        }
+
+        private static HashSet<Entity> GetGroupSet(
+            TransportType transportType,
+            HashSet<Entity> bus,
+            HashSet<Entity> train,
+            HashSet<Entity> tram,
+            HashSet<Entity> subway,
+            HashSet<Entity> ship,
+            HashSet<Entity> ferry,
+            HashSet<Entity> air)
+        {
+            switch (transportType)
+            {
+                case TransportType.Bus:
+                    return bus;
+                case TransportType.Train:
+                    return train;
+                case TransportType.Tram:
+                    return tram;
+                case TransportType.Subway:
+                    return subway;
+                case TransportType.Ship:
+                    return ship;
+                case TransportType.Ferry:
+                    return ferry;
+                case TransportType.Airplane:
+                    return air;
+                default:
+                    return bus;
+            }
+        }
+
+        private static void AddLateGroupPassengers(
+            TransportType transportType,
+            int passengers,
+            ref LateGroupStats bus,
+            ref LateGroupStats train,
+            ref LateGroupStats tram,
+            ref LateGroupStats subway,
+            ref LateGroupStats ship,
+            ref LateGroupStats ferry,
+            ref LateGroupStats air)
+        {
+            switch (transportType)
+            {
+                case TransportType.Bus:
+                    bus.Passengers += passengers;
+                    bus.Vehicles++;
+                    break;
+                case TransportType.Train:
+                    train.Passengers += passengers;
+                    train.Vehicles++;
+                    break;
+                case TransportType.Tram:
+                    tram.Passengers += passengers;
+                    tram.Vehicles++;
+                    break;
+                case TransportType.Subway:
+                    subway.Passengers += passengers;
+                    subway.Vehicles++;
+                    break;
+                case TransportType.Ship:
+                    ship.Passengers += passengers;
+                    ship.Vehicles++;
+                    break;
+                case TransportType.Ferry:
+                    ferry.Passengers += passengers;
+                    ferry.Vehicles++;
+                    break;
+                case TransportType.Airplane:
+                    air.Passengers += passengers;
+                    air.Vehicles++;
+                    break;
+            }
+        }
+
+        private bool TryGetTransportType(Entity lineEntity, out TransportType transportType)
+        {
+            transportType = TransportType.None;
+            if (lineEntity == Entity.Null || !EntityManager.HasComponent<PrefabRef>(lineEntity))
+            {
+                return false;
+            }
+
+            PrefabRef prefabRef = EntityManager.GetComponentData<PrefabRef>(lineEntity);
+            if (!EntityManager.HasComponent<TransportLineData>(prefabRef.m_Prefab))
+            {
+                return false;
+            }
+
+            TransportLineData lineData = EntityManager.GetComponentData<TransportLineData>(prefabRef.m_Prefab);
+            if (!lineData.m_PassengerTransport)
+            {
+                return false;
+            }
+
+            transportType = lineData.m_TransportType;
+            return true;
+        }
+
+        private bool TryGetVehicleTransportType(Entity vehicleEntity, out TransportType transportType)
+        {
+            transportType = TransportType.None;
+            if (!EntityManager.HasComponent<PrefabRef>(vehicleEntity))
+            {
+                return false;
+            }
+
+            Entity prefabEntity = EntityManager.GetComponentData<PrefabRef>(vehicleEntity).m_Prefab;
+            if (!EntityManager.HasComponent<PublicTransportVehicleData>(prefabEntity))
+            {
+                return false;
+            }
+
+            transportType = EntityManager.GetComponentData<PublicTransportVehicleData>(prefabEntity).m_TransportType;
+            return true;
+        }
+
+        private string ResolveStopName(Entity stopEntity, TransportType transportType)
+        {
+            string name = m_NameSystem.GetRenderedLabelName(stopEntity);
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                return SimplifyStopName(name, transportType);
+            }
+
+            return SimplifyStopName(m_NameSystem.GetDebugName(stopEntity), transportType);
+        }
+
+        private string ResolveLineName(Entity lineEntity)
+        {
+            if (lineEntity == Entity.Null)
+            {
+                return string.Empty;
+            }
+
+            string name = m_NameSystem.GetRenderedLabelName(lineEntity);
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                return NormalizeWhitespace(name);
+            }
+
+            return NormalizeWhitespace(m_NameSystem.GetDebugName(lineEntity));
+        }
+
+        private static string SimplifyStopName(string name, TransportType transportType)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return string.Empty;
+            }
+
+            string simplified = RemoveWord(name, "Passenger");
+            simplified = RemoveWord(simplified, transportType.ToString());
+            simplified = NormalizeWhitespace(simplified);
+
+            return string.IsNullOrWhiteSpace(simplified)
+                ? name.Trim()
+                : simplified;
+        }
+
+        private static string RemoveWord(string value, string word)
+        {
+            if (string.IsNullOrWhiteSpace(value) || string.IsNullOrWhiteSpace(word))
+            {
+                return value;
+            }
+
+            string[] parts = value.Split(' ');
+            List<string> kept = new List<string>(parts.Length);
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (string.Equals(parts[i], word, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                kept.Add(parts[i]);
+            }
+
+            return string.Join(" ", kept);
+        }
+
+        private static string NormalizeWhitespace(string value)
+        {
+            return string.Join(" ", value.Split(System.Array.Empty<char>(), System.StringSplitOptions.RemoveEmptyEntries));
+        }
+    }
+}
