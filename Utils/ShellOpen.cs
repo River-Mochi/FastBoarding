@@ -1,7 +1,7 @@
 // File: Utils/ShellOpen.cs
 // Purpose: Cross-platform-ish file/folder opening helpers for Options UI buttons.
 
-namespace BoardingTime
+namespace FastBoarding
 {
     using System;
     using System.Diagnostics;
@@ -31,6 +31,7 @@ namespace BoardingTime
         {
             try
             {
+                // CS2 puts Player.log beside the Logs folder; use that as the install-independent anchor.
                 string consoleLogPath = Application.consoleLogPath;
                 if (string.IsNullOrEmpty(consoleLogPath))
                 {

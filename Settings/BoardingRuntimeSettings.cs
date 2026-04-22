@@ -1,7 +1,7 @@
 // File: Settings/BoardingRuntimeSettings.cs
 // Purpose: Runtime settings snapshot shared by Options UI setters and ECS systems.
 
-namespace BoardingTime
+namespace FastBoarding
 {
     using System;
 
@@ -98,6 +98,7 @@ namespace BoardingTime
             }
 
             BusBoardingSpeedFactor = value;
+            // Any speed-factor change wakes the one-shot prefab tuning pass.
             StopTuningRevision++;
             return true;
         }
@@ -155,6 +156,7 @@ namespace BoardingTime
 
         public static string DescribeForLog()
         {
+            // Keep this compact because it is appended to support log lines.
             return
                 $"bus={BusBoardingSpeedFactor}x, rail={RailBoardingSpeedFactor}x, " +
                 $"ship+ferry={WaterBoardingSpeedFactor}x, air={AirBoardingSpeedFactor}x, " +

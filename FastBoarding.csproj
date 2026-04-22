@@ -10,8 +10,8 @@
 		<Nullable>enable</Nullable>
 
 		<!-- DLL name and default namespace -->
-		<AssemblyName>BoardingTime</AssemblyName>
-		<RootNamespace>BoardingTime</RootNamespace>
+		<AssemblyName>FastBoarding</AssemblyName>
+		<RootNamespace>FastBoarding</RootNamespace>
 
 		<!-- Single source of truth for version number -->
 		<Version>1.0.1</Version>
@@ -85,12 +85,11 @@
 		<None Include="$(ModTargetsFile)" Link="Properties\Mod.targets" />
 	</ItemGroup>
 
-
     <!-- AUTO UPDATE PublishConfiguration ModVersion using CSPROJ Version number
 	     remove bom, make EOL=CRLF, and left-align text -->
     <Target Name="UpdatePublishConfigVersion" BeforeTargets="Build" Condition="Exists('$(MSBuildProjectDirectory)\Scripts\Update-PublishConfig.ps1')          AND Exists('$(MSBuildProjectDirectory)\$(PublishConfigurationPath)')">
 
-        <Message Text="BoardingTime PublishConfig: syncing ModVersion + normalizing EOL/BOM + left-align blocks..." Importance="high" />
+        <Message Text="FastBoarding PublishConfig: syncing ModVersion + normalizing EOL/BOM + left-align blocks..." Importance="high" />
 
         <Exec Command="&quot;$(SystemRoot)\System32\WindowsPowerShell\v1.0\powershell.exe&quot; -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\Scripts\Update-PublishConfig.ps1&quot; -Path &quot;$(MSBuildProjectDirectory)\$(PublishConfigurationPath)&quot; -Version &quot;$(Version)&quot; -Eol crlf -LeftAlignBlocks" />
     </Target>

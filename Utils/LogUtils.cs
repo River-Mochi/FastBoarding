@@ -2,7 +2,7 @@
 // Purpose: popup-safe logging helpers for CS2 mods.
 // Based on River-Mochi shared CS2 utilities.
 
-namespace BoardingTime
+namespace FastBoarding
 {
     using Colossal.Logging;
     using System;
@@ -118,6 +118,7 @@ namespace BoardingTime
 
             lock (s_FileWriteLock)
             {
+                // Direct append keeps routine mod diagnostics out of Colossal's fragile UI-log path.
                 Directory.CreateDirectory(Path.GetDirectoryName(logPath));
 
                 using FileStream stream = new FileStream(
@@ -145,6 +146,7 @@ namespace BoardingTime
         {
             try
             {
+                // Prefer the path Colossal assigned to this custom logger.
                 if (!string.IsNullOrEmpty(log.logPath))
                 {
                     return log.logPath;

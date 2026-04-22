@@ -1,7 +1,7 @@
-// File: System/TransitWaitStatusSystem.cs
+// File: System/Status/TransitWaitStatusSystem.cs
 // Purpose: Builds transit wait snapshots on demand for the Options UI status group.
 
-namespace BoardingTime
+namespace FastBoarding
 {
     using System;
     using System.Collections.Generic;
@@ -423,6 +423,7 @@ namespace BoardingTime
 
         private static void InsertWorstStop(List<WorstStopSnapshot> topWorstStops, WorstStopSnapshot candidate)
         {
+            // Keep a tiny sorted top-N list instead of sorting every stop in the city.
             int insertAt = topWorstStops.Count;
             for (int i = 0; i < topWorstStops.Count; i++)
             {
@@ -555,12 +556,14 @@ namespace BoardingTime
 
             if (EntityManager.HasComponent<GroupMember>(passenger))
             {
+                // Report group members, but leave them to vanilla until group boarding is fully researched.
                 groupKey = EntityManager.GetComponentData<GroupMember>(passenger).m_Leader;
                 return true;
             }
 
             if (EntityManager.HasBuffer<GroupCreature>(passenger))
             {
+                // Group leaders own this buffer, so count them as group passengers too.
                 groupKey = passenger;
                 return true;
             }
@@ -717,6 +720,7 @@ namespace BoardingTime
 
         private static bool IsGenericLineToolName(string name)
         {
+            // Avoid misleading reports like "Bus Line Tool" when there is no player-facing line name.
             return name.EndsWith(" Line Tool", System.StringComparison.OrdinalIgnoreCase);
         }
 

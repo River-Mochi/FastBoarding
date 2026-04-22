@@ -1,7 +1,7 @@
 // File: Mod.cs
-// Purpose: Entry point for Boarding Time.
+// Purpose: Entry point for Fast Boarding.
 
-namespace BoardingTime
+namespace FastBoarding
 {
     using Colossal;
     using Colossal.IO.AssetDatabase;
@@ -16,16 +16,18 @@ namespace BoardingTime
 
     public sealed class Mod : IMod
     {
-        public const string ModName = "Boarding Time";
-        public const string ModId = "BoardingTime";
-        public const string ModTag = "[BT]";
+        public const string ModName = "Fast Boarding";
+        public const string ModId = "FastBoarding";
+        public const string ModTag = "[FB]";
 
         public static readonly string ModVersion =
             Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
 
+        // Register a dedicated FastBoarding.log, then use LogUtils for popup-safe writes.
         public static readonly ILog s_Log =
             LogManager.GetLogger(ModId).SetShowsErrorsInUI(false);
 
+        // OnLoad may run more than once during mod reload tests; keep the banner once per process.
         private static bool s_BannerLogged;
 
         public static Setting? Settings;
@@ -42,6 +44,7 @@ namespace BoardingTime
 
             try
             {
+                // Useful in support logs because local, Skyve, and PDX builds can load from different paths.
                 if (gameManager.modManager.TryGetExecutableAsset(this, out var asset))
                 {
                     LogUtils.Info(s_Log, () => $"Current mod asset at {asset.path}");
@@ -56,7 +59,7 @@ namespace BoardingTime
             Settings = setting;
           
 
-            // Register languages (uncomment as languages added)
+            // Register languages here so future locale files only need one new AddLocaleSource line.
             AddLocaleSource("en-US", new LocaleEN(setting));
             // AddLocaleSource("fr-FR", new LocaleFR(setting));
             // AddLocaleSource("es-ES", new LocaleES(setting));
@@ -72,6 +75,7 @@ namespace BoardingTime
             try
             {
                 // CS2 persists ModSetting values in the mod .coc file.
+                // Loading before RegisterInOptionsUI follows the normal PDX settings flow.
                 AssetDatabase.global.LoadSettings(ModId, setting, new Setting(this));
                 setting.RegisterInOptionsUI();
                 BoardingRuntimeSettings.Apply(setting);
@@ -109,6 +113,7 @@ namespace BoardingTime
             {
                 try
                 {
+                    // Keep the Options UI clean if the mod is unloaded/reloaded.
                     Settings.UnregisterInOptionsUI();
                 }
                 catch (Exception ex)

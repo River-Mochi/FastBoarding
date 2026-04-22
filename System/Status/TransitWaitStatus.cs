@@ -1,7 +1,7 @@
-// File: System/TransitWaitStatus.cs
+// File: System/Status/TransitWaitStatus.cs
 // Purpose: Cached Options UI status text for current transit wait snapshots.
 
-namespace BoardingTime
+namespace FastBoarding
 {
     using Game;
     using Game.Prefabs;
@@ -14,33 +14,33 @@ namespace BoardingTime
 
     public static class TransitWaitStatus
     {
-        public const string KeyStatusNotLoaded = "BT_STATUS_NOT_LOADED";
-        public const string KeyNoCityLoaded = "BT_STATUS_NO_CITY_LOADED";
-        public const string KeyNoStopsFound = "BT_STATUS_NO_STOPS";
-        public const string KeyStatusLine = "BT_STATUS_LINE";
-        public const string KeyReportNoCityLoaded = "BT_REPORT_NO_CITY_LOADED";
-        public const string KeyReportTitle = "BT_REPORT_TITLE";
-        public const string KeyReportSettings = "BT_REPORT_SETTINGS";
-        public const string KeyReportNote = "BT_REPORT_NOTE";
-        public const string KeyReportFamilyHeader = "BT_REPORT_FAMILY_HEADER";
-        public const string KeyReportServedStops = "BT_REPORT_SERVED_STOPS";
-        public const string KeyReportStopsWithWaiting = "BT_REPORT_STOPS_WITH_WAITING";
-        public const string KeyReportWaitingPassengers = "BT_REPORT_WAITING_PASSENGERS";
-        public const string KeyReportAverageWait = "BT_REPORT_AVERAGE_WAIT";
-        public const string KeyReportLateBoardersSkipped = "BT_REPORT_LATE_BOARDERS_SKIPPED";
-        public const string KeyReportWorstStopNone = "BT_REPORT_WORST_STOP_NONE";
-        public const string KeyReportWorstStopAverageWait = "BT_REPORT_WORST_STOP_AVERAGE_WAIT";
-        public const string KeyReportWorstStopName = "BT_REPORT_WORST_STOP_NAME";
-        public const string KeyReportWorstStopEntity = "BT_REPORT_WORST_STOP_ENTITY";
-        public const string KeyReportWorstWaypointEntity = "BT_REPORT_WORST_WAYPOINT_ENTITY";
-        public const string KeyReportWorstLineHint = "BT_REPORT_WORST_LINE_HINT";
-        public const string KeyReportWorstLineEntity = "BT_REPORT_WORST_LINE_ENTITY";
-        public const string KeyReportWorstLineWaypointAverage = "BT_REPORT_WORST_LINE_WAYPOINT_AVERAGE";
-        public const string KeyReportTopWorstStopsHeader = "BT_REPORT_TOP_WORST_STOPS_HEADER";
-        public const string KeyReportTopWorstStopLine = "BT_REPORT_TOP_WORST_STOP_LINE";
-        public const string KeyReportLateGroups = "BT_REPORT_LATE_GROUPS";
-        public const string KeyReportNone = "BT_REPORT_NONE";
-        public const string KeyReportUnknown = "BT_REPORT_UNKNOWN";
+        public const string KeyStatusNotLoaded = "FB_STATUS_NOT_LOADED";
+        public const string KeyNoCityLoaded = "FB_STATUS_NO_CITY_LOADED";
+        public const string KeyNoStopsFound = "FB_STATUS_NO_STOPS";
+        public const string KeyStatusLine = "FB_STATUS_LINE";
+        public const string KeyReportNoCityLoaded = "FB_REPORT_NO_CITY_LOADED";
+        public const string KeyReportTitle = "FB_REPORT_TITLE";
+        public const string KeyReportSettings = "FB_REPORT_SETTINGS";
+        public const string KeyReportNote = "FB_REPORT_NOTE";
+        public const string KeyReportFamilyHeader = "FB_REPORT_FAMILY_HEADER";
+        public const string KeyReportServedStops = "FB_REPORT_SERVED_STOPS";
+        public const string KeyReportStopsWithWaiting = "FB_REPORT_STOPS_WITH_WAITING";
+        public const string KeyReportWaitingPassengers = "FB_REPORT_WAITING_PASSENGERS";
+        public const string KeyReportAverageWait = "FB_REPORT_AVERAGE_WAIT";
+        public const string KeyReportLateBoardersSkipped = "FB_REPORT_LATE_BOARDERS_SKIPPED";
+        public const string KeyReportWorstStopNone = "FB_REPORT_WORST_STOP_NONE";
+        public const string KeyReportWorstStopAverageWait = "FB_REPORT_WORST_STOP_AVERAGE_WAIT";
+        public const string KeyReportWorstStopName = "FB_REPORT_WORST_STOP_NAME";
+        public const string KeyReportWorstStopEntity = "FB_REPORT_WORST_STOP_ENTITY";
+        public const string KeyReportWorstWaypointEntity = "FB_REPORT_WORST_WAYPOINT_ENTITY";
+        public const string KeyReportWorstLineHint = "FB_REPORT_WORST_LINE_HINT";
+        public const string KeyReportWorstLineEntity = "FB_REPORT_WORST_LINE_ENTITY";
+        public const string KeyReportWorstLineWaypointAverage = "FB_REPORT_WORST_LINE_WAYPOINT_AVERAGE";
+        public const string KeyReportTopWorstStopsHeader = "FB_REPORT_TOP_WORST_STOPS_HEADER";
+        public const string KeyReportTopWorstStopLine = "FB_REPORT_TOP_WORST_STOP_LINE";
+        public const string KeyReportLateGroups = "FB_REPORT_LATE_GROUPS";
+        public const string KeyReportNone = "FB_REPORT_NONE";
+        public const string KeyReportUnknown = "FB_REPORT_UNKNOWN";
 
         public static int RefreshIntervalSeconds { get; set; } = 15;
 
@@ -147,6 +147,7 @@ namespace BoardingTime
         {
             try
             {
+                // Snapshot work is on demand; this does not run every simulation frame.
                 TransitWaitStatusSystem system = world.GetOrCreateSystemManaged<TransitWaitStatusSystem>();
                 TransitWaitStatusSystem.Snapshot snapshot = system.BuildSnapshot();
                 ApplySnapshot(snapshot);
@@ -162,8 +163,8 @@ namespace BoardingTime
                 AirSummary = string.Empty;
 
                 Mod.WarnOnce(
-                    "BT_STATUS_SNAPSHOT_EXCEPTION",
-                    () => $"[BT] Transit status snapshot failed: {ex.GetType().Name}: {ex.Message}");
+                    "FB_STATUS_SNAPSHOT_EXCEPTION",
+                    () => $"{Mod.ModTag} Transit status snapshot failed: {ex.GetType().Name}: {ex.Message}");
             }
         }
 
@@ -173,7 +174,7 @@ namespace BoardingTime
             GameManager gm = GameManager.instance;
             if (world == null || !world.IsCreated || !gm.gameMode.IsGame())
             {
-                LogUtils.Info(Mod.s_Log, () => Localize(KeyReportNoCityLoaded, "[BT] Stats report requested, but no city is loaded."));
+                LogUtils.Info(Mod.s_Log, () => Localize(KeyReportNoCityLoaded, "[FB] Stats report requested, but no city is loaded."));
                 return;
             }
 
@@ -187,7 +188,7 @@ namespace BoardingTime
                 // Keep this verbose output in the log, not the cramped Options UI row.
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine();
-                sb.AppendLine(Localize(KeyReportTitle, "========== [BT] TRANSIT BOARDING STATUS REPORT =========="));
+                sb.AppendLine(Localize(KeyReportTitle, "========== [FB] TRANSIT BOARDING STATUS REPORT =========="));
                 sb.AppendLine(FormatReport(KeyReportSettings, "Settings: {0}", BoardingRuntimeSettings.DescribeForLog()));
                 sb.AppendLine(Localize(KeyReportNote, "Note: Worst line is a hint from the highest-wait waypoint at the worst stop."));
 
@@ -205,7 +206,7 @@ namespace BoardingTime
             }
             catch (Exception ex)
             {
-                LogUtils.Warn(Mod.s_Log, () => $"[BT] Stats report failed: {ex.GetType().Name}: {ex.Message}", ex);
+                LogUtils.Warn(Mod.s_Log, () => $"{Mod.ModTag} Stats report failed: {ex.GetType().Name}: {ex.Message}", ex);
             }
         }
 
@@ -389,6 +390,7 @@ namespace BoardingTime
 
             if (s_LastSimulationFrame != uint.MaxValue && simulationSystem.frameIndex < s_LastSimulationFrame)
             {
+                // Lower frame index means a different load/city; reset stale daily counters.
                 s_CurrentDayKey = int.MinValue;
                 ResetDailyCounters();
             }
@@ -409,6 +411,7 @@ namespace BoardingTime
                 return;
             }
 
+            // "Skipped today" follows the in-game calendar day.
             s_CurrentDayKey = dayKey;
             ResetDailyCounters();
         }

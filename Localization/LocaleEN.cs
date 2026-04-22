@@ -1,7 +1,7 @@
 // File: Localization/LocaleEN.cs
-// Purpose: English en-US locale entries for Boarding Time.
+// Purpose: English en-US locale entries for Fast Boarding.
 
-namespace BoardingTime
+namespace FastBoarding
 {
     using Colossal;
     using System.Collections.Generic;
@@ -36,6 +36,7 @@ namespace BoardingTime
                 title = title + " (" + Mod.ModVersion + ")";
             }
 
+            // One helper keeps all seven status tooltips in sync for future translations.
             string StatusDescription(string transitName)
             {
                 return
@@ -121,13 +122,13 @@ namespace BoardingTime
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatsToLog)), "Stats to Log" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)),
-                    "Writes a detailed one-time report to **BoardingTime.log**.\n" +
+                    "Writes a detailed one-time report to **FastBoarding.log**.\n" +
                     "Includes waiting totals, top 5 worst stops per mode, entity IDs, and line hints."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenLog)), "Open Log" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)),
-                    "Opens **BoardingTime.log** if it exists.\n" +
+                    "Opens **FastBoarding.log** if it exists.\n" +
                     "If the file is not found yet, opens the Logs folder instead."
                 },
 
@@ -135,8 +136,8 @@ namespace BoardingTime
                 { TransitWaitStatus.KeyNoCityLoaded, "No city loaded." },
                 { TransitWaitStatus.KeyNoStopsFound, "No stops found." },
                 { TransitWaitStatus.KeyStatusLine, "{0} wait | avg {1} | worst {2} | {3} skipped" },
-                { TransitWaitStatus.KeyReportNoCityLoaded, "[BT] Stats report requested, but no city is loaded." },
-                { TransitWaitStatus.KeyReportTitle, "========== [BT] TRANSIT BOARDING STATUS REPORT ==========" },
+                { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] Stats report requested, but no city is loaded." },
+                { TransitWaitStatus.KeyReportTitle, "========== [FB] TRANSIT BOARDING STATUS REPORT ==========" },
                 { TransitWaitStatus.KeyReportSettings, "Settings: {0}" },
                 { TransitWaitStatus.KeyReportNote, "Note: Worst line is a hint from the highest-wait waypoint at the worst stop." },
                 { TransitWaitStatus.KeyReportFamilyHeader, "--- {0} ---" },

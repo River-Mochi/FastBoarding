@@ -1,6 +1,6 @@
-## Boarding Time
+## Fast Boarding
 
-Boarding Time is a transit mod focused on boarding tweaks.
+Fast Boarding is a transit mod focused on boarding tweaks.
 
 Instead of replacing the vanilla transport AI systems, this version uses:
 
@@ -35,7 +35,7 @@ If a passenger assigned to that vehicle still is not ready, the mod can cancel t
 - Group boarding is handled conservatively to avoid splitting groups across platform and vehicle.
 - The mod is designed to be save-game safe and safe to remove.
 - The late-boarder behavior is still experimental, so it is smart to test it on a copy of a save first until we have a little live testing behind it.
-- Game errors and warnings still appear in the game's normal logs, but mod-specific logging goes to `BoardingTime.log`.
+- Game errors and warnings still appear in the game's normal logs, but mod-specific logging goes to `FastBoarding.log`.
 
 ### Credits
 - River-Mochi mod author
@@ -45,7 +45,7 @@ If a passenger assigned to that vehicle still is not ready, the mod can cancel t
 All Aboard solved the problem inside the vehicle AI itself. It changed the exact “should this bus/train keep waiting?” logic,
 so it had to replace the transport AI systems that own that decision.
 
-Boarding Time takes a lighter route. It changes the inputs around boarding instead of replacing the AI:
+Fast Boarding takes a lighter route. It changes the inputs around boarding instead of replacing the AI:
 
 - it shortens dwell time by tuning stop prefab data
 - it can cancel overdue passengers from that vehicle’s boarding list after departure time

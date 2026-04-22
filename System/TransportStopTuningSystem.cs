@@ -1,7 +1,7 @@
 // File: System/TransportStopTuningSystem.cs
 // Purpose: Applies boarding-speed slider values to public transport stop prefabs.
 
-namespace BoardingTime
+namespace FastBoarding
 {
     using Game;
     using Game.Common;
@@ -37,6 +37,7 @@ namespace BoardingTime
         {
             if (m_AppliedRevision == BoardingRuntimeSettings.StopTuningRevision)
             {
+                // Nothing changed since the last pass, so go idle.
                 Enabled = false;
                 return;
             }
@@ -62,6 +63,7 @@ namespace BoardingTime
 
                 int speedFactor = GetSpeedFactor(authoringStop.m_TransportType);
                 float speedMultiplier = speedFactor;
+                // Authoring loading factor is stored as delta-from-1; runtime tuning uses the effective value.
                 var baseEffectiveLoading = math.max(0f, 1f + authoringStop.m_LoadingFactor);
                 var tunedStop = EntityManager.GetComponentData<TransportStopData>(prefabEntity);
 
@@ -107,6 +109,7 @@ namespace BoardingTime
             entities.Dispose();
             m_AppliedRevision = BoardingRuntimeSettings.StopTuningRevision;
             Enabled = false;
+            // One log line per retune is debug info and should not spam during normal play.
             LogUtils.Info(
                 Mod.s_Log,
                 () => $"Applied stop tuning to {updatedPrefabs} transport stop prefabs. {BoardingRuntimeSettings.DescribeForLog()}");

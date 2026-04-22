@@ -1,7 +1,7 @@
 // File: Settings/Setting.cs
-// Purpose: Options UI settings for Boarding Time.
+// Purpose: Options UI settings for Fast Boarding.
 
-namespace BoardingTime
+namespace FastBoarding
 {
     using Colossal.IO.AssetDatabase;
     using Game;
@@ -13,7 +13,7 @@ namespace BoardingTime
     using Unity.Entities;
     using UnityEngine;
 
-    [FileLocation("ModsSettings/BoardingTime/BoardingTime")]
+    [FileLocation("ModsSettings/FastBoarding/FastBoarding")]
     [SettingsUITabOrder(ActionsTab, AboutTab)]
     [SettingsUIGroupOrder(SpeedGroup, BehaviorGroup, StatusGroup, AboutInfoGroup, AboutLinksGroup)]
     [SettingsUIShowGroupName(SpeedGroup, BehaviorGroup, StatusGroup, AboutLinksGroup)]
@@ -216,6 +216,7 @@ namespace BoardingTime
 
         public override void SetDefaults()
         {
+            // Vanilla behavior is 1x and the experimental late-boarder pass is opt-in.
             BusBoardingSpeedFactor = DefaultSpeedFactor;
             RailBoardingSpeedFactor = DefaultSpeedFactor;
             WaterBoardingSpeedFactor = DefaultSpeedFactor;
@@ -229,7 +230,7 @@ namespace BoardingTime
 
             base.Apply();
 
-            // Apply() is still part of the normal CS2 auto-save path.
+            // Apply() is still part of the normal auto-save path.
             // It keeps load/reset/clamp behavior aligned with the runtime snapshot.
             BoardingRuntimeChangeFlags changes = BoardingRuntimeSettings.Apply(this);
 
@@ -287,6 +288,7 @@ namespace BoardingTime
         {
             if (BoardingRuntimeSettings.SetCancelLateBoarders(value))
             {
+                // SettingsUISetter gives us immediate live behavior without adding an Apply button.
                 LogUtils.Info(
                     Mod.s_Log,
                     () => $"Cancel late boarders {(value ? "enabled" : "disabled")} from Options UI. {BoardingRuntimeSettings.DescribeForLog()}");

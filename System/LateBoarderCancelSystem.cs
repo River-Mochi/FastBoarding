@@ -1,7 +1,7 @@
 // File: System/LateBoarderCancelSystem.cs
 // Purpose: Experimental system that lets solo late passengers miss a departing transit vehicle.
 
-namespace BoardingTime
+namespace FastBoarding
 {
     using Game;
     using Game.Common;
@@ -21,6 +21,7 @@ namespace BoardingTime
 
     public partial class LateBoarderCancelSystem : GameSystemBase
     {
+        // 4096/day means every 64 simulation frames; cancellation work is also capped below.
         public const int UpdatesPerDay = 4096;
         private const int MaxCancellationsPerUpdate = 64;
         private const uint DiagnosticFrameInterval = 4096;
@@ -87,7 +88,7 @@ namespace BoardingTime
 
                 if (IsPlayerUsingTool())
                 {
-                    // Avoid racing user edit tools such as bulldoze/net/object placement.
+                    // Avoid touching passenger buffers while edit tools may be deleting/rebuilding entities.
                     m_SkippedForTool++;
                     LogPassSummary(
                         m_SimulationSystem?.frameIndex ?? 0,
@@ -105,8 +106,8 @@ namespace BoardingTime
                 BoardingRuntimeSettings.SetCancelLateBoarders(false);
 
                 Mod.WarnOnce(
-                    "BT_LATE_BOARDER_CANCEL_EXCEPTION",
-                    () => $"[BT] Cancel late boarders disabled after {ex.GetType().Name}: {ex.Message}");
+                    "FB_LATE_BOARDER_CANCEL_EXCEPTION",
+                    () => $"{Mod.ModTag} Cancel late boarders disabled after {ex.GetType().Name}: {ex.Message}");
             }
         }
 
@@ -155,6 +156,7 @@ namespace BoardingTime
 
                     if ((publicTransport.m_State & (PublicTransportFlags.Evacuating | PublicTransportFlags.PrisonerTransport)) != 0)
                     {
+                        // These flags are special gameplay flows, not normal public boarding.
                         continue;
                     }
 
@@ -215,6 +217,7 @@ namespace BoardingTime
                     {
                         if (cancellationsThisUpdate >= MaxCancellationsPerUpdate)
                         {
+                            // Spread very large crowds over multiple ticks instead of spiking one frame.
                             break;
                         }
 
@@ -247,6 +250,7 @@ namespace BoardingTime
                     }
                 }
 
+                // Mutate after scanning so we do not edit buffers while enumerating them.
                 ecb.Playback(EntityManager);
                 // Update UI counters only after all queued ECS edits have succeeded.
                 RecordCanceledCounts(
@@ -450,6 +454,7 @@ namespace BoardingTime
             ecb.SetComponent(passenger, resident);
 
             var human = EntityManager.GetComponentData<Human>(passenger);
+            // Clear urgency from the missed boarding attempt before vanilla resumes control.
             human.m_Flags &= ~(HumanFlags.Run | HumanFlags.Emergency);
             ecb.SetComponent(passenger, human);
 

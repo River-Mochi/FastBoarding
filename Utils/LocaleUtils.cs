@@ -1,7 +1,7 @@
 // File: Utils/LocaleUtils.cs
 // Purpose: safe localization lookup and formatting helpers for Options UI strings.
 
-namespace BoardingTime
+namespace FastBoarding
 {
     using Colossal.Localization;
     using Game.SceneFlow;
@@ -19,6 +19,7 @@ namespace BoardingTime
 
             try
             {
+                // During early load the active dictionary may be unavailable; fallback keeps UI safe.
                 LocalizationDictionary? dict = GameManager.instance.localizationManager.activeDictionary;
                 if (dict != null && dict.TryGetValue(entryId, out string value) && !string.IsNullOrEmpty(value))
                 {
@@ -38,6 +39,7 @@ namespace BoardingTime
 
             try
             {
+                // Locale strings are hand-edited, so tolerate a bad placeholder count.
                 return string.Format(CultureInfo.CurrentCulture, format, args);
             }
             catch (FormatException)
