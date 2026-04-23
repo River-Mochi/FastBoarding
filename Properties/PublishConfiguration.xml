@@ -2,21 +2,21 @@
 	<!--Id must be set in order to update existed mod. it is not required for publishing mod for the first time-->
 	<ModId Value=""/>
 	<!--Name of the mod to display to players-->
-	<DisplayName Value="Faster Boarding"/>
+	<DisplayName Value="Fast Boarding"/>
 	<!--Short description of the mod-->
-	<ShortDescription Value="Limits total time transit waits at stops; tardy passengers can miss the vehicle instead of causing endless boarding."/>
+	<ShortDescription Value="Limits total time transit waits at stops; Late passengers stop preventing transit from leaving, causing endless boarding."/>
 	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
 	<!--LongDescription Value="This is a long description" /-->
 	<LongDescription>
-## Faster Boarding [Beta]
+## Fast Boarding [Beta]
 
-Safer, faster public transit boarding
+Faster public transit boarding
 - Increase transit usage, reduce blocked stops, reduce private car demand indirectly.
 - The larger your city, the more this mod will help.
 - Instead of replacing the transport system files, this build focuses on two behaviors:
 
 - **Prefab stop tuning** for bus, tram, train, subway, ship, ferries, and air transit
-- **Optional late-boarder cancellation** so passengers can miss a vehicle instead of holding it forever.
+- **Optional Let Vehicles Leave** so tardy citizens can miss a vehicle instead of holding it forever.
 
 ### What the sliders do
 
@@ -24,35 +24,42 @@ Tune boarding speeds for:
 
 - Bus, Rail (train, tram, subway), Water (ship, ferry), Air
 - Higher values shorten dwell time by increasing stop loading speed and adjusting the boarding-time estimate used by the game.
-- ✅ When **Let vehicle leave** is enabled, passengers who are Late (*not ready*) after *departure time* can be dropped from that vehicle's boarding process.
-- The goal is for the vehicle to leave and not have to wait for late passengers who could be far away. Then the game's vanilla methods handle the rest of the passenger flow.
+- ✅ When **Let Vehicles Leave** is enabled, late passengers who are *still not ready* after *departure time* can be dropped from that vehicle's boarding process.
+- The goal is simple: let the vehicle leave instead of waiting on passengers who are late, possibly far away. The game then naturally reassigns them.
 
-### Status report in Options menu
-- After the city runs a bit, check the options menu to see status for the mod
-- Skipped number shows the mod is working and how many late passengers have been skipped so that the transit can leave on time.
-- If the number is "0", ensure the checkbox is enabled. This is also a snapshot of RIGHT NOW.
-- Example, if the Worst stop is over 5 minutes, then it might be good to inspect that stop or traffic nearby.
-- For More detailed organized stats, use the [Stats to Log] button.
-- I like to click the button every 30 min, then compare the report later for changes, it also shows you exactly where your worst stops are.
+### Status report included
+- After the city runs a bit, check the Options menu to see current status.
+- *Skipped* number shows how many late passengers have been skipped so the transit can leave on time.
+- This is a snapshot of right-now; if the skip number stays at "0" for a long time, make sure to enable the checkbox ✅.
+- For more detailed stats, use the [Stats to Log] button.
+- Example usage: Worst stop shows over 10 minutes, check it for traffic, bad placement, not enough vehicles, or replace the stop.
+- This is a one-shot button that does not run in the city per-frame, so no performance impact.
+- When investigating, I like to click the button every 30 min, then compare the report later; it also shows exactly where the worst stops are and more.
 
 ### Notes
 - Compatibility: conflict will be with any mod that touches boarding behavior, like All-Aboard, so choose one or the other.
-- This is intended to be a lighter alternative than replacing the vanilla transport AI systems.
+- This is intended to be a lighter, safer alternative than replacing the game's entire Transport system files.
 - Group boarding is handled conservatively to avoid splitting groups across platform and vehicle.
-- Safe to remove anytime.
-- No Harmony patches; lightweight design as to not cause performance issues
+- This mod works well with `Public Works Plus` to solve many transit issues.
+- Save-game safe. Safe to remove anytime.
+- No Harmony patches; lightweight design for low overhead and negligible performance impact.
 
 ### Support and feedback
-If the mods help you, give it a Like, it's free + easy way to show support to your modders :)
+If mods help you, give them a Like, it's easy way to show support for free mods :)
 Feedback on: Github, Discord, etc., link icons on this page.
 
 ### Credits
-- RiverMochi (mod author)
-- Inspiration and thanks to bcallender's All Aboard mod.
+- RiverMochi....mod author
+- Inspiration and thanks to bcallender's All Aboard mod and Wayze's old InstantBoarding.
+- yenyang.......for testing and code feedback
+- Neco1996......for testing
+- MayorCheeks...for testing
+
+
 
 </LongDescription>
 	<!--Thumbnail-->
-	<Thumbnail Value="Properties/Thumbnail-Trainboard.jpg"/>
+	<Thumbnail Value="Properties/Thumbnail-Trainboard02.jpg"/>
 	<!--Screenshot, can be set multiple times-->
 	<Screenshot Value="Properties/image10-BoardingSpeed.jpg"/>
 	<Screenshot Value="Properties/image20-Status.jpg"/>
