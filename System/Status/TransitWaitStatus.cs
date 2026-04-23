@@ -148,7 +148,6 @@ namespace FastBoarding
             s_HasSnapshotThisCity = false;
             s_LastRefreshTicksUtc = 0;
             s_LastUiFrame = -1;
-            ResetDailyCounters();
 
             BusSummary = Localize(KeyStatusNotLoaded, "Status not loaded.");
             OverviewSummary = BusSummary;
@@ -182,9 +181,18 @@ namespace FastBoarding
 
             if (isGame != s_WasInGame)
             {
-                // Loading/unloading a city means old counters and cached stop entities are stale.
+                bool leftGame = s_WasInGame && !isGame;
                 s_WasInGame = isGame;
+
+                // Loading/unloading a city makes cached stop text stale. Do not reset skipped
+                // counters when entering a city here, because the skip system may have already
+                // recorded passengers before the player opens Options UI for the first time.
                 InvalidateCache();
+
+                if (leftGame)
+                {
+                    ResetDailyCounters();
+                }
             }
 
             if (!isGame)

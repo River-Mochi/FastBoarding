@@ -8,6 +8,7 @@ namespace FastBoarding
     using Game.Prefabs;
     using Game.Simulation;
     using Game.Tools;
+    using System;
     using Unity.Collections;
     using Unity.Entities;
     using Unity.Mathematics;
@@ -37,6 +38,7 @@ namespace FastBoarding
         {
             if (m_AppliedRevision == BoardingRuntimeSettings.StopTuningRevision)
             {
+                WakeLateBoarderSystemIfNeeded();
                 // Nothing changed since the last pass, so go idle.
                 Enabled = false;
                 return;
@@ -116,11 +118,38 @@ namespace FastBoarding
 
             entities.Dispose();
             m_AppliedRevision = BoardingRuntimeSettings.StopTuningRevision;
+            WakeLateBoarderSystemIfNeeded();
             Enabled = false;
             // One log line per retune is debug info and should not spam during normal play.
             LogUtils.Info(
                 Mod.s_Log,
                 () => $"Applied stop tuning to {updatedPrefabs} transport stop prefabs. {BoardingRuntimeSettings.DescribeForLog()}");
+        }
+
+        private void WakeLateBoarderSystemIfNeeded()
+        {
+            if (!BoardingRuntimeSettings.CancelLateBoarders)
+            {
+                return;
+            }
+
+            try
+            {
+                // If the checkbox was enabled before loading a city, the live setter could not wake
+                // the simulation system yet. This one-shot prefab pass runs after load, so it is a
+                // safe place to activate the late-cim skip system for the loaded world.
+                LateBoarderCancelSystem system =
+                    World.GetExistingSystemManaged<LateBoarderCancelSystem>() ??
+                    World.GetOrCreateSystemManaged<LateBoarderCancelSystem>();
+
+                system.Enabled = true;
+            }
+            catch (Exception ex)
+            {
+                Mod.WarnOnce(
+                    "FB_WAKE_LATE_BOARDER_FAILED",
+                    () => $"{Mod.ModTag} Failed waking late-cim skip system: {ex.GetType().Name}: {ex.Message}");
+            }
         }
 
         private static int GetSpeedFactor(TransportType transportType)
