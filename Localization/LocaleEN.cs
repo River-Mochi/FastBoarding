@@ -68,7 +68,9 @@ namespace FastBoarding
                     "Higher values reduce bus stop boarding/loading time.\n" +
                     "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
                     "Use [✓] <Let vehicles leave without late cims> if you want solo late cims to miss the vehicle.\n" +
-                    "2x means ~double boarding speed."
+                    "2x means ~double boarding speed.\n"+
+                    "Tech notes: higher loading factor means shorter planned stop duration, and boarding time is more like the passenger-side wait/boarding estimate.\n"+
+                    "This is not the same as forcing the vehicle to leave."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "Rail boarding speed" },
@@ -110,7 +112,7 @@ namespace FastBoarding
                     "Skipped Late citizens are not deleted; vanilla systems continue from there to assign them."
                 },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "Total" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "Total usage" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)),
                     "Monthly public transit usage from the game's Transportation infoview.\n" +
                     "Updated time shows when this status snapshot was taken (usually after entering Options menu)."
@@ -155,9 +157,9 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyStatusLine, "{0} wait | avg {1} | worst {2} | {3} skipped" },
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} tourist/mo | {1} citizens/mo | updated {2}" },
                 { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] Stats report requested, but no city is loaded." },
-                { TransitWaitStatus.KeyReportTitle, "Fast Boarding transit status report" },
+                { TransitWaitStatus.KeyReportTitle, "Stats to Log snapshot - Fast Boarding" },
                 { TransitWaitStatus.KeyReportSettings, "Settings: {0}" },
-                { TransitWaitStatus.KeyReportNote, "Note: Worst line is a hint from the highest-wait waypoint at the worst stop." },
+                { TransitWaitStatus.KeyReportNote, "Line hint comes from the highest-wait waypoint at that stop." },
                 { TransitWaitStatus.KeyReportFamilyHeader, "{0}" },
                 { TransitWaitStatus.KeyReportServedStops, "Served stops: {0}" },
                 { TransitWaitStatus.KeyReportStopsWithWaiting, "Stops with waiting passengers: {0}" },
@@ -175,7 +177,7 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportTopWorstStopsHeader, "Top {0} worst stops by average wait:" },
                 { TransitWaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | avg {2} | waiting {3} | stop entity {4} | waypoint entity {5} | line entity {6} | line hint {7}" },
                 { TransitWaitStatus.KeyReportLateGroups, "Late group passengers left alone: {0} passengers in {1} groups on {2} vehicles" },
-                { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "Last skipped solo cims" },
+                { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "Skipped solo cim examples" },
                 { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | passenger {2} | vehicle {3} | frame {4} | time {5} | now {6}" },
                 { TransitWaitStatus.KeyReportNone, "none" },
                 { TransitWaitStatus.KeyReportUnknown, "(unknown)" },

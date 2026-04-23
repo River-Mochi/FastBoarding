@@ -2,7 +2,11 @@
 
 Problem: `m_DepartureFrame` is used as a gate,
 but `StopBoarding` still returns `false` if any passenger in the vehicle buffer has `CurrentVehicle` without the `Ready` flag.
+Returning false means “do not stop boarding yet, someone is still on the way.”
 So vanilla has a planned departure frame, but it is not a hard “leave now even if someone is late” cutoff which is where this mod helps.
+
+Game Design hole: in transportAI code, the departure frame itself does not forcibly clear that late passenger or make the vehicle leave.
+That is the design hole Fast Boarding is working around.
 
 This mod map records the important assumptions from decompiled game code so I don't have to reread them later and tracks the design goals.
 - also for anyone who wants to understand the mod's inner workings.

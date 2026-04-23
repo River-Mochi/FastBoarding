@@ -798,7 +798,10 @@ namespace FastBoarding
             string name = m_NameSystem.GetRenderedLabelName(lineEntity);
             if (!string.IsNullOrWhiteSpace(name))
             {
-                return NormalizeWhitespace(name);
+                name = NormalizeWhitespace(name);
+                return IsGenericLineToolName(name)
+                    ? string.Empty
+                    : name;
             }
 
             string debugName = NormalizeWhitespace(m_NameSystem.GetDebugName(lineEntity));

@@ -1,0 +1,142 @@
+// File: Localization/LocaleES.cs
+// Purpose: Spanish es-ES locale entries for Fast Boarding.
+
+namespace FastBoarding
+{
+    using Colossal;
+    using System.Collections.Generic;
+
+    /// <summary>
+    /// Spanish localization source.
+    /// </summary>
+    public sealed class LocaleES : IDictionarySource
+    {
+        private readonly Setting m_Setting;
+
+        /// <summary>
+        /// Constructs the Spanish locale.
+        /// </summary>
+        /// <param name="setting">Settings object used for locale IDs.</param>
+        public LocaleES(Setting setting)
+        {
+            m_Setting = setting;
+        }
+
+        /// <summary>
+        /// Creates all Spanish localization entries for this mod.
+        /// </summary>
+        public IEnumerable<KeyValuePair<string, string>> ReadEntries(
+            IList<IDictionaryEntryError> errors,
+            Dictionary<string, int> indexCounts)
+        {
+            string title = Mod.ModName;
+
+            if (!string.IsNullOrEmpty(Mod.ModVersion))
+            {
+                title = title + " (" + Mod.ModVersion + ")";
+            }
+
+            // One helper keeps all seven status tooltips in sync for future translations.
+            string StatusDescription(string transitName)
+            {
+                return
+                    $"<Estado actual de {transitName}>\n" +
+                    "**Esperando** = pasajeros esperando ahora mismo.\n" +
+                    "**Media** = tiempo medio de espera de esos pasajeros.\n" +
+                    "**Peor** parada = mayor espera media en una parada.\n" +
+                    "**Saltados** = embarques tardíos cancelados hoy por la opción.\n" +
+                    "Usa <Stats al log> para un informe detallado: nombres de paradas, ID de entidades y más.";
+            }
+
+            return new Dictionary<string, string>
+            {
+                { m_Setting.GetSettingsLocaleID(), title },
+                { m_Setting.GetOptionTabLocaleID(Setting.ActionsTab), "Acciones" },
+                { m_Setting.GetOptionTabLocaleID(Setting.AboutTab), "Acerca de" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.SpeedGroup), "Velocidad de embarque" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.BehaviorGroup), "Comportamiento" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.StatusGroup), "Estado" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGroup), "Info del mod" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGroup), "Enlaces" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.DebugGroup), "Depuración" },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.BusBoardingSpeedFactor)), "Velocidad de bus" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.BusBoardingSpeedFactor)), "<1x = vanilla>\nValores más altos reducen el tiempo de embarque/carga en paradas de bus.\nEsto vacía colas normales más rápido, pero un pasajero tarde aún puede retrasar la salida.\nUsa [✓] <Dejar salir vehículos sin cims tarde> si quieres que cims solo tarde pierdan el vehículo.\n2x significa aprox. doble velocidad." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "Velocidad rail" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "<1x = vanilla>\nAplica a trenes, tranvías y metro.\nValores más altos reducen el tiempo de embarque/carga.\nUsa [✓] <Dejar salir vehículos sin cims tarde> si cims solo tarde siguen bloqueando." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "Velocidad barco + ferry" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "<1x = vanilla>\nAplica a barcos y ferries.\nValores más altos reducen el tiempo de embarque/carga.\nUsa [✓] <Dejar salir vehículos sin cims tarde> si cims solo tarde siguen bloqueando." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "Velocidad avión" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "<1x = vanilla>\nAplica a terminales de aviones de pasajeros.\nValores más altos reducen el tiempo de embarque/carga.\nUsa [✓] <Dejar salir vehículos sin cims tarde> si cims solo tarde siguen bloqueando." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "Dejar salir sin cims tarde" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)), "**BETA experimental**\nCiudadanos solo que siguen <no listos> después de la hora de salida vanilla pueden perder el vehículo.\nLos grupos/familias <no se saltan> todavía; pueden seguir causando retrasos.\nLos ciudadanos saltados no se eliminan; los sistemas vanilla continúan desde ahí." },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "Uso total" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)), "Uso mensual del transporte público desde la infovista de Transporte del juego.\nLa hora muestra cuándo se tomó esta instantánea." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "Bus" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusBus)), StatusDescription("bus") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusTram)), "Tranvía" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusTram)), StatusDescription("tranvía") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusTrain)), "Tren" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusTrain)), StatusDescription("tren") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSubway)), "Metro" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSubway)), StatusDescription("metro") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusFerry)), "Ferry" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusFerry)), StatusDescription("ferry") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusShip)), "Barco" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusShip)), StatusDescription("barco") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusAir)), "Avión" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusAir)), StatusDescription("avión") },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatsToLog)), "Stats al log" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)), "Escribe un informe detallado puntual en **FastBoarding.log**.\nIncluye totales de espera, 3 peores paradas por modo, ejemplos de cims saltados e ID de entidades." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenLog)), "Abrir log" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)), "Abre **FastBoarding.log** si existe.\nSi no, abre la carpeta Logs." },
+
+                { TransitWaitStatus.KeyStatusNotLoaded, "Estado no cargado." },
+                { TransitWaitStatus.KeyNoCityLoaded, "No hay ciudad cargada." },
+                { TransitWaitStatus.KeyNoStopsFound, "No se encontraron paradas." },
+                { TransitWaitStatus.KeyStatusLine, "{0} esperan | media {1} | peor {2} | {3} saltados" },
+                { TransitWaitStatus.KeyStatusOverviewLine, "{0} turistas/mes | {1} ciudadanos/mes | act. {2}" },
+                { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] Se pidió informe, pero no hay ciudad cargada." },
+                { TransitWaitStatus.KeyReportTitle, "Instantánea Stats al log - Fast Boarding" },
+                { TransitWaitStatus.KeyReportSettings, "Ajustes: {0}" },
+                { TransitWaitStatus.KeyReportNote, "La pista de línea viene del waypoint con mayor espera en esa parada." },
+                { TransitWaitStatus.KeyReportFamilyHeader, "{0}" },
+                { TransitWaitStatus.KeyReportServedStops, "Paradas servidas: {0}" },
+                { TransitWaitStatus.KeyReportStopsWithWaiting, "Paradas con espera: {0}" },
+                { TransitWaitStatus.KeyReportWaitingPassengers, "Pasajeros esperando: {0}" },
+                { TransitWaitStatus.KeyReportAverageWait, "Espera media: {0}" },
+                { TransitWaitStatus.KeyReportLateBoardersSkipped, "Pasajeros tarde saltados hoy: {0}" },
+                { TransitWaitStatus.KeyReportWorstStopNone, "Peor parada: ninguna, no hay pasajeros esperando ahora." },
+                { TransitWaitStatus.KeyReportWorstStopAverageWait, "Espera media peor parada: {0}" },
+                { TransitWaitStatus.KeyReportWorstStopName, "Nombre peor parada: {0}" },
+                { TransitWaitStatus.KeyReportWorstStopEntity, "Entidad peor parada: {0}" },
+                { TransitWaitStatus.KeyReportWorstWaypointEntity, "Entidad waypoint: {0}" },
+                { TransitWaitStatus.KeyReportWorstLineHint, "Pista de línea: {0}" },
+                { TransitWaitStatus.KeyReportWorstLineEntity, "Entidad línea: {0}" },
+                { TransitWaitStatus.KeyReportWorstLineWaypointAverage, "Media waypoint línea: {0} con {1} esperando" },
+                { TransitWaitStatus.KeyReportTopWorstStopsHeader, "Top {0} peores paradas por espera media:" },
+                { TransitWaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | media {2} | esperando {3} | parada {4} | waypoint {5} | línea {6} | pista {7}" },
+                { TransitWaitStatus.KeyReportLateGroups, "Grupos tarde no saltados: {0} pasajeros en {1} grupos en {2} vehículos" },
+                { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "Ejemplos de cims solo saltados" },
+                { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | pasajero {2} | vehículo {3} | frame {4} | hora {5} | ahora {6}" },
+                { TransitWaitStatus.KeyReportNone, "ninguno" },
+                { TransitWaitStatus.KeyReportUnknown, "(desconocido)" },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "Mod" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "Nombre mostrado del mod." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "Versión" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "Versión actual del mod." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "Abre la página de Paradox Mods del autor." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableVerboseLogging)), "Activar log detallado" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)), "**Solo depuración / pruebas**\nAñade diagnósticos en vivo a <FastBoarding.log> mientras la ciudad corre.\n**No lo actives para juego normal.**\nPuede reducir el rendimiento y crear logs enormes." }
+            };
+        }
+
+        public void Unload()
+        {
+        }
+    }
+}

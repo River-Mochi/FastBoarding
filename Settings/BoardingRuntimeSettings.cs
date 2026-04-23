@@ -180,7 +180,12 @@ namespace FastBoarding
             return
                 $"bus={BusBoardingSpeedFactor}x, rail={RailBoardingSpeedFactor}x, " +
                 $"ship+ferry={WaterBoardingSpeedFactor}x, air={AirBoardingSpeedFactor}x, " +
-                $"missLateSolo={CancelLateBoarders}, verbose={EnableVerboseLogging}";
+                $"skipLateSoloCim={CancelLateBoarders}";
+        }
+
+        public static string DescribeVerboseForLog(bool enabled)
+        {
+            return $"Verbose log [x] {enabled.ToString().ToLowerInvariant()}, {DescribeForLog()}";
         }
 
         private static int ClampSpeedFactor(int value)

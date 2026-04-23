@@ -46,21 +46,21 @@ namespace FastBoarding
 
             // Register languages here so future locale files only need one new AddLocaleSource line.
             AddLocaleSource("en-US", new LocaleEN(setting));
-            // AddLocaleSource("fr-FR", new LocaleFR(setting));
-            // AddLocaleSource("es-ES", new LocaleES(setting));
-            // AddLocaleSource("de-DE", new LocaleDE(setting));
+            AddLocaleSource("fr-FR", new LocaleFR(setting));
+            AddLocaleSource("es-ES", new LocaleES(setting));
+            AddLocaleSource("de-DE", new LocaleDE(setting));
             // AddLocaleSource("it-IT", new LocaleIT(setting));
             // AddLocaleSource("ja-JP", new LocaleJA(setting));
             // AddLocaleSource("ko-KR", new LocaleKO(setting));
             // AddLocaleSource("pl-PL", new LocalePL(setting));
             // AddLocaleSource("pt-BR", new LocalePT_BR(setting));
-            // AddLocaleSource("zh-HANS", new LocaleZH_CN(setting));    // Simplified Chinese
-           // AddLocaleSource("zh-HANT", new LocaleZH_HANT(setting));  // Traditional Chinese
+            AddLocaleSource("zh-HANS", new LocaleZH_CN(setting));    // Simplified Chinese
+            // AddLocaleSource("zh-HANT", new LocaleZH_HANT(setting));  // Traditional Chinese
 
             try
             {
                 // CS2 persists ModSetting values in the mod .coc file.
-                // Loading before RegisterInOptionsUI follows the normal PDX settings flow.
+                // Loading before RegisterInOptionsUI follows the normal flow.
                 AssetDatabase.global.LoadSettings(ModId, setting, new Setting(this));
                 setting.RegisterInOptionsUI();
                 BoardingRuntimeSettings.Apply(setting);

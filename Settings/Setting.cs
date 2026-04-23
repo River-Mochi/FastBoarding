@@ -252,19 +252,19 @@ namespace FastBoarding
 
             if ((changes & BoardingRuntimeChangeFlags.StopTuning) != 0)
             {
-                LogUtils.Info(Mod.s_Log, () => $"Settings applied. {BoardingRuntimeSettings.DescribeForLog()}");
+                LogUtils.Info(Mod.s_Log, () => $"Settings applied: {BoardingRuntimeSettings.DescribeForLog()}");
                 TryEnableStopTuningSystem();
             }
 
             if ((changes & BoardingRuntimeChangeFlags.LateBoarders) != 0)
             {
-                LogUtils.Info(Mod.s_Log, () => $"Late-boarder setting applied. {BoardingRuntimeSettings.DescribeForLog()}");
+                LogUtils.Info(Mod.s_Log, () => $"Late-cim skip [x] {CancelLateBoarders.ToString().ToLowerInvariant()}, {BoardingRuntimeSettings.DescribeForLog()}");
                 TrySetLateBoarderSystemEnabled(CancelLateBoarders);
             }
 
             if ((changes & BoardingRuntimeChangeFlags.VerboseLogging) != 0)
             {
-                LogUtils.Info(Mod.s_Log, () => $"Verbose logging {(EnableVerboseLogging ? "enabled" : "disabled")}. {BoardingRuntimeSettings.DescribeForLog()}");
+                LogUtils.Info(Mod.s_Log, () => BoardingRuntimeSettings.DescribeVerboseForLog(EnableVerboseLogging));
             }
         }
 
@@ -312,7 +312,7 @@ namespace FastBoarding
                 // SettingsUISetter gives us immediate live behavior without adding an Apply button.
                 LogUtils.Info(
                     Mod.s_Log,
-                    () => $"Let vehicles leave without late cims {(value ? "enabled" : "disabled")} from Options UI. {BoardingRuntimeSettings.DescribeForLog()}");
+                    () => $"Late-cim skip [x] {value.ToString().ToLowerInvariant()}, {BoardingRuntimeSettings.DescribeForLog()}");
                 TrySetLateBoarderSystemEnabled(value);
             }
         }
@@ -321,13 +321,13 @@ namespace FastBoarding
         {
             if (BoardingRuntimeSettings.SetEnableVerboseLogging(value))
             {
-                LogUtils.Info(Mod.s_Log, () => $"Verbose logging {(value ? "enabled" : "disabled")} from Options UI. {BoardingRuntimeSettings.DescribeForLog()}");
+                LogUtils.Info(Mod.s_Log, () => BoardingRuntimeSettings.DescribeVerboseForLog(value));
             }
         }
 
         private static void LogSpeedChange()
         {
-            LogUtils.Info(Mod.s_Log, () => $"Boarding speed changed from Options UI. {BoardingRuntimeSettings.DescribeForLog()}");
+            LogUtils.Info(Mod.s_Log, () => $"Speed changed: {BoardingRuntimeSettings.DescribeForLog()}");
         }
 
         private void RepairAndClamp()

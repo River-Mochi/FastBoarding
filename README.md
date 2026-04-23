@@ -2,10 +2,18 @@
 
 Fast Boarding is a transit mod focused on helping public transport board faster without replacing the game's whole transport AI.
 
-It uses two lighter-touch ideas:
+### Uses two lighter-touch ideas:
 
-- Boarding speed sliders tune vanilla public transport stop data.
-- Optional late-cim skipping lets a late solo cim miss a vehicle instead of holding it forever.
+#### Sliders
+  - make normal boarding/loading faster through vanilla transit stop data (safe prefab change)
+
+#### Let vehicles leave without late cims [x] toggle
+  - after vanilla departure frame,
+  - if a solo cim is still not *Ready*,
+  - detach that cim from this vehicle/path leg,
+  - remove them from the vehicle passenger buffer,
+  - let vanilla continue from there
+
 
 ### Current Features
 

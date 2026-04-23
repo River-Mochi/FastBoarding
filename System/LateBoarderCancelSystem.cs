@@ -398,7 +398,7 @@ namespace FastBoarding
             m_LoggedActive = true;
             LogUtils.Info(
                 Mod.s_Log,
-                () => $"Late-cim skip active. interval={GetUpdateInterval(SystemUpdatePhase.GameSimulation)} frames, cap={MaxCancellationsPerUpdate} per update. {BoardingRuntimeSettings.DescribeForLog()}");
+                () => $"Skip pass active: every {GetUpdateInterval(SystemUpdatePhase.GameSimulation)}f, cap={MaxCancellationsPerUpdate}, {BoardingRuntimeSettings.DescribeForLog()}");
         }
 
         private void LogPassSummary(uint frame, PassStats stats, string reason)
@@ -427,9 +427,17 @@ namespace FastBoarding
 
             m_LastDiagnosticFrame = frame;
             string activeTool = m_ToolSystem?.activeTool?.GetType().Name ?? "none";
+            if (reason == "paused-tool")
+            {
+                LogUtils.Info(
+                    Mod.s_Log,
+                    () => $"Skip pass paused: frame={frame}, tool={activeTool}, pauses={m_SkippedForTool}, totalSkipped={m_TotalCanceled}");
+                return;
+            }
+
             LogUtils.Info(
                 Mod.s_Log,
-                () => $"LateBoarder {reason}: frame={frame}, vehicles={stats.Vehicles}, passengers={stats.Passengers}, candidates={stats.Candidates}, canceled={stats.Canceled}, total={m_TotalCanceled}, skippedTool={m_SkippedForTool}, activeTool={activeTool}, {BoardingRuntimeSettings.DescribeForLog()}");
+                () => $"Skip pass: frame={frame}, vehicles={stats.Vehicles}, pax={stats.Passengers}, lateSolo={stats.Candidates}, skipped={stats.Canceled}, totalSkipped={m_TotalCanceled}, tool={activeTool}, {BoardingRuntimeSettings.DescribeForLog()}");
         }
 
         private void TrackFollowUpSample(CanceledPassengerSample sample)
@@ -473,7 +481,7 @@ namespace FastBoarding
 
                 LogUtils.Info(
                     Mod.s_Log,
-                    () => $"Late-cim follow-up: mode={sample.TransportType}, passenger={sample.Passenger}, missedVehicle={sample.Vehicle}, afterFrames={elapsedFrames}, {DescribePassengerState(sample.Passenger)}");
+                    () => $"Skip follow-up: {sample.TransportType}, cim={sample.Passenger}, missed={sample.Vehicle}, +{elapsedFrames}f, {DescribePassengerState(sample.Passenger)}");
             }
         }
 
@@ -504,7 +512,13 @@ namespace FastBoarding
                 ? EntityManager.GetComponentData<PathOwner>(passenger).m_ElementIndex
                 : -1;
 
-            return $"currentVehicle={currentVehicleText}, pathElements={pathCount}, pathIndex={pathIndex}";
+            string hint = currentVehicleText != "none"
+                ? "assigned"
+                : pathCount > 0
+                    ? "has path"
+                    : "no path yet";
+
+            return $"currentVehicle={currentVehicleText}, path={pathCount} elems idx={pathIndex}, hint={hint}";
         }
 
         private static bool ShouldLogDiagnostics()

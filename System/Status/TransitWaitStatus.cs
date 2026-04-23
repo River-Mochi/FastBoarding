@@ -264,9 +264,7 @@ namespace FastBoarding
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine();
                 AppendSectionHeader(sb, Localize(KeyReportTitle, "Fast Boarding transit status report"));
-                AppendField(sb, "Generated local", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                 AppendField(sb, "Snapshot updated", s_LastSnapshotLocalTime == default ? "unknown" : s_LastSnapshotLocalTime.ToString("HH:mm:ss"));
-                AppendField(sb, "Monthly transit total", $"{LocaleUtils.FormatN0(snapshot.MonthlyTourists)} tourist/mo | {LocaleUtils.FormatN0(snapshot.MonthlyCitizens)} citizens/mo");
                 AppendField(sb, "Settings", BoardingRuntimeSettings.DescribeForLog());
                 AppendField(sb, "Note", Localize(KeyReportNote, "Worst line is a hint from the highest-wait waypoint at the worst stop."));
 
@@ -380,7 +378,7 @@ namespace FastBoarding
             AppendField(
                 sb,
                 "Total public transit",
-                $"{LocaleUtils.FormatN0(snapshot.MonthlyTourists)} tourist/mo | {LocaleUtils.FormatN0(snapshot.MonthlyCitizens)} citizens/mo");
+                $"{LocaleUtils.FormatN0(snapshot.MonthlyTourists)} tourists/mo | {LocaleUtils.FormatN0(snapshot.MonthlyCitizens)} citizens/mo");
             AppendSummaryLine(sb, "Bus", snapshot.Bus, s_BusLateBoardersToday);
             AppendSummaryLine(sb, "Tram", snapshot.Tram, s_TramLateBoardersToday);
             AppendSummaryLine(sb, "Train", snapshot.Train, s_TrainLateBoardersToday);
@@ -405,7 +403,7 @@ namespace FastBoarding
             AppendField(
                 sb,
                 label,
-                $"{LocaleUtils.FormatN0(family.WaitingPassengers)} waiting | average {FormatDuration(family.AverageWaitSeconds)} | worst {FormatDuration(family.WorstStopWaitSeconds)} | {LocaleUtils.FormatN0(lateBoardersCanceledToday)} skipped");
+                $"{LocaleUtils.FormatN0(family.WaitingPassengers)} waiting | avg wait {FormatDuration(family.AverageWaitSeconds)} | worst stop {FormatDuration(family.WorstStopWaitSeconds)} | queued/total stops {LocaleUtils.FormatN0(family.ActiveQueueStops)}/{LocaleUtils.FormatN0(family.StopCount)} | {LocaleUtils.FormatN0(lateBoardersCanceledToday)} skipped late passengers");
         }
 
         private static void AppendFamilyReport(
@@ -428,11 +426,12 @@ namespace FastBoarding
             AppendField(
                 sb,
                 "Status",
-                $"{LocaleUtils.FormatN0(family.WaitingPassengers)} waiting | average {FormatDuration(family.AverageWaitSeconds)} | worst {FormatDuration(family.WorstStopWaitSeconds)} | {LocaleUtils.FormatN0(lateBoardersCanceledToday)} skipped today");
+                $"{LocaleUtils.FormatN0(family.WaitingPassengers)} waiting | avg wait {FormatDuration(family.AverageWaitSeconds)} | worst stop {FormatDuration(family.WorstStopWaitSeconds)} | queued/total stops {LocaleUtils.FormatN0(family.ActiveQueueStops)}/{LocaleUtils.FormatN0(family.StopCount)}");
+            AppendField(sb, "Late solo cims skipped", LocaleUtils.FormatN0(lateBoardersCanceledToday) + " today");
             AppendField(
                 sb,
-                "Late group passengers left alone",
-                $"{LocaleUtils.FormatN0(family.LateGroupPassengers)} passengers in {LocaleUtils.FormatN0(family.LateGroupGroups)} groups on {LocaleUtils.FormatN0(family.LateGroupVehicles)} vehicles");
+                "Late groups not skipped",
+                $"{LocaleUtils.FormatN0(family.LateGroupPassengers)} passengers | {LocaleUtils.FormatN0(family.LateGroupGroups)} groups | {LocaleUtils.FormatN0(family.LateGroupVehicles)} vehicles");
 
             if (family.WaitingPassengers <= 0)
             {
@@ -475,7 +474,7 @@ namespace FastBoarding
             SkippedPassengerSampleRing skippedSamples)
         {
             sb.AppendLine();
-            AppendSectionHeader(sb, Localize(KeyReportLastSkippedSamplesHeader, "Last skipped solo cims"));
+            AppendSubHeader(sb, Localize(KeyReportLastSkippedSamplesHeader, "Skipped solo cim examples"));
 
             if (skippedSamples.Count == 0)
             {
@@ -539,7 +538,13 @@ namespace FastBoarding
                 ? $"{EntityText(currentVehicle)} ({vehicleFlags})"
                 : "none";
 
-            return $"currentVehicle {vehicleText}; path elements {pathCount}; path index {pathIndex}";
+            string hint = hasCurrentVehicle
+                ? "assigned"
+                : pathCount > 0
+                    ? "has path"
+                    : "no path yet";
+
+            return $"currentVehicle {vehicleText}; path {pathCount} elems idx {pathIndex}; hint {hint}";
         }
 
         private static SkippedPassengerSampleRing GetSkippedSampleRing(TransportType transportType)
