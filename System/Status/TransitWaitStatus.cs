@@ -159,6 +159,17 @@ namespace FastBoarding
             AirSummary = string.Empty;
         }
 
+        public static void ResetForCityLoad()
+        {
+            // Called from a guaranteed city-load lifecycle hook so switched saves start clean,
+            // while later Options UI refreshes do not erase counters already collected.
+            s_WasInGame = true;
+            s_CurrentDayKey = int.MinValue;
+            s_LastSimulationFrame = uint.MaxValue;
+            ResetDailyCounters();
+            InvalidateCache();
+        }
+
         public static void RefreshIfNeeded()
         {
             World world = World.DefaultGameObjectInjectionWorld;

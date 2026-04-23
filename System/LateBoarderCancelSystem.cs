@@ -3,10 +3,12 @@
 
 namespace FastBoarding
 {
+    using Colossal.Serialization.Entities;
     using Game;
     using Game.Common;
     using Game.Creatures;
     using Game.Pathfind;
+    using Game.SceneFlow;
     using Game.Simulation;
     using Game.Tools;
     using Game.Vehicles;
@@ -118,6 +120,21 @@ namespace FastBoarding
                 .WithNone<Deleted, Destroyed, Temp, Overridden>()
                 .Build();
             RequireForUpdate(m_VehicleQuery);
+        }
+
+        protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode)
+        {
+            base.OnGameLoadingComplete(purpose, mode);
+
+            if (!IsRealGameLoad(purpose, mode))
+            {
+                return;
+            }
+
+            // If the player saved the checkbox ON, the Options UI setter will not fire on load.
+            // Reactivate here so the live pass works without opening Options after city load/switch.
+            ResetDiagnosticsForCityLoad();
+            Enabled = BoardingRuntimeSettings.CancelLateBoarders;
         }
 
         protected override void OnUpdate()
@@ -742,6 +759,22 @@ namespace FastBoarding
             }
 
             return EntityManager.GetComponentData<PublicTransportVehicleData>(prefab).m_TransportType;
+        }
+
+        private void ResetDiagnosticsForCityLoad()
+        {
+            m_LastDiagnosticFrame = 0;
+            m_TotalCanceled = 0;
+            m_SkippedForTool = 0;
+            m_LoggedActive = false;
+            m_FollowUpCount = 0;
+            m_NextFollowUpSample = 0;
+        }
+
+        private static bool IsRealGameLoad(Purpose purpose, GameMode mode)
+        {
+            return mode == GameMode.Game &&
+                (purpose == Purpose.NewGame || purpose == Purpose.LoadGame);
         }
     }
 }

@@ -3,9 +3,11 @@
 
 namespace FastBoarding
 {
+    using Colossal.Serialization.Entities;
     using Game;
     using Game.Common;
     using Game.Prefabs;
+    using Game.SceneFlow;
     using Game.Simulation;
     using Game.Tools;
     using System;
@@ -32,6 +34,22 @@ namespace FastBoarding
 
             // This system runs as a one-shot pass when settings change.
             RequireForUpdate(m_StopPrefabQuery);
+        }
+
+        protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode)
+        {
+            base.OnGameLoadingComplete(purpose, mode);
+
+            if (!IsRealGameLoad(purpose, mode))
+            {
+                return;
+            }
+
+            // City switch/load gives us a fresh prefab world. Re-run the one-shot pass even when
+            // slider revisions did not change, and reset cached status text for the new city.
+            m_AppliedRevision = -1;
+            TransitWaitStatus.ResetForCityLoad();
+            Enabled = true;
         }
 
         protected override void OnUpdate()
@@ -150,6 +168,12 @@ namespace FastBoarding
                     "FB_WAKE_LATE_BOARDER_FAILED",
                     () => $"{Mod.ModTag} Failed waking late-cim skip system: {ex.GetType().Name}: {ex.Message}");
             }
+        }
+
+        private static bool IsRealGameLoad(Purpose purpose, GameMode mode)
+        {
+            return mode == GameMode.Game &&
+                (purpose == Purpose.NewGame || purpose == Purpose.LoadGame);
         }
 
         private static int GetSpeedFactor(TransportType transportType)
