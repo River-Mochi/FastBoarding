@@ -72,9 +72,9 @@ namespace FastBoarding
                     "<1x = vanilla>\n" +
                     "Higher values reduce bus stop boarding/loading time.\n" +
                     "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
-                    "Use [✓] <Let vehicles leave without late cims> if you want solo late cims to miss the vehicle.\n" +
+                    "Use [✓] <Let vehicles leave> if you want the bus to not be forced to wait for late cims.\n" +
                     "2x means ~double boarding speed.\n" +
-                    "Tech notes: higher loading factor means shorter planned stop duration, and boarding time is more like the passenger-side wait/boarding estimate.\n" +
+                    "Tech notes: higher loading factor means shorter planned stop duration, and boarding time is more like passenger-side wait/boarding estimate.\n" +
                     "This is not the same as forcing the vehicle to leave."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "Rail boarding speed" },
@@ -83,7 +83,8 @@ namespace FastBoarding
                     "Applies to train, tram, and subway stops.\n" +
                     "Higher values reduce boarding/loading time at rail stops.\n" +
                     "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
-                    "Use [✓] <Let vehicles leave without late cims> if you want solo late cims to miss the vehicle.\n" +
+                    "Use [✓] <Let vehicles leave> to allow vehicle to leave if it's past departure time.\n" +
+                    "vanilla will natually reroute the cim.\n" +
                     "2x means ~double boarding speed."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "Ship + ferry speed" },
@@ -92,7 +93,7 @@ namespace FastBoarding
                     "Applies to ship and ferry stops.\n" +
                     "Higher values reduce boarding/loading time at ship and ferry stops.\n" +
                     "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
-                    "Use [✓] <Let vehicles leave without late cims> if you want solo late cims to miss the vehicle.\n" +
+                    "Use [✓] <Let vehicles leave> to allow vehicle to leave if it's past departure time.\n" +
                     "2x means ~double boarding speed."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "Airplane speed" },
@@ -101,17 +102,17 @@ namespace FastBoarding
                     "Applies to passenger airplane terminals.\n" +
                     "Higher values reduce boarding/loading time at airplane terminals.\n" +
                     "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
-                    "Use [✓] <Let vehicles leave without late cims> if you want solo late cims to miss the vehicle.\n" +
+                    "Use [✓] <Let vehicles leave> so that late cims don't hold up the vehicle.\n" +
                     "2x means ~double boarding speed."
                 },
 
                 // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "Let vehicles leave without late cims" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
-                    "**BETA**\n" +
                     "Late passengers who are still <not ready> after vanilla Departure time are allowed to miss the vehicle.\n" +
-                    "Note: we only skip solo late citizens for now, so groups/families travelling together are <not skipped> and may still cause delays like in vanilla.\n" +
-                    "Group travelers are a small number compared to many solo passengers.\n" +
+                    "Note: we only skip solo late citizens for now." +
+                    "Groups/families travelling together and LATE are <not skipped> and may still cause delays to transit like in vanilla.\n" +
+                    "Groups are a very small number compared to many single passengers. They add spice to the traffic situation :) \n" +
                     "Skipped Late citizens are not deleted; vanilla systems continue from there to assign them."
                 },
 
@@ -203,7 +204,10 @@ namespace FastBoarding
                     "Adds live diagnostic details to <FastBoarding.log> while the city runs.\n" +
                     "**Do not enable for normal gameplay.**\n" +
                     "Leaving this on can decrease performance and create huge log files.\n" +
-                    "You can delete old log files later."
+                    "You can delete old log files later.\n" +
+                    "Note: since the [Stat to Logs] is Current right now snapshot only, \n" +
+                    "  running verbose logging for 15-30 min would give you more details of transactions over time."
+
                 },
             };
         }

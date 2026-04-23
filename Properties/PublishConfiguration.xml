@@ -10,35 +10,37 @@
 	<LongDescription>
 ## Faster Boarding [Beta]
 
-Safer public transit boarding tweaks.
-move more people by transit, reduce blocked stops, reduce private car demand indirectly
-Instead of replacing the transportAIsystems, this build focuses on two smaller behaviors:
+Safer, faster public transit boarding
+- Increase transit usage, reduce blocked stops, reduce private car demand indirectly.
+- The larger your city, the more this mod will help.
+- Instead of replacing the transportAIsystems, this build focuses on two behaviors:
 
-- **Prefab stop tuning** for road, rail, water, and air transit
-- **Optional late-boarder cancellation** so passengers can miss a vehicle instead of holding it forever
+- **Prefab stop tuning** for bus, tram, train, subway, ship, ferries, and air transit
+- **Optional late-boarder cancellation** so passengers can miss a vehicle instead of holding it forever.
 
 ### What the sliders do
 
 Tune boarding speeds for:
 
-- Bus
-- Rail (train, tram, subway)
-- Water (ship, ferry)
-- Air
+- Bus, Rail (train, tram, subway), Water (ship, ferry), Air
+- Higher values shorten dwell time by increasing stop loading speed and adjusting the boarding-time estimate used by the game.
+- ✅ When **Let vehicle leave** is enabled, passengers who are Late (*not ready*) after *departure time* can be dropped from that vehicle's boarding process.
+- The goal is for the vehicle to leave and not have to wait for on the way passengers. Then the game's vanilla methods can handle the rest of the passenger flow.
 
-Higher values shorten dwell time by increasing stop loading speed and adjusting the boarding-time estimate used by the game.
-
-### Optional experimental behavior
-
-When **Cancel Late Boarders** is enabled, passengers who are still not ready after departure time can be dropped from that vehicle's boarding process.
-The goal is for the vehicle to leave and for those passengers to wait for the next one instead of blocking the line.
+### Status report in Options menu
+- After the city runs a bit, check the options menu to see status for the mod
+- Skipped number shows the mod is working and how many late passengers have been skipped so that the transit can leave on time.
+- If the number is "0", ensure the checkbox is enabled. This is also a snapshot of RIGHT NOW.
+- I like to see the worst stop is under 3 min, if it's more, I inspect.
+- For More detailed organized stats, use the [Stats to Log] button.
+- I like to click the button every 30 min, then compare the report later for changes, it also shows you exactly where your worst stops are.
 
 ### Notes
-
-- This is intended to be a lighter approach than replacing the vanilla transport AI systems.
+- Compatibility: 'All Aboard' will conflict with this mod since it also modifies boarding behavior, so choose one or the other.
+- This is intended to be a lighter alternative than replacing the vanilla transport AI systems.
 - Group boarding is handled conservatively to avoid splitting groups across platform and vehicle.
 - Safe to remove anytime.
-- No Harmony patches.
+- No Harmony patches; lightweight design as to not cause performance issues
 
 
 ### Credits
@@ -64,10 +66,7 @@ The goal is for the vehicle to leave and for those passengers to wait for the ne
 	<Dependency Id=""/>
 	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 	<ChangeLog>
-- Reworked the mod into a standard CS2 Mod.cs + Setting.cs + LocaleEN.cs layout
-- Added per-family boarding speed sliders for bus, rail, water, and air
-- Added optional experimental late-boarder cancellation
-- Restored required publish configuration structure and publish profile files
+
 </ChangeLog>
 	<!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->
 	<ExternalLink Type="github" Url="https://github.com/River-Mochi/FastBoarding"/>
