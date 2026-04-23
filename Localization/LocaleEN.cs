@@ -84,7 +84,7 @@ namespace FastBoarding
                     "Higher values reduce boarding/loading time at rail stops.\n" +
                     "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
                     "Use [✓] <Let vehicles leave> to allow vehicle to leave if it's past departure time.\n" +
-                    "vanilla will natually reroute the cim.\n" +
+                    "vanilla will naturally reroute the cim.\n" +
                     "2x means ~double boarding speed."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "Ship + ferry speed" },
@@ -110,9 +110,9 @@ namespace FastBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "Let vehicles leave without late cims" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
                     "Late passengers who are still <not ready> after vanilla Departure time are allowed to miss the vehicle.\n" +
-                    "Note: we only skip solo late citizens for now." +
+                    "Note: we only skip solo late citizens for now.\n" +
                     "Groups/families travelling together and LATE are <not skipped> and may still cause delays to transit like in vanilla.\n" +
-                    "Groups are a very small number compared to many single passengers. They add spice to the traffic situation :) \n" +
+                    "Groups are a very small number compared to many single passengers.\n" +
                     "Skipped Late citizens are not deleted; vanilla systems continue from there to assign them."
                 },
 
@@ -205,7 +205,7 @@ namespace FastBoarding
                     "**Do not enable for normal gameplay.**\n" +
                     "Leaving this on can decrease performance and create huge log files.\n" +
                     "You can delete old log files later.\n" +
-                    "Note: since the [Stat to Logs] is Current right now snapshot only, \n" +
+                    "Note: since the [Stats to Logs] button is Current right now only snapshot of data, \n" +
                     "  running verbose logging for 15-30 min would give you more details of transactions over time."
 
                 },
