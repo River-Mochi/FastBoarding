@@ -29,7 +29,8 @@ namespace FastBoarding
         private const int MaxSampledCimsPerModePerUpdate = 3;
         private const int MaxSampledCimsPerUpdate = MaxSampledCimsPerModePerUpdate * 7;
         private const uint FollowUpDelayFrames = 4096;
-        private const int MaxFollowUpSamples = MaxSampledCimsPerUpdate;
+        private const int MaxFollowUpSamples = 256;
+        private const int MaxFollowUpLogsPerUpdate = 12;
 
         private EntityQuery m_VehicleQuery;
         private SimulationSystem? m_SimulationSystem;
@@ -460,14 +461,37 @@ namespace FastBoarding
         private void TrackFollowUpSample(CanceledPassengerSample sample)
         {
             uint frame = m_SimulationSystem?.frameIndex ?? 0;
-            m_FollowUpSamples[m_NextFollowUpSample] =
+            int slot = FindFollowUpSampleSlot();
+            if (slot < 0)
+            {
+                return;
+            }
+
+            m_FollowUpSamples[slot] =
                 new FollowUpSample(sample.TransportType, sample.Vehicle, sample.Passenger, frame);
-            m_NextFollowUpSample = (m_NextFollowUpSample + 1) % m_FollowUpSamples.Length;
 
             if (m_FollowUpCount < m_FollowUpSamples.Length)
             {
                 m_FollowUpCount++;
             }
+        }
+
+        private int FindFollowUpSampleSlot()
+        {
+            // Prefer finished/empty slots so high-volume skip passes do not overwrite samples
+            // before they reach FollowUpDelayFrames and prove what vanilla did next.
+            for (int attempt = 0; attempt < m_FollowUpSamples.Length; attempt++)
+            {
+                int index = (m_NextFollowUpSample + attempt) % m_FollowUpSamples.Length;
+                FollowUpSample sample = m_FollowUpSamples[index];
+                if (!sample.Active || sample.Logged)
+                {
+                    m_NextFollowUpSample = (index + 1) % m_FollowUpSamples.Length;
+                    return index;
+                }
+            }
+
+            return -1;
         }
 
         private void LogFollowUps(uint frame)
@@ -477,8 +501,14 @@ namespace FastBoarding
                 return;
             }
 
+            int loggedThisUpdate = 0;
             for (int i = 0; i < m_FollowUpCount; i++)
             {
+                if (loggedThisUpdate >= MaxFollowUpLogsPerUpdate)
+                {
+                    break;
+                }
+
                 FollowUpSample sample = m_FollowUpSamples[i];
                 if (!sample.Active || sample.Logged)
                 {
@@ -494,7 +524,9 @@ namespace FastBoarding
                 }
 
                 sample.Logged = true;
+                sample.Active = false;
                 m_FollowUpSamples[i] = sample;
+                loggedThisUpdate++;
 
                 LogUtils.Info(
                     Mod.s_Log,
