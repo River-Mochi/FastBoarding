@@ -44,6 +44,7 @@ namespace FastBoarding
                     "**Esperando** = pasajeros esperando ahora mismo.\n" +
                     "**Media** = tiempo medio de espera de esos pasajeros.\n" +
                     "**Peor** parada = mayor espera media en una parada.\n" +
+                    "Las peores paradas son buenos lugares para revisar accidentes, paradas bloqueadas/bugueadas o vehículos retenidos cerca.\n" +
                     "**Saltados** = embarques tardíos cancelados hoy por la opción.\n" +
                     "Usa <Stats al log> para un informe detallado: nombres de paradas, ID de entidades y más.";
             }
@@ -102,6 +103,10 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportTitle, "Instantánea Stats al log - Fast Boarding" },
                 { TransitWaitStatus.KeyReportSettings, "Ajustes: {0}" },
                 { TransitWaitStatus.KeyReportNote, "La pista de línea viene del waypoint con mayor espera en esa parada." },
+                { TransitWaitStatus.KeyReportTesterHintsHeader, "Pistas para testers" },
+                { TransitWaitStatus.KeyReportHintWorstStops, "Peores paradas: revísalas primero en el juego o con el mod Scene Explorer. Busca accidentes, tráfico bloqueado, mala ubicación de parada o una parada bugueada." },
+                { TransitWaitStatus.KeyReportHintSkippedCims, "Cims solo saltados: pasajeros tarde que saltamos para permitir que el transporte salga. El estado posterior debería ser normalmente 'has path' o 'assigned'. Si sigue en 'no path yet', inspecciona esa entidad cim después de más tiempo." },
+                { TransitWaitStatus.KeyReportHintLateGroups, "Grupos tarde: son familias/grupos que dejamos a vanilla. Recuentos altos dan pistas para soporte seguro de viajes en grupo en el futuro." },
                 { TransitWaitStatus.KeyReportFamilyHeader, "{0}" },
                 { TransitWaitStatus.KeyReportServedStops, "Paradas servidas: {0}" },
                 { TransitWaitStatus.KeyReportStopsWithWaiting, "Paradas con espera: {0}" },

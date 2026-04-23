@@ -44,6 +44,7 @@ namespace FastBoarding
                     "**Waiting** = total passengers waiting right now.\n" +
                     "**Avg** = average wait time for those passengers.\n" +
                     "**Worst** stop = highest average wait at one stop.\n" +
+                    "Worst stops are good places to inspect for traffic accidents, blocked/bugged stops, or vehicles held up nearby.\n" +
                     "**Skipped** = late boardings canceled today by toggle.\n" +
                     "Use <Stats to Log> for detailed report: stop names, entity IDs, and more.";
             }
@@ -160,6 +161,10 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportTitle, "Stats to Log snapshot - Fast Boarding" },
                 { TransitWaitStatus.KeyReportSettings, "Settings: {0}" },
                 { TransitWaitStatus.KeyReportNote, "Line hint comes from the highest-wait waypoint at that stop." },
+                { TransitWaitStatus.KeyReportTesterHintsHeader, "Tester hints" },
+                { TransitWaitStatus.KeyReportHintWorstStops, "Worst stops: inspect these first in-game or with Scene Explorer mod. Look for accidents, traffic, bad transit stop location, or a bugged stop." },
+                { TransitWaitStatus.KeyReportHintSkippedCims, "Skipped solo cims: late passengers we skip to allow transit to leave. later state should usually become 'has path' or 'assigned'. If it stays 'no path yet', inspect that cim entity after more time." },
+                { TransitWaitStatus.KeyReportHintLateGroups, "Late groups: these are families/groups left to vanilla. High counts are clues for future safe group-travel support." },
                 { TransitWaitStatus.KeyReportFamilyHeader, "{0}" },
                 { TransitWaitStatus.KeyReportServedStops, "Served stops: {0}" },
                 { TransitWaitStatus.KeyReportStopsWithWaiting, "Stops with waiting passengers: {0}" },

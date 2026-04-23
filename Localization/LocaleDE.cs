@@ -44,6 +44,7 @@ namespace FastBoarding
                     "**Wartend** = alle Passagiere, die gerade warten.\n" +
                     "**Durchschn.** = durchschnittliche Wartezeit dieser Passagiere.\n" +
                     "**Schlimmster** Halt = höchste durchschnittliche Wartezeit an einem Halt.\n" +
+                    "Schlimmste Halte sind gute Stellen zum Prüfen auf Unfälle, blockierte/verbuggte Halte oder Fahrzeuge, die in der Nähe festhängen.\n" +
                     "**Übersprungen** = heute durch die Option abgebrochene späte Einstiege.\n" +
                     "Nutze <Stats ins Log> für einen Detailbericht: Haltestellennamen, Entity-IDs und mehr.";
             }
@@ -102,6 +103,10 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportTitle, "Stats-ins-Log-Schnappschuss - Fast Boarding" },
                 { TransitWaitStatus.KeyReportSettings, "Einstellungen: {0}" },
                 { TransitWaitStatus.KeyReportNote, "Der Linienhinweis kommt vom Wegpunkt mit der höchsten Wartezeit an diesem Halt." },
+                { TransitWaitStatus.KeyReportTesterHintsHeader, "Tester-Hinweise" },
+                { TransitWaitStatus.KeyReportHintWorstStops, "Schlimmste Halte: zuerst im Spiel oder mit dem Scene Explorer Mod prüfen. Achte auf Unfälle, blockierten Verkehr, schlechte Halteposition oder einen verbuggten Halt." },
+                { TransitWaitStatus.KeyReportHintSkippedCims, "Übersprungene Solo-Cims: verspätete Passagiere, die übersprungen werden, damit der Verkehr abfahren kann. Der spätere Zustand sollte meist 'has path' oder 'assigned' werden. Wenn er bei 'no path yet' bleibt, prüfe diese Cim-Entity nach mehr Zeit." },
+                { TransitWaitStatus.KeyReportHintLateGroups, "Späte Gruppen: Familien/Gruppen, die Vanilla überlassen werden. Hohe Werte sind Hinweise für zukünftige sichere Unterstützung von Gruppenreisen." },
                 { TransitWaitStatus.KeyReportFamilyHeader, "{0}" },
                 { TransitWaitStatus.KeyReportServedStops, "Bediente Halte: {0}" },
                 { TransitWaitStatus.KeyReportStopsWithWaiting, "Halte mit Wartenden: {0}" },

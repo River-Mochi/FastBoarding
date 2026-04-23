@@ -44,6 +44,7 @@ namespace FastBoarding
                     "**En attente** = nombre total de passagers qui attendent maintenant.\n" +
                     "**Moy.** = temps d'attente moyen de ces passagers.\n" +
                     "**Pire** arrêt = attente moyenne la plus haute à un arrêt.\n" +
+                    "Les pires arrêts sont de bons endroits à inspecter pour accidents, arrêts bloqués/bugués ou véhicules coincés à proximité.\n" +
                     "**Ignorés** = embarquements tardifs annulés aujourd'hui par l'option.\n" +
                     "Utilisez <Stats vers le log> pour un rapport détaillé : noms d'arrêts, ID d'entités, etc.";
             }
@@ -128,6 +129,10 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportTitle, "Instantané Stats vers le log - Fast Boarding" },
                 { TransitWaitStatus.KeyReportSettings, "Réglages : {0}" },
                 { TransitWaitStatus.KeyReportNote, "L'indice de ligne vient du waypoint avec la plus forte attente à cet arrêt." },
+                { TransitWaitStatus.KeyReportTesterHintsHeader, "Conseils de test" },
+                { TransitWaitStatus.KeyReportHintWorstStops, "Pires arrêts : inspectez-les d'abord en jeu ou avec le mod Scene Explorer. Cherchez accidents, trafic bloqué, mauvais emplacement d'arrêt ou arrêt bugué." },
+                { TransitWaitStatus.KeyReportHintSkippedCims, "Cims solo ignorés : passagers en retard que le mod ignore pour permettre au transit de partir. Leur état suivant devrait souvent devenir 'has path' ou 'assigned'. Si cela reste 'no path yet', inspectez l'entité cim après plus de temps." },
+                { TransitWaitStatus.KeyReportHintLateGroups, "Groupes en retard : familles/groupes laissés à vanilla. Un nombre élevé donne des indices pour un futur support sûr des déplacements en groupe." },
                 { TransitWaitStatus.KeyReportFamilyHeader, "{0}" },
                 { TransitWaitStatus.KeyReportServedStops, "Arrêts desservis : {0}" },
                 { TransitWaitStatus.KeyReportStopsWithWaiting, "Arrêts avec attente : {0}" },

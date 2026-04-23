@@ -26,6 +26,10 @@ namespace FastBoarding
         public const string KeyReportTitle = "FB_REPORT_TITLE";
         public const string KeyReportSettings = "FB_REPORT_SETTINGS";
         public const string KeyReportNote = "FB_REPORT_NOTE";
+        public const string KeyReportTesterHintsHeader = "FB_REPORT_TESTER_HINTS_HEADER";
+        public const string KeyReportHintWorstStops = "FB_REPORT_HINT_WORST_STOPS";
+        public const string KeyReportHintSkippedCims = "FB_REPORT_HINT_SKIPPED_CIMS";
+        public const string KeyReportHintLateGroups = "FB_REPORT_HINT_LATE_GROUPS";
         public const string KeyReportFamilyHeader = "FB_REPORT_FAMILY_HEADER";
         public const string KeyReportServedStops = "FB_REPORT_SERVED_STOPS";
         public const string KeyReportStopsWithWaiting = "FB_REPORT_STOPS_WITH_WAITING";
@@ -268,6 +272,7 @@ namespace FastBoarding
                 AppendField(sb, "Settings", BoardingRuntimeSettings.DescribeForLog());
                 AppendField(sb, "Note", Localize(KeyReportNote, "Worst line is a hint from the highest-wait waypoint at the worst stop."));
 
+                AppendTesterHints(sb);
                 AppendSummaryReport(sb, snapshot);
 
                 AppendFamilyReport(sb, world, "Bus", snapshot.Bus, s_BusLateBoardersToday, s_BusSkippedSamples);
@@ -286,6 +291,21 @@ namespace FastBoarding
             {
                 LogUtils.Warn(Mod.s_Log, () => $"{Mod.ModTag} Stats report failed: {ex.GetType().Name}: {ex.Message}", ex);
             }
+        }
+
+        private static void AppendTesterHints(StringBuilder sb)
+        {
+            sb.AppendLine();
+            AppendSubHeader(sb, Localize(KeyReportTesterHintsHeader, "Tester hints"));
+            sb.AppendLine("- " + Localize(
+                KeyReportHintWorstStops,
+                "Worst stops: inspect these first in-game or with Scene Explorer. Look for accidents, blocked traffic, bad stop placement, or a bugged stop."));
+            sb.AppendLine("- " + Localize(
+                KeyReportHintSkippedCims,
+                "Skipped solo cims: later state should usually become 'has path' or 'assigned'. If it stays 'no path yet', inspect that cim entity after more time."));
+            sb.AppendLine("- " + Localize(
+                KeyReportHintLateGroups,
+                "Late groups: these are families/groups left to vanilla. High counts are clues for future safe group-travel support."));
         }
 
         internal static void RecordLateBoardersCanceled(World world, TransportType transportType, int count)

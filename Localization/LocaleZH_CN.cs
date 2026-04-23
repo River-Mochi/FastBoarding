@@ -44,6 +44,7 @@ namespace FastBoarding
                     "**等待中** = 当前正在等待的乘客总数。\n" +
                     "**平均** = 这些乘客的平均等待时间。\n" +
                     "**最差**站点 = 单个站点最高平均等待时间。\n" +
+                    "最差站点适合优先检查：可能有交通事故、被堵住/出错的站点，或附近车辆被卡住。\n" +
                     "**跳过** = 今天由选项取消的迟到上车。\n" +
                     "使用 <统计到日志> 查看详细报告：站点名称、实体 ID 等。";
             }
@@ -128,6 +129,10 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportTitle, "统计到日志快照 - Fast Boarding" },
                 { TransitWaitStatus.KeyReportSettings, "设置：{0}" },
                 { TransitWaitStatus.KeyReportNote, "线路提示来自该站点等待最高的路径点。" },
+                { TransitWaitStatus.KeyReportTesterHintsHeader, "测试提示" },
+                { TransitWaitStatus.KeyReportHintWorstStops, "最差站点：请先在游戏内或使用 Scene Explorer 模组检查。查看是否有事故、交通堵塞、站点位置不佳或站点出错。" },
+                { TransitWaitStatus.KeyReportHintSkippedCims, "被跳过的单独市民：这些是为了让公交/列车离开而跳过的迟到乘客。之后状态通常应变成 'has path' 或 'assigned'。如果一直是 'no path yet'，请过一段时间再检查该市民实体。" },
+                { TransitWaitStatus.KeyReportHintLateGroups, "迟到群组：这些家庭/群组仍交给原版处理。数量高时，可作为以后安全支持群组出行的线索。" },
                 { TransitWaitStatus.KeyReportFamilyHeader, "{0}" },
                 { TransitWaitStatus.KeyReportServedStops, "服务站点：{0}" },
                 { TransitWaitStatus.KeyReportStopsWithWaiting, "有等待乘客的站点：{0}" },
