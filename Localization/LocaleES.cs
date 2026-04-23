@@ -108,10 +108,10 @@ namespace FastBoarding
                 // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "Dejar salir sin cims tarde" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
-                    "**BETA experimental**\n" +
-                    "Ciudadanos solo que siguen <no listos> después de la hora de salida vanilla pueden perder el vehículo.\n" +
-                    "Nota: los grupos/familias que viajan juntos <no se saltan> todavía; pueden seguir causando retrasos como en vanilla.\n" +
-                    "Incluso saltar solo viajeros en solitario ayuda, porque suelen ser la mayoría en las paradas.\n" +
+                    "**BETA**\n" +
+                    "Los pasajeros tarde que siguen <no listos> después de la hora de salida vanilla pueden perder el vehículo.\n" +
+                    "Nota: por ahora solo saltamos ciudadanos tarde que viajan solos, así que los grupos/familias que viajan juntos <no se saltan> y aún pueden causar retrasos como en vanilla.\n" +
+                    "Los viajeros en grupo son pocos comparados con muchos pasajeros solos.\n" +
                     "Los ciudadanos tarde saltados no se eliminan; los sistemas vanilla continúan desde ahí para asignarlos."
                 },
 

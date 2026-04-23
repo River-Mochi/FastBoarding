@@ -110,7 +110,7 @@ namespace FastBoarding
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
                     "**BETA**\n" +
                     "Late passengers who are still <not ready> after vanilla Departure time are allowed to miss the vehicle.\n" +
-                    "Note: we only skip solo late citizens for now, so groups/families travelling together are <not skipped> and may still cause delays like in vanilla.\n" +     
+                    "Note: we only skip solo late citizens for now, so groups/families travelling together are <not skipped> and may still cause delays like in vanilla.\n" +
                     "Group travelers are a small number compared to many solo passengers.\n" +
                     "Skipped Late citizens are not deleted; vanilla systems continue from there to assign them."
                 },

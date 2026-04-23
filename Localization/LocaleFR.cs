@@ -108,10 +108,10 @@ namespace FastBoarding
                 // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "Laisser partir sans cims en retard" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
-                    "**BÊTA expérimentale**\n" +
-                    "Les citoyens solo en retard qui sont encore <pas prêts> après l'heure de départ vanilla peuvent rater le véhicule.\n" +
-                    "Note : les groupes/familles voyageant ensemble ne sont <pas ignorés> pour l'instant ; ils peuvent encore causer des retards comme en vanilla.\n" +
-                    "Même le mode solo uniquement aide, car les voyageurs solo sont généralement la majorité aux arrêts de transit.\n" +
+                    "**BÊTA**\n" +
+                    "Les passagers en retard qui sont encore <pas prêts> après l'heure de départ vanilla peuvent rater le véhicule.\n" +
+                    "Note : pour l'instant nous ignorons seulement les citoyens solo en retard, donc les groupes/familles voyageant ensemble ne sont <pas ignorés> et peuvent encore causer des retards comme en vanilla.\n" +
+                    "Les voyageurs en groupe sont peu nombreux comparés aux nombreux passagers solo.\n" +
                     "Les citoyens en retard ignorés ne sont pas supprimés ; les systèmes vanilla continuent ensuite à les assigner."
                 },
 

@@ -108,10 +108,10 @@ namespace FastBoarding
                 // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "Deixar sair sem cims atrasados" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
-                    "**BETA experimental**\n" +
-                    "Cidadãos solo atrasados que ainda estão <não prontos> depois do horário vanilla de saída podem perder o veículo.\n" +
-                    "Nota: grupos/famílias viajando juntos ainda <não são pulados>; eles ainda podem causar alguns atrasos como no vanilla.\n" +
-                    "Mesmo pular apenas viajantes solo ajuda, porque eles geralmente são a maioria nas paradas de transporte.\n" +
+                    "**BETA**\n" +
+                    "Passageiros atrasados que ainda estão <não prontos> depois do horário vanilla de saída podem perder o veículo.\n" +
+                    "Nota: por enquanto só pulamos cidadãos atrasados que viajam sozinhos, então grupos/famílias viajando juntos <não são pulados> e ainda podem causar atrasos como no vanilla.\n" +
+                    "Viajantes em grupo são poucos comparados aos muitos passageiros solo.\n" +
                     "Cidadãos atrasados pulados não são deletados; os sistemas vanilla continuam dali para atribuí-los."
                 },
 

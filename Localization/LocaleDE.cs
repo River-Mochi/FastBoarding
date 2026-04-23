@@ -108,10 +108,10 @@ namespace FastBoarding
                 // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "Ohne späte Cims abfahren" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
-                    "**Experimentelle BETA**\n" +
-                    "Einzelne verspätete Bürger, die nach der Vanilla-Abfahrtszeit noch <nicht bereit> sind, dürfen das Fahrzeug verpassen.\n" +
-                    "Hinweis: Gruppen/Familien, die zusammen reisen, werden noch <nicht übersprungen>; sie können weiterhin Verzögerungen wie Vanilla verursachen.\n" +
-                    "Auch nur Solo-Cims zu überspringen hilft, weil Solo-Reisende normalerweise die Mehrheit an Haltestellen sind.\n" +
+                    "**BETA**\n" +
+                    "Verspätete Fahrgäste, die nach der Vanilla-Abfahrtszeit noch <nicht bereit> sind, dürfen das Fahrzeug verpassen.\n" +
+                    "Hinweis: Wir überspringen vorerst nur einzelne verspätete Bürger; Gruppen/Familien, die zusammen reisen, werden <nicht übersprungen> und können weiterhin Verzögerungen wie in Vanilla verursachen.\n" +
+                    "Gruppenreisende sind im Vergleich zu vielen Solo-Fahrgästen nur eine kleine Anzahl.\n" +
                     "Übersprungene späte Bürger werden nicht gelöscht; Vanilla-Systeme weisen sie danach weiter zu."
                 },
 

@@ -131,7 +131,7 @@ Status is a snapshot, not a live background system. The Options UI calls status 
 
 ## Intentional Non-Features
 
-- No Harmony transpiler or AI system replacement.
+- No Harmony  Transit system replacements.
 - No unbunching changes for now because line data can be save-persistent and would need reset button for true restore.
 - No group/family cancellation yet. Groups can still hold a vehicle because vanilla leader/member behavior needs more research before mutation is safe.
 - No direct edits to `m_AccessDistance` yet. That may affect path/access behavior rather than just boarding speed.

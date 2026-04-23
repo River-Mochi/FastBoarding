@@ -108,10 +108,10 @@ namespace FastBoarding
                 // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "让车辆不等迟到市民而离开" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
-                    "**实验性 BETA**\n" +
-                    "单独出行的市民如果在原版发车时间后仍然<未准备好>，可以错过该车辆。\n" +
-                    "注意：同行群组/家庭目前<不会被跳过>；它们仍可能像原版一样造成延误。\n" +
-                    "即使只跳过单独出行者也有帮助，因为他们通常是站点的大多数乘客。\n" +
+                    "**BETA**\n" +
+                    "在原版发车时间后仍然<未准备好>的迟到乘客，可以错过该车辆。\n" +
+                    "注意：目前我们只跳过单独出行的迟到市民，因此同行群组/家庭<不会被跳过>，仍可能像原版一样造成延误。\n" +
+                    "与大量单独乘客相比，群组出行者数量较少。\n" +
                     "被跳过的迟到市民不会被删除；之后由原版系统继续分配他们。"
                 },
 
