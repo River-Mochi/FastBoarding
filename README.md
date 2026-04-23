@@ -1,57 +1,63 @@
 ## Fast Boarding
 
-Fast Boarding is a transit mod focused on boarding tweaks.
+Fast Boarding is a transit mod focused on helping public transport board faster without replacing the game's whole transport AI.
 
-Instead of replacing the vanilla transport AI systems, this version uses:
+It uses two lighter-touch ideas:
 
-- Prefab stop tuning to shorten dwell time
-- Optional late-boarder cancellation so tardy passengers can miss a vehicle instead of holding it forever
+- Boarding speed sliders tune vanilla public transport stop data.
+- Optional late-cim skipping lets a late solo cim miss a vehicle instead of holding it forever.
 
 ### Current Features
 
 - Separate boarding-speed sliders for:
   - Bus
-  - Rail (train, tram, subway)
-  - Water (ship, ferry)
-  - Air
-- `Cancel Late Boarders` toggle
+  - Rail: train, tram, subway
+  - Ship + ferry
+  - Airplane
+- `Let vehicles leave without late cims` toggle
+- Compact Options UI status rows for current waits, worst stops, and skipped cims
+- `Stats to Log` report with more details for testers
 
 ### How It Works
 
-The boarding speed sliders increase each stop family's effective loading speed and also adjust the related boarding-time estimate used by the game.
+The sliders change the base game's `Game.Prefabs.TransportStopData` on passenger transport stop prefabs. Fast Boarding only changes:
 
-The optional late-boarder system watches public transport vehicles that are already past their departure frame.
-If a passenger assigned to that vehicle still is not ready, the mod can cancel that boarding attempt so the vehicle is free to leave and the passenger can try again later.
+- `m_LoadingFactor`
+- `m_BoardingTime`
+
+Fast Boarding does not change `PublicTransport.m_DepartureFrame`, line schedules, vehicle counts, route counts, or the vanilla transport AI systems.
+
+At `1x`, untouched stops are left alone. At `2x-10x`, the mod reduces boarding/loading time so normal queues clear faster through vanilla systems.
+
+The optional missed-boarding toggle watches vehicles that are already past their vanilla departure frame. If a solo cim assigned to that vehicle is still not ready, the mod detaches that cim from the current vehicle and removes the missed vehicle leg from their current path. The cim is not deleted; they simply miss that vehicle and vanilla systems continue from there.
+
+Groups/families travelling together are not skipped yet. They can still delay a vehicle like vanilla, because group leader/member behavior needs more research before changing it safely.
+
+### Compared With All Aboard
+
+All Aboard solved the waiting problem inside the vehicle AI itself by disabling/replacing the vanilla road and train transport AI systems with patched copies.
+
+Fast Boarding takes a smaller no-Harmony route:
+
+- It tunes the stop data vanilla already reads.
+- It optionally lets late solo cims miss a vehicle after vanilla departure time.
+- It works with the vanilla transport AI instead of replacing it.
 
 ### Design Goals
 
-- Avoid Harmony where possible
+- Avoid Harmony
 - Avoid wholesale AI system replacement
 - Keep the mod compatible with the standard CS2 toolchain and Options UI patterns
 - Give players broad tuning ranges for testing what feels best
+- Keep `1x` as close to vanilla as possible
 
 ### Notes
 
-- Group boarding is handled conservatively to avoid splitting groups across platform and vehicle.
 - The mod is designed to be save-game safe and safe to remove.
-- The late-boarder behavior is still experimental, so it is smart to test it on a copy of a save first until we have a little live testing behind it.
+- The missed-boarding behavior is still experimental, so test on a copy of a save first until there is more live testing.
 - Game errors and warnings still appear in the game's normal logs, but mod-specific logging goes to `FastBoarding.log`.
+- Verbose logging is for testers only and should stay OFF during normal gameplay.
 
 ### Credits
-- River-Mochi mod author
+- River-Mochi: mod author
 - Inspiration and thanks to bcallender's All Aboard mod.
-
-
-All Aboard solved the problem inside the vehicle AI itself. It changed the exact “should this bus/train keep waiting?” logic,
-so it had to replace the transport AI systems that own that decision.
-
-Fast Boarding takes a lighter route. It changes the inputs around boarding instead of replacing the AI:
-
-- it shortens dwell time by tuning stop prefab data
-- it can cancel overdue passengers from that vehicle’s boarding list after departure time
-- Once those late passengers are no longer counted as pending for that vehicle, vanilla AI can leave on its own.
-- So this mod works with the game’s transport AI instead of overriding it.
-
-
-This mod does not replace the vanilla TransportAIsystems. It speeds up stop boarding data and, when enabled,
-removes overdue passengers from a vehicle’s pending boarding list so vanilla departure logic can continue normally.”

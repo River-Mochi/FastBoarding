@@ -15,8 +15,8 @@ namespace FastBoarding
 
     [FileLocation("ModsSettings/FastBoarding/FastBoarding")]
     [SettingsUITabOrder(ActionsTab, AboutTab)]
-    [SettingsUIGroupOrder(SpeedGroup, BehaviorGroup, StatusGroup, AboutInfoGroup, AboutLinksGroup)]
-    [SettingsUIShowGroupName(SpeedGroup, BehaviorGroup, StatusGroup, AboutLinksGroup)]
+    [SettingsUIGroupOrder(SpeedGroup, BehaviorGroup, StatusGroup, AboutInfoGroup, AboutLinksGroup, DebugGroup)]
+    [SettingsUIShowGroupName(SpeedGroup, BehaviorGroup, StatusGroup, AboutLinksGroup, DebugGroup)]
     public sealed class Setting : ModSetting
     {
         public const string ActionsTab = "Actions";
@@ -28,6 +28,7 @@ namespace FastBoarding
         public const string StatusButtonsRow = "StatusButtonsRow";
         public const string AboutInfoGroup = "ModInfo";
         public const string AboutLinksGroup = "Links";
+        public const string DebugGroup = "Debug";
 
         private const string UrlParadox =
             "https://mods.paradoxplaza.com/authors/River-mochi/cities_skylines_2?games=cities_skylines_2&orderBy=desc&sortBy=best&time=alltime";
@@ -78,6 +79,16 @@ namespace FastBoarding
         [SettingsUISection(ActionsTab, BehaviorGroup)]
         [SettingsUISetter(typeof(Setting), nameof(SetCancelLateBoardersLive))]
         public bool CancelLateBoarders { get; set; }
+
+        [SettingsUISection(ActionsTab, StatusGroup)]
+        public string StatusOverview
+        {
+            get
+            {
+                try { TransitWaitStatus.RefreshIfNeeded(); } catch { }
+                return TransitWaitStatus.OverviewSummary ?? string.Empty;
+            }
+        }
 
         [SettingsUISection(ActionsTab, StatusGroup)]
         public string StatusBus
@@ -214,6 +225,10 @@ namespace FastBoarding
             }
         }
 
+        [SettingsUISection(AboutTab, DebugGroup)]
+        [SettingsUISetter(typeof(Setting), nameof(SetEnableVerboseLoggingLive))]
+        public bool EnableVerboseLogging { get; set; }
+
         public override void SetDefaults()
         {
             // Vanilla behavior is 1x and the experimental late-boarder pass is opt-in.
@@ -222,6 +237,7 @@ namespace FastBoarding
             WaterBoardingSpeedFactor = DefaultSpeedFactor;
             AirBoardingSpeedFactor = DefaultSpeedFactor;
             CancelLateBoarders = false;
+            EnableVerboseLogging = false;
         }
 
         public override void Apply()
@@ -244,6 +260,11 @@ namespace FastBoarding
             {
                 LogUtils.Info(Mod.s_Log, () => $"Late-boarder setting applied. {BoardingRuntimeSettings.DescribeForLog()}");
                 TrySetLateBoarderSystemEnabled(CancelLateBoarders);
+            }
+
+            if ((changes & BoardingRuntimeChangeFlags.VerboseLogging) != 0)
+            {
+                LogUtils.Info(Mod.s_Log, () => $"Verbose logging {(EnableVerboseLogging ? "enabled" : "disabled")}. {BoardingRuntimeSettings.DescribeForLog()}");
             }
         }
 
@@ -291,8 +312,16 @@ namespace FastBoarding
                 // SettingsUISetter gives us immediate live behavior without adding an Apply button.
                 LogUtils.Info(
                     Mod.s_Log,
-                    () => $"Cancel late boarders {(value ? "enabled" : "disabled")} from Options UI. {BoardingRuntimeSettings.DescribeForLog()}");
+                    () => $"Let vehicles leave without late cims {(value ? "enabled" : "disabled")} from Options UI. {BoardingRuntimeSettings.DescribeForLog()}");
                 TrySetLateBoarderSystemEnabled(value);
+            }
+        }
+
+        private void SetEnableVerboseLoggingLive(bool value)
+        {
+            if (BoardingRuntimeSettings.SetEnableVerboseLogging(value))
+            {
+                LogUtils.Info(Mod.s_Log, () => $"Verbose logging {(value ? "enabled" : "disabled")} from Options UI. {BoardingRuntimeSettings.DescribeForLog()}");
             }
         }
 

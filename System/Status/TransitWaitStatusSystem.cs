@@ -19,7 +19,7 @@ namespace FastBoarding
 
     public sealed partial class TransitWaitStatusSystem : GameSystemBase
     {
-        private const int TopWorstStopCount = 5;
+        private const int TopWorstStopCount = 3;
 
         public readonly struct WorstStopSnapshot
         {
@@ -144,7 +144,9 @@ namespace FastBoarding
                 FamilySnapshot subway,
                 FamilySnapshot ship,
                 FamilySnapshot ferry,
-                FamilySnapshot air)
+                FamilySnapshot air,
+                int monthlyTourists,
+                int monthlyCitizens)
             {
                 Bus = bus;
                 Train = train;
@@ -153,6 +155,8 @@ namespace FastBoarding
                 Ship = ship;
                 Ferry = ferry;
                 Air = air;
+                MonthlyTourists = monthlyTourists;
+                MonthlyCitizens = monthlyCitizens;
             }
 
             public FamilySnapshot Bus { get; }
@@ -168,6 +172,10 @@ namespace FastBoarding
             public FamilySnapshot Ferry { get; }
 
             public FamilySnapshot Air { get; }
+
+            public int MonthlyTourists { get; }
+
+            public int MonthlyCitizens { get; }
         }
 
         private struct LateGroupStats
@@ -177,6 +185,19 @@ namespace FastBoarding
             public int Groups;
 
             public int Vehicles;
+        }
+
+        private readonly struct MonthlyPassengerTotals
+        {
+            public MonthlyPassengerTotals(int tourists, int citizens)
+            {
+                Tourists = tourists;
+                Citizens = citizens;
+            }
+
+            public int Tourists { get; }
+
+            public int Citizens { get; }
         }
 
         private struct StopAggregate
@@ -200,14 +221,20 @@ namespace FastBoarding
 
         private EntityQuery m_WaitingWaypointQuery;
         private EntityQuery m_BoardingVehicleQuery;
+        private EntityQuery m_TransportConfigQuery;
         private NameSystem m_NameSystem = null!;
         private SimulationSystem m_SimulationSystem = null!;
+        private CityStatisticsSystem m_CityStatisticsSystem = null!;
+        private PrefabSystem m_PrefabSystem = null!;
+        private UITransportConfigurationPrefab? m_TransportConfig;
 
         protected override void OnCreate()
         {
             base.OnCreate();
             m_NameSystem = World.GetOrCreateSystemManaged<NameSystem>();
             m_SimulationSystem = World.GetOrCreateSystemManaged<SimulationSystem>();
+            m_CityStatisticsSystem = World.GetOrCreateSystemManaged<CityStatisticsSystem>();
+            m_PrefabSystem = World.GetOrCreateSystemManaged<PrefabSystem>();
 
             m_WaitingWaypointQuery = SystemAPI.QueryBuilder()
                 .WithAll<WaitingPassengers, Connected, Owner>()
@@ -218,6 +245,8 @@ namespace FastBoarding
                 .WithAll<Game.Vehicles.PublicTransport, Passenger>()
                 .WithNone<Deleted, Destroyed, Temp, Overridden>()
                 .Build();
+
+            m_TransportConfigQuery = GetEntityQuery(ComponentType.ReadOnly<UITransportConfigurationData>());
         }
 
         protected override void OnUpdate()
@@ -303,8 +332,68 @@ namespace FastBoarding
             FamilySnapshot ship = BuildFamilySnapshot(shipStops, shipLateGroups);
             FamilySnapshot ferry = BuildFamilySnapshot(ferryStops, ferryLateGroups);
             FamilySnapshot air = BuildFamilySnapshot(airStops, airLateGroups);
+            MonthlyPassengerTotals monthlyTotals = BuildMonthlyPassengerTotals();
 
-            return new Snapshot(bus, train, tram, subway, ship, ferry, air);
+            return new Snapshot(
+                bus,
+                train,
+                tram,
+                subway,
+                ship,
+                ferry,
+                air,
+                monthlyTotals.Tourists,
+                monthlyTotals.Citizens);
+        }
+
+        private MonthlyPassengerTotals BuildMonthlyPassengerTotals()
+        {
+            UITransportConfigurationPrefab? config = GetTransportConfig();
+            if (config == null)
+            {
+                return new MonthlyPassengerTotals(0, 0);
+            }
+
+            int totalTourists = 0;
+            int totalCitizens = 0;
+            UITransportSummaryItem[] items = config.m_PassengerSummaryItems;
+            for (int i = 0; i < items.Length; i++)
+            {
+                UITransportSummaryItem item = items[i];
+
+                try
+                {
+                    // This matches the vanilla Transportation infoview passenger summary.
+                    totalCitizens += m_CityStatisticsSystem.GetStatisticValue(item.m_Statistic);
+                    totalTourists += m_CityStatisticsSystem.GetStatisticValue(item.m_Statistic, 1);
+                }
+                catch
+                {
+                    // Missing stats should not break the Options UI status snapshot.
+                }
+            }
+
+            return new MonthlyPassengerTotals(totalTourists, totalCitizens);
+        }
+
+        private UITransportConfigurationPrefab? GetTransportConfig()
+        {
+            if (m_TransportConfig != null)
+            {
+                return m_TransportConfig;
+            }
+
+            try
+            {
+                m_TransportConfig =
+                    m_PrefabSystem.GetSingletonPrefab<UITransportConfigurationPrefab>(m_TransportConfigQuery);
+            }
+            catch
+            {
+                m_TransportConfig = null;
+            }
+
+            return m_TransportConfig;
         }
 
         private void AccumulateStop(

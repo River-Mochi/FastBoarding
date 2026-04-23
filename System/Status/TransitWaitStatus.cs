@@ -4,6 +4,9 @@
 namespace FastBoarding
 {
     using Game;
+    using Game.Common;
+    using Game.Creatures;
+    using Game.Pathfind;
     using Game.Prefabs;
     using Game.SceneFlow;
     using Game.Simulation;
@@ -18,6 +21,7 @@ namespace FastBoarding
         public const string KeyNoCityLoaded = "FB_STATUS_NO_CITY_LOADED";
         public const string KeyNoStopsFound = "FB_STATUS_NO_STOPS";
         public const string KeyStatusLine = "FB_STATUS_LINE";
+        public const string KeyStatusOverviewLine = "FB_STATUS_OVERVIEW_LINE";
         public const string KeyReportNoCityLoaded = "FB_REPORT_NO_CITY_LOADED";
         public const string KeyReportTitle = "FB_REPORT_TITLE";
         public const string KeyReportSettings = "FB_REPORT_SETTINGS";
@@ -39,13 +43,17 @@ namespace FastBoarding
         public const string KeyReportTopWorstStopsHeader = "FB_REPORT_TOP_WORST_STOPS_HEADER";
         public const string KeyReportTopWorstStopLine = "FB_REPORT_TOP_WORST_STOP_LINE";
         public const string KeyReportLateGroups = "FB_REPORT_LATE_GROUPS";
+        public const string KeyReportLastSkippedSamplesHeader = "FB_REPORT_LAST_SKIPPED_SAMPLES_HEADER";
+        public const string KeyReportLastSkippedSampleLine = "FB_REPORT_LAST_SKIPPED_SAMPLE_LINE";
         public const string KeyReportNone = "FB_REPORT_NONE";
         public const string KeyReportUnknown = "FB_REPORT_UNKNOWN";
 
         private const int ReportHeaderWidth = 60;
+        private const int SkippedSampleCapacityPerMode = 3;
 
         public static int RefreshIntervalSeconds { get; set; } = 15;
 
+        public static string OverviewSummary { get; private set; } = string.Empty;
         public static string BusSummary { get; private set; } = string.Empty;
         public static string TrainSummary { get; private set; } = string.Empty;
         public static string TramSummary { get; private set; } = string.Empty;
@@ -67,6 +75,69 @@ namespace FastBoarding
         private static long s_ShipLateBoardersToday;
         private static long s_FerryLateBoardersToday;
         private static long s_AirLateBoardersToday;
+        private static DateTime s_LastSnapshotLocalTime;
+        private static readonly SkippedPassengerSampleRing s_BusSkippedSamples = new SkippedPassengerSampleRing();
+        private static readonly SkippedPassengerSampleRing s_TrainSkippedSamples = new SkippedPassengerSampleRing();
+        private static readonly SkippedPassengerSampleRing s_TramSkippedSamples = new SkippedPassengerSampleRing();
+        private static readonly SkippedPassengerSampleRing s_SubwaySkippedSamples = new SkippedPassengerSampleRing();
+        private static readonly SkippedPassengerSampleRing s_ShipSkippedSamples = new SkippedPassengerSampleRing();
+        private static readonly SkippedPassengerSampleRing s_FerrySkippedSamples = new SkippedPassengerSampleRing();
+        private static readonly SkippedPassengerSampleRing s_AirSkippedSamples = new SkippedPassengerSampleRing();
+
+        private readonly struct SkippedPassengerSample
+        {
+            public SkippedPassengerSample(TransportType transportType, Entity vehicle, Entity passenger, uint frame, DateTime localTime)
+            {
+                TransportType = transportType;
+                Vehicle = vehicle;
+                Passenger = passenger;
+                Frame = frame;
+                LocalTime = localTime;
+            }
+
+            public TransportType TransportType { get; }
+
+            public Entity Vehicle { get; }
+
+            public Entity Passenger { get; }
+
+            public uint Frame { get; }
+
+            public DateTime LocalTime { get; }
+        }
+
+        private sealed class SkippedPassengerSampleRing
+        {
+            private readonly SkippedPassengerSample[] m_Samples =
+                new SkippedPassengerSample[SkippedSampleCapacityPerMode];
+            private int m_Count;
+            private int m_NextIndex;
+
+            public int Count => m_Count;
+
+            public void Add(SkippedPassengerSample sample)
+            {
+                m_Samples[m_NextIndex] = sample;
+                m_NextIndex = (m_NextIndex + 1) % m_Samples.Length;
+
+                if (m_Count < m_Samples.Length)
+                {
+                    m_Count++;
+                }
+            }
+
+            public void Clear()
+            {
+                m_Count = 0;
+                m_NextIndex = 0;
+            }
+
+            public SkippedPassengerSample GetNewest(int newestIndex)
+            {
+                int index = (m_NextIndex - 1 - newestIndex + m_Samples.Length) % m_Samples.Length;
+                return m_Samples[index];
+            }
+        }
 
         public static void InvalidateCache()
         {
@@ -76,6 +147,7 @@ namespace FastBoarding
             ResetDailyCounters();
 
             BusSummary = Localize(KeyStatusNotLoaded, "Status not loaded.");
+            OverviewSummary = BusSummary;
             TrainSummary = string.Empty;
             TramSummary = string.Empty;
             SubwaySummary = string.Empty;
@@ -114,6 +186,7 @@ namespace FastBoarding
             if (!isGame)
             {
                 BusSummary = Localize(KeyNoCityLoaded, "No city loaded.");
+                OverviewSummary = BusSummary;
                 TrainSummary = string.Empty;
                 TramSummary = string.Empty;
                 SubwaySummary = string.Empty;
@@ -192,16 +265,20 @@ namespace FastBoarding
                 sb.AppendLine();
                 AppendSectionHeader(sb, Localize(KeyReportTitle, "Fast Boarding transit status report"));
                 AppendField(sb, "Generated local", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                AppendField(sb, "Snapshot updated", s_LastSnapshotLocalTime == default ? "unknown" : s_LastSnapshotLocalTime.ToString("HH:mm:ss"));
+                AppendField(sb, "Monthly transit total", $"{LocaleUtils.FormatN0(snapshot.MonthlyTourists)} tourist/mo | {LocaleUtils.FormatN0(snapshot.MonthlyCitizens)} citizens/mo");
                 AppendField(sb, "Settings", BoardingRuntimeSettings.DescribeForLog());
                 AppendField(sb, "Note", Localize(KeyReportNote, "Worst line is a hint from the highest-wait waypoint at the worst stop."));
 
-                AppendFamilyReport(sb, "Bus", snapshot.Bus, s_BusLateBoardersToday);
-                AppendFamilyReport(sb, "Tram", snapshot.Tram, s_TramLateBoardersToday);
-                AppendFamilyReport(sb, "Train", snapshot.Train, s_TrainLateBoardersToday);
-                AppendFamilyReport(sb, "Subway", snapshot.Subway, s_SubwayLateBoardersToday);
-                AppendFamilyReport(sb, "Ferry", snapshot.Ferry, s_FerryLateBoardersToday);
-                AppendFamilyReport(sb, "Ship", snapshot.Ship, s_ShipLateBoardersToday);
-                AppendFamilyReport(sb, "Airplane", snapshot.Air, s_AirLateBoardersToday);
+                AppendSummaryReport(sb, snapshot);
+
+                AppendFamilyReport(sb, world, "Bus", snapshot.Bus, s_BusLateBoardersToday, s_BusSkippedSamples);
+                AppendFamilyReport(sb, world, "Tram", snapshot.Tram, s_TramLateBoardersToday, s_TramSkippedSamples);
+                AppendFamilyReport(sb, world, "Train", snapshot.Train, s_TrainLateBoardersToday, s_TrainSkippedSamples);
+                AppendFamilyReport(sb, world, "Subway", snapshot.Subway, s_SubwayLateBoardersToday, s_SubwaySkippedSamples);
+                AppendFamilyReport(sb, world, "Ferry", snapshot.Ferry, s_FerryLateBoardersToday, s_FerrySkippedSamples);
+                AppendFamilyReport(sb, world, "Ship", snapshot.Ship, s_ShipLateBoardersToday, s_ShipSkippedSamples);
+                AppendFamilyReport(sb, world, "Airplane", snapshot.Air, s_AirLateBoardersToday, s_AirSkippedSamples);
 
                 AppendDivider(sb);
 
@@ -248,6 +325,15 @@ namespace FastBoarding
             }
         }
 
+        internal static void RecordLateBoarderSample(World world, TransportType transportType, Entity vehicle, Entity passenger)
+        {
+            EnsureCounterDay(world);
+
+            uint frame = world.GetExistingSystemManaged<SimulationSystem>()?.frameIndex ?? 0;
+            GetSkippedSampleRing(transportType).Add(
+                new SkippedPassengerSample(transportType, vehicle, passenger, frame, DateTime.Now));
+        }
+
         private static string FormatFamily(TransitWaitStatusSystem.FamilySnapshot family, long lateBoardersCanceledToday)
         {
             if (family.StopCount == 0)
@@ -266,6 +352,8 @@ namespace FastBoarding
 
         private static void ApplySnapshot(TransitWaitStatusSystem.Snapshot snapshot)
         {
+            s_LastSnapshotLocalTime = DateTime.Now;
+            OverviewSummary = FormatOverview(snapshot);
             BusSummary = FormatFamily(snapshot.Bus, s_BusLateBoardersToday);
             TrainSummary = FormatFamily(snapshot.Train, s_TrainLateBoardersToday);
             TramSummary = FormatFamily(snapshot.Tram, s_TramLateBoardersToday);
@@ -275,27 +363,72 @@ namespace FastBoarding
             AirSummary = FormatFamily(snapshot.Air, s_AirLateBoardersToday);
         }
 
-        private static void AppendFamilyReport(
+        private static string FormatOverview(TransitWaitStatusSystem.Snapshot snapshot)
+        {
+            return LocaleUtils.SafeFormat(
+                KeyStatusOverviewLine,
+                "{0} tourist/mo | {1} citizens/mo | updated {2}",
+                LocaleUtils.FormatN0(snapshot.MonthlyTourists),
+                LocaleUtils.FormatN0(snapshot.MonthlyCitizens),
+                s_LastSnapshotLocalTime.ToString("HH:mm:ss"));
+        }
+
+        private static void AppendSummaryReport(StringBuilder sb, TransitWaitStatusSystem.Snapshot snapshot)
+        {
+            sb.AppendLine();
+            AppendSectionHeader(sb, "Summary");
+            AppendField(
+                sb,
+                "Total public transit",
+                $"{LocaleUtils.FormatN0(snapshot.MonthlyTourists)} tourist/mo | {LocaleUtils.FormatN0(snapshot.MonthlyCitizens)} citizens/mo");
+            AppendSummaryLine(sb, "Bus", snapshot.Bus, s_BusLateBoardersToday);
+            AppendSummaryLine(sb, "Tram", snapshot.Tram, s_TramLateBoardersToday);
+            AppendSummaryLine(sb, "Train", snapshot.Train, s_TrainLateBoardersToday);
+            AppendSummaryLine(sb, "Subway", snapshot.Subway, s_SubwayLateBoardersToday);
+            AppendSummaryLine(sb, "Ferry", snapshot.Ferry, s_FerryLateBoardersToday);
+            AppendSummaryLine(sb, "Ship", snapshot.Ship, s_ShipLateBoardersToday);
+            AppendSummaryLine(sb, "Airplane", snapshot.Air, s_AirLateBoardersToday);
+        }
+
+        private static void AppendSummaryLine(
             StringBuilder sb,
             string label,
             TransitWaitStatusSystem.FamilySnapshot family,
             long lateBoardersCanceledToday)
+        {
+            if (family.StopCount == 0)
+            {
+                AppendField(sb, label, Localize(KeyNoStopsFound, "No stops found."));
+                return;
+            }
+
+            AppendField(
+                sb,
+                label,
+                $"{LocaleUtils.FormatN0(family.WaitingPassengers)} waiting | average {FormatDuration(family.AverageWaitSeconds)} | worst {FormatDuration(family.WorstStopWaitSeconds)} | {LocaleUtils.FormatN0(lateBoardersCanceledToday)} skipped");
+        }
+
+        private static void AppendFamilyReport(
+            StringBuilder sb,
+            World world,
+            string label,
+            TransitWaitStatusSystem.FamilySnapshot family,
+            long lateBoardersCanceledToday,
+            SkippedPassengerSampleRing skippedSamples)
         {
             sb.AppendLine();
             AppendSectionHeader(sb, FormatReport(KeyReportFamilyHeader, "{0}", label));
 
             if (family.StopCount == 0)
             {
-                AppendField(sb, "Served stops", "0");
                 sb.AppendLine(Localize(KeyNoStopsFound, "No stops found."));
                 return;
             }
 
-            AppendField(sb, "Served stops", LocaleUtils.FormatN0(family.StopCount));
-            AppendField(sb, "Stops with waiting", LocaleUtils.FormatN0(family.ActiveQueueStops));
-            AppendField(sb, "Waiting passengers", LocaleUtils.FormatN0(family.WaitingPassengers));
-            AppendField(sb, "Average wait", FormatDuration(family.AverageWaitSeconds));
-            AppendField(sb, "Late boarders skipped today", LocaleUtils.FormatN0(lateBoardersCanceledToday));
+            AppendField(
+                sb,
+                "Status",
+                $"{LocaleUtils.FormatN0(family.WaitingPassengers)} waiting | average {FormatDuration(family.AverageWaitSeconds)} | worst {FormatDuration(family.WorstStopWaitSeconds)} | {LocaleUtils.FormatN0(lateBoardersCanceledToday)} skipped today");
             AppendField(
                 sb,
                 "Late group passengers left alone",
@@ -304,23 +437,13 @@ namespace FastBoarding
             if (family.WaitingPassengers <= 0)
             {
                 sb.AppendLine(Localize(KeyReportWorstStopNone, "Worst stop: none, no waiting passengers right now."));
-                return;
+            }
+            else
+            {
+                AppendTopWorstStops(sb, family);
             }
 
-            sb.AppendLine();
-            AppendSubHeader(sb, "Worst stop");
-            AppendField(sb, "Average wait", FormatDuration(family.WorstStopWaitSeconds));
-            AppendField(sb, "Name", TextOrUnknown(family.WorstStopName));
-            AppendField(sb, "Stop entity", EntityText(family.WorstStopEntity));
-            AppendField(sb, "Waypoint entity", EntityText(family.WorstWaypointEntity));
-            AppendField(sb, "Line hint", TextOrUnknown(family.WorstLineName));
-            AppendField(sb, "Line entity", EntityText(family.WorstLineEntity));
-            AppendField(
-                sb,
-                "Worst line waypoint avg",
-                $"{FormatDuration(family.WorstLineWaitSeconds)} with {LocaleUtils.FormatN0(family.WorstLineWaitingPassengers)} waiting");
-
-            AppendTopWorstStops(sb, family);
+            AppendSkippedPassengerSamples(sb, world, skippedSamples);
         }
 
         private static void AppendTopWorstStops(StringBuilder sb, TransitWaitStatusSystem.FamilySnapshot family)
@@ -339,13 +462,106 @@ namespace FastBoarding
             for (int i = 0; i < family.TopWorstStops.Length; i++)
             {
                 TransitWaitStatusSystem.WorstStopSnapshot stop = family.TopWorstStops[i];
-                sb.AppendLine($"{LocaleUtils.FormatN0(i + 1)}. {TextOrUnknown(stop.StopName)}");
-                AppendField(sb, "   Average wait", FormatDuration(stop.AverageWaitSeconds));
-                AppendField(sb, "   Waiting", LocaleUtils.FormatN0(stop.WaitingPassengers));
-                AppendField(sb, "   Stop entity", EntityText(stop.StopEntity));
-                AppendField(sb, "   Waypoint entity", EntityText(stop.WaypointEntity));
-                AppendField(sb, "   Line entity", EntityText(stop.LineEntity));
-                AppendField(sb, "   Line hint", TextOrUnknown(stop.LineName));
+                sb.AppendLine(
+                    $"{LocaleUtils.FormatN0(i + 1)}. {TextOrUnknown(stop.StopName)} | avg {FormatDuration(stop.AverageWaitSeconds)} | waiting {LocaleUtils.FormatN0(stop.WaitingPassengers)} | line hint {TextOrUnknown(stop.LineName)}");
+                sb.AppendLine(
+                    $"   stop {EntityText(stop.StopEntity)} | waypoint {EntityText(stop.WaypointEntity)} | line {EntityText(stop.LineEntity)}");
+            }
+        }
+
+        private static void AppendSkippedPassengerSamples(
+            StringBuilder sb,
+            World world,
+            SkippedPassengerSampleRing skippedSamples)
+        {
+            sb.AppendLine();
+            AppendSectionHeader(sb, Localize(KeyReportLastSkippedSamplesHeader, "Last skipped solo cims"));
+
+            if (skippedSamples.Count == 0)
+            {
+                sb.AppendLine(Localize(KeyReportNone, "none"));
+                return;
+            }
+
+            for (int i = 0; i < skippedSamples.Count; i++)
+            {
+                SkippedPassengerSample sample = skippedSamples.GetNewest(i);
+                sb.AppendLine(LocaleUtils.SafeFormat(
+                    KeyReportLastSkippedSampleLine,
+                    "{0}. {1} | passenger {2} | vehicle {3} | frame {4} | time {5} | now {6}",
+                    LocaleUtils.FormatN0(i + 1),
+                    sample.TransportType,
+                    EntityText(sample.Passenger),
+                    EntityText(sample.Vehicle),
+                    sample.Frame,
+                    sample.LocalTime.ToString("HH:mm:ss"),
+                    FormatPassengerState(world, sample.Passenger)));
+            }
+        }
+
+        private static string FormatPassengerState(World world, Entity passenger)
+        {
+            if (world == null || !world.IsCreated || passenger == Entity.Null)
+            {
+                return "unknown";
+            }
+
+            EntityManager entityManager = world.EntityManager;
+            if (!entityManager.Exists(passenger))
+            {
+                return "entity missing";
+            }
+
+            if (entityManager.HasComponent<Deleted>(passenger) ||
+                entityManager.HasComponent<Destroyed>(passenger))
+            {
+                return "deleted/destroyed";
+            }
+
+            bool hasCurrentVehicle = entityManager.HasComponent<CurrentVehicle>(passenger);
+            Entity currentVehicle = Entity.Null;
+            CreatureVehicleFlags vehicleFlags = default;
+            if (hasCurrentVehicle)
+            {
+                CurrentVehicle currentVehicleData = entityManager.GetComponentData<CurrentVehicle>(passenger);
+                currentVehicle = currentVehicleData.m_Vehicle;
+                vehicleFlags = currentVehicleData.m_Flags;
+            }
+
+            int pathCount = entityManager.HasBuffer<PathElement>(passenger)
+                ? entityManager.GetBuffer<PathElement>(passenger).Length
+                : -1;
+            int pathIndex = entityManager.HasComponent<PathOwner>(passenger)
+                ? entityManager.GetComponentData<PathOwner>(passenger).m_ElementIndex
+                : -1;
+
+            string vehicleText = hasCurrentVehicle
+                ? $"{EntityText(currentVehicle)} ({vehicleFlags})"
+                : "none";
+
+            return $"currentVehicle {vehicleText}; path elements {pathCount}; path index {pathIndex}";
+        }
+
+        private static SkippedPassengerSampleRing GetSkippedSampleRing(TransportType transportType)
+        {
+            switch (transportType)
+            {
+                case TransportType.Bus:
+                    return s_BusSkippedSamples;
+                case TransportType.Train:
+                    return s_TrainSkippedSamples;
+                case TransportType.Tram:
+                    return s_TramSkippedSamples;
+                case TransportType.Subway:
+                    return s_SubwaySkippedSamples;
+                case TransportType.Ship:
+                    return s_ShipSkippedSamples;
+                case TransportType.Ferry:
+                    return s_FerrySkippedSamples;
+                case TransportType.Airplane:
+                    return s_AirSkippedSamples;
+                default:
+                    return s_BusSkippedSamples;
             }
         }
 
@@ -453,6 +669,13 @@ namespace FastBoarding
             s_ShipLateBoardersToday = 0;
             s_FerryLateBoardersToday = 0;
             s_AirLateBoardersToday = 0;
+            s_BusSkippedSamples.Clear();
+            s_TrainSkippedSamples.Clear();
+            s_TramSkippedSamples.Clear();
+            s_SubwaySkippedSamples.Clear();
+            s_ShipSkippedSamples.Clear();
+            s_FerrySkippedSamples.Clear();
+            s_AirSkippedSamples.Clear();
         }
 
         private static string Localize(string entryId, string fallback) => LocaleUtils.Localize(entryId, fallback);

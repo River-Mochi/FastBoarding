@@ -40,21 +40,6 @@ namespace FastBoarding
                 LogUtils.Info(s_Log, () => $"{ModName} v{ModVersion} OnLoad");
             }
 
-            GameManager gameManager = GameManager.instance;
-
-            try
-            {
-                // Useful in support logs because local, Skyve, and PDX builds can load from different paths.
-                if (gameManager.modManager.TryGetExecutableAsset(this, out var asset))
-                {
-                    LogUtils.Info(s_Log, () => $"Current mod asset at {asset.path}");
-                }
-            }
-            catch (Exception ex)
-            {
-                LogUtils.Warn(s_Log, () => $"TryGetExecutableAsset failed: {ex.GetType().Name}: {ex.Message}", ex);
-            }
-
             Setting setting = new Setting(this);
             Settings = setting;
           

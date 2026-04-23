@@ -10,7 +10,8 @@ namespace FastBoarding
     {
         None = 0,
         StopTuning = 1 << 0,
-        LateBoarders = 1 << 1
+        LateBoarders = 1 << 1,
+        VerboseLogging = 1 << 2
     }
 
     /// <summary>
@@ -34,6 +35,8 @@ namespace FastBoarding
         public static int AirBoardingSpeedFactor { get; private set; } = Setting.DefaultSpeedFactor;
 
         public static bool CancelLateBoarders { get; private set; } = false;
+
+        public static bool EnableVerboseLogging { get; private set; } = false;
 
         public static BoardingRuntimeChangeFlags Apply(Setting settings)
         {
@@ -84,6 +87,12 @@ namespace FastBoarding
                 // The live boarding system only needs to wake when this behavior toggle changes.
                 LateBoarderRevision++;
                 changes |= BoardingRuntimeChangeFlags.LateBoarders;
+            }
+
+            if (EnableVerboseLogging != settings.EnableVerboseLogging)
+            {
+                EnableVerboseLogging = settings.EnableVerboseLogging;
+                changes |= BoardingRuntimeChangeFlags.VerboseLogging;
             }
 
             return changes;
@@ -154,13 +163,24 @@ namespace FastBoarding
             return true;
         }
 
+        public static bool SetEnableVerboseLogging(bool value)
+        {
+            if (EnableVerboseLogging == value)
+            {
+                return false;
+            }
+
+            EnableVerboseLogging = value;
+            return true;
+        }
+
         public static string DescribeForLog()
         {
             // Keep this compact because it is appended to support log lines.
             return
                 $"bus={BusBoardingSpeedFactor}x, rail={RailBoardingSpeedFactor}x, " +
                 $"ship+ferry={WaterBoardingSpeedFactor}x, air={AirBoardingSpeedFactor}x, " +
-                $"cancelLate={CancelLateBoarders}";
+                $"missLateSolo={CancelLateBoarders}, verbose={EnableVerboseLogging}";
         }
 
         private static int ClampSpeedFactor(int value)

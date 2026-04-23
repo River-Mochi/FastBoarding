@@ -12,7 +12,6 @@ namespace FastBoarding
     using Game.Vehicles;
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using Unity.Collections;
     using Unity.Entities;
     using PrefabRef = Game.Prefabs.PrefabRef;
@@ -25,6 +24,10 @@ namespace FastBoarding
         public const int UpdatesPerDay = 4096;
         private const int MaxCancellationsPerUpdate = 64;
         private const uint DiagnosticFrameInterval = 4096;
+        private const int MaxSampledCimsPerModePerUpdate = 3;
+        private const int MaxSampledCimsPerUpdate = MaxSampledCimsPerModePerUpdate * 7;
+        private const uint FollowUpDelayFrames = 4096;
+        private const int MaxFollowUpSamples = MaxSampledCimsPerUpdate;
 
         private EntityQuery m_VehicleQuery;
         private SimulationSystem? m_SimulationSystem;
@@ -34,6 +37,9 @@ namespace FastBoarding
         private long m_TotalCanceled;
         private int m_SkippedForTool;
         private bool m_LoggedActive;
+        private readonly FollowUpSample[] m_FollowUpSamples = new FollowUpSample[MaxFollowUpSamples];
+        private int m_FollowUpCount;
+        private int m_NextFollowUpSample;
 
         private readonly struct PassStats
         {
@@ -52,6 +58,47 @@ namespace FastBoarding
             public int Candidates { get; }
 
             public int Canceled { get; }
+        }
+
+        private readonly struct CanceledPassengerSample
+        {
+            public CanceledPassengerSample(TransportType transportType, Entity vehicle, Entity passenger)
+            {
+                TransportType = transportType;
+                Vehicle = vehicle;
+                Passenger = passenger;
+            }
+
+            public TransportType TransportType { get; }
+
+            public Entity Vehicle { get; }
+
+            public Entity Passenger { get; }
+        }
+
+        private struct FollowUpSample
+        {
+            public FollowUpSample(TransportType transportType, Entity vehicle, Entity passenger, uint frame)
+            {
+                Active = true;
+                Logged = false;
+                TransportType = transportType;
+                Vehicle = vehicle;
+                Passenger = passenger;
+                Frame = frame;
+            }
+
+            public bool Active;
+
+            public bool Logged;
+
+            public TransportType TransportType;
+
+            public Entity Vehicle;
+
+            public Entity Passenger;
+
+            public uint Frame;
         }
 
         public override int GetUpdateInterval(SystemUpdatePhase phase)
@@ -94,11 +141,14 @@ namespace FastBoarding
                         m_SimulationSystem?.frameIndex ?? 0,
                         new PassStats(0, 0, 0, 0),
                         "paused-tool");
+                    LogFollowUps(m_SimulationSystem?.frameIndex ?? 0);
                     return;
                 }
 
                 PassStats stats = RunCancellationPass();
-                LogPassSummary(m_SimulationSystem?.frameIndex ?? 0, stats, "pass");
+                uint frame = m_SimulationSystem?.frameIndex ?? 0;
+                LogPassSummary(frame, stats, "pass");
+                LogFollowUps(frame);
             }
             catch (Exception ex)
             {
@@ -107,7 +157,7 @@ namespace FastBoarding
 
                 Mod.WarnOnce(
                     "FB_LATE_BOARDER_CANCEL_EXCEPTION",
-                    () => $"{Mod.ModTag} Cancel late boarders disabled after {ex.GetType().Name}: {ex.Message}");
+                    () => $"{Mod.ModTag} Late-cim skip disabled after {ex.GetType().Name}: {ex.Message}");
             }
         }
 
@@ -127,6 +177,15 @@ namespace FastBoarding
             int shipCanceled = 0;
             int ferryCanceled = 0;
             int airCanceled = 0;
+            int busSampleCount = 0;
+            int trainSampleCount = 0;
+            int tramSampleCount = 0;
+            int subwaySampleCount = 0;
+            int shipSampleCount = 0;
+            int ferrySampleCount = 0;
+            int airSampleCount = 0;
+            CanceledPassengerSample[]? sampledCanceledPassengers = null;
+            int sampledCanceledPassengerCount = 0;
 
             try
             {
@@ -226,6 +285,23 @@ namespace FastBoarding
                             canceledPassengers.Add(passenger);
                             cancellationsThisUpdate++;
                             canceledForVehicle++;
+
+                            if (sampledCanceledPassengerCount < MaxSampledCimsPerUpdate &&
+                                TryCountCanceledSample(
+                                    transportType,
+                                    ref busSampleCount,
+                                    ref trainSampleCount,
+                                    ref tramSampleCount,
+                                    ref subwaySampleCount,
+                                    ref shipSampleCount,
+                                    ref ferrySampleCount,
+                                    ref airSampleCount))
+                            {
+                                // Keep a few entity IDs per mode for the on-demand troubleshooting report.
+                                sampledCanceledPassengers ??= new CanceledPassengerSample[MaxSampledCimsPerUpdate];
+                                sampledCanceledPassengers[sampledCanceledPassengerCount++] =
+                                    new CanceledPassengerSample(transportType, vehicleEntity, passenger);
+                            }
                         }
                     }
 
@@ -262,6 +338,24 @@ namespace FastBoarding
                     ferryCanceled,
                     airCanceled);
 
+                if (sampledCanceledPassengers != null)
+                {
+                    for (int i = 0; i < sampledCanceledPassengerCount; i++)
+                    {
+                        CanceledPassengerSample sample = sampledCanceledPassengers[i];
+                        TransitWaitStatus.RecordLateBoarderSample(
+                            World,
+                            sample.TransportType,
+                            sample.Vehicle,
+                            sample.Passenger);
+
+                        if (ShouldLogDiagnostics())
+                        {
+                            TrackFollowUpSample(sample);
+                        }
+                    }
+                }
+
                 return new PassStats(vehiclesScanned, passengersScanned, candidates, cancellationsThisUpdate);
             }
             finally
@@ -289,9 +383,13 @@ namespace FastBoarding
             return activeTool != null && activeTool != m_DefaultToolSystem;
         }
 
-        [Conditional("DEBUG")]
         private void LogActiveOnce()
         {
+            if (!ShouldLogDiagnostics())
+            {
+                return;
+            }
+
             if (m_LoggedActive)
             {
                 return;
@@ -300,13 +398,17 @@ namespace FastBoarding
             m_LoggedActive = true;
             LogUtils.Info(
                 Mod.s_Log,
-                () => $"Cancel late boarders active. interval={GetUpdateInterval(SystemUpdatePhase.GameSimulation)} frames, cap={MaxCancellationsPerUpdate} per update. {BoardingRuntimeSettings.DescribeForLog()}");
+                () => $"Late-cim skip active. interval={GetUpdateInterval(SystemUpdatePhase.GameSimulation)} frames, cap={MaxCancellationsPerUpdate} per update. {BoardingRuntimeSettings.DescribeForLog()}");
         }
 
-        [Conditional("DEBUG")]
         private void LogPassSummary(uint frame, PassStats stats, string reason)
         {
             m_TotalCanceled += stats.Canceled;
+
+            if (!ShouldLogDiagnostics())
+            {
+                return;
+            }
 
             bool force = stats.Canceled >= MaxCancellationsPerUpdate;
             bool intervalElapsed = m_LastDiagnosticFrame == 0 ||
@@ -328,6 +430,90 @@ namespace FastBoarding
             LogUtils.Info(
                 Mod.s_Log,
                 () => $"LateBoarder {reason}: frame={frame}, vehicles={stats.Vehicles}, passengers={stats.Passengers}, candidates={stats.Candidates}, canceled={stats.Canceled}, total={m_TotalCanceled}, skippedTool={m_SkippedForTool}, activeTool={activeTool}, {BoardingRuntimeSettings.DescribeForLog()}");
+        }
+
+        private void TrackFollowUpSample(CanceledPassengerSample sample)
+        {
+            uint frame = m_SimulationSystem?.frameIndex ?? 0;
+            m_FollowUpSamples[m_NextFollowUpSample] =
+                new FollowUpSample(sample.TransportType, sample.Vehicle, sample.Passenger, frame);
+            m_NextFollowUpSample = (m_NextFollowUpSample + 1) % m_FollowUpSamples.Length;
+
+            if (m_FollowUpCount < m_FollowUpSamples.Length)
+            {
+                m_FollowUpCount++;
+            }
+        }
+
+        private void LogFollowUps(uint frame)
+        {
+            if (!ShouldLogDiagnostics())
+            {
+                return;
+            }
+
+            for (int i = 0; i < m_FollowUpCount; i++)
+            {
+                FollowUpSample sample = m_FollowUpSamples[i];
+                if (!sample.Active || sample.Logged)
+                {
+                    continue;
+                }
+
+                uint elapsedFrames = frame >= sample.Frame
+                    ? frame - sample.Frame
+                    : uint.MaxValue;
+                if (elapsedFrames < FollowUpDelayFrames)
+                {
+                    continue;
+                }
+
+                sample.Logged = true;
+                m_FollowUpSamples[i] = sample;
+
+                LogUtils.Info(
+                    Mod.s_Log,
+                    () => $"Late-cim follow-up: mode={sample.TransportType}, passenger={sample.Passenger}, missedVehicle={sample.Vehicle}, afterFrames={elapsedFrames}, {DescribePassengerState(sample.Passenger)}");
+            }
+        }
+
+        private string DescribePassengerState(Entity passenger)
+        {
+            if (passenger == Entity.Null || !EntityManager.Exists(passenger))
+            {
+                return "state=entity missing";
+            }
+
+            if (EntityManager.HasComponent<Deleted>(passenger) ||
+                EntityManager.HasComponent<Destroyed>(passenger))
+            {
+                return "state=deleted/destroyed";
+            }
+
+            string currentVehicleText = "none";
+            if (EntityManager.HasComponent<CurrentVehicle>(passenger))
+            {
+                CurrentVehicle currentVehicle = EntityManager.GetComponentData<CurrentVehicle>(passenger);
+                currentVehicleText = $"{currentVehicle.m_Vehicle} ({currentVehicle.m_Flags})";
+            }
+
+            int pathCount = EntityManager.HasBuffer<PathElement>(passenger)
+                ? EntityManager.GetBuffer<PathElement>(passenger).Length
+                : -1;
+            int pathIndex = EntityManager.HasComponent<PathOwner>(passenger)
+                ? EntityManager.GetComponentData<PathOwner>(passenger).m_ElementIndex
+                : -1;
+
+            return $"currentVehicle={currentVehicleText}, pathElements={pathCount}, pathIndex={pathIndex}";
+        }
+
+        private static bool ShouldLogDiagnostics()
+        {
+#if DEBUG
+            return true;
+#else
+            return BoardingRuntimeSettings.EnableVerboseLogging;
+#endif
         }
 
         private bool CanSafelyCancelPassenger(Entity vehicleEntity, Entity passenger)
@@ -396,6 +582,48 @@ namespace FastBoarding
                     airCanceled += count;
                     break;
             }
+        }
+
+        private static bool TryCountCanceledSample(
+            TransportType transportType,
+            ref int busSampleCount,
+            ref int trainSampleCount,
+            ref int tramSampleCount,
+            ref int subwaySampleCount,
+            ref int shipSampleCount,
+            ref int ferrySampleCount,
+            ref int airSampleCount)
+        {
+            switch (transportType)
+            {
+                case TransportType.Bus:
+                    return TryIncrementSampleCount(ref busSampleCount);
+                case TransportType.Train:
+                    return TryIncrementSampleCount(ref trainSampleCount);
+                case TransportType.Tram:
+                    return TryIncrementSampleCount(ref tramSampleCount);
+                case TransportType.Subway:
+                    return TryIncrementSampleCount(ref subwaySampleCount);
+                case TransportType.Ship:
+                    return TryIncrementSampleCount(ref shipSampleCount);
+                case TransportType.Ferry:
+                    return TryIncrementSampleCount(ref ferrySampleCount);
+                case TransportType.Airplane:
+                    return TryIncrementSampleCount(ref airSampleCount);
+                default:
+                    return false;
+            }
+        }
+
+        private static bool TryIncrementSampleCount(ref int sampleCount)
+        {
+            if (sampleCount >= MaxSampledCimsPerModePerUpdate)
+            {
+                return false;
+            }
+
+            sampleCount++;
+            return true;
         }
 
         private void RecordCanceledCounts(
