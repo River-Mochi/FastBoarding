@@ -8,6 +8,7 @@ namespace FastBoarding
     using Game;
     using Game.Common;
     using Game.Creatures;
+    using Game.Pathfind;
     using Game.Prefabs;
     using Game.Routes;
     using Game.Simulation;
@@ -200,6 +201,104 @@ namespace FastBoarding
             public int Citizens { get; }
         }
 
+        public enum FollowUpOutcome
+        {
+            SameVehicle,
+            DifferentVehicle,
+            HasPathNotAssignedYet,
+            Other,
+        }
+
+        public readonly struct FollowUpSnapshot
+        {
+            public FollowUpSnapshot(
+                FollowUpOutcome outcome,
+                string outcomeLabel,
+                Entity currentVehicle,
+                CreatureVehicleFlags currentVehicleFlags,
+                int pathElementCount,
+                int pathIndex,
+                Entity nextTargetEntity,
+                Entity nextWaypointEntity,
+                Entity nextStopEntity,
+                string nextStopName,
+                Entity nextLineEntity,
+                string nextLineName,
+                string hint)
+            {
+                Outcome = outcome;
+                OutcomeLabel = outcomeLabel ?? string.Empty;
+                CurrentVehicle = currentVehicle;
+                CurrentVehicleFlags = currentVehicleFlags;
+                PathElementCount = pathElementCount;
+                PathIndex = pathIndex;
+                NextTargetEntity = nextTargetEntity;
+                NextWaypointEntity = nextWaypointEntity;
+                NextStopEntity = nextStopEntity;
+                NextStopName = nextStopName ?? string.Empty;
+                NextLineEntity = nextLineEntity;
+                NextLineName = nextLineName ?? string.Empty;
+                Hint = hint ?? string.Empty;
+            }
+
+            public FollowUpOutcome Outcome { get; }
+
+            public string OutcomeLabel { get; }
+
+            public Entity CurrentVehicle { get; }
+
+            public CreatureVehicleFlags CurrentVehicleFlags { get; }
+
+            public int PathElementCount { get; }
+
+            public int PathIndex { get; }
+
+            public Entity NextTargetEntity { get; }
+
+            public Entity NextWaypointEntity { get; }
+
+            public Entity NextStopEntity { get; }
+
+            public string NextStopName { get; }
+
+            public Entity NextLineEntity { get; }
+
+            public string NextLineName { get; }
+
+            public string Hint { get; }
+
+            public string CurrentVehicleText => CurrentVehicle == Entity.Null
+                ? "none"
+                : $"{CurrentVehicle} ({CurrentVehicleFlags})";
+        }
+
+        private readonly struct FollowUpTargetInfo
+        {
+            public FollowUpTargetInfo(
+                Entity nextWaypointEntity,
+                Entity nextStopEntity,
+                string nextStopName,
+                Entity nextLineEntity,
+                string nextLineName)
+            {
+                NextWaypointEntity = nextWaypointEntity;
+                NextStopEntity = nextStopEntity;
+                NextStopName = nextStopName ?? string.Empty;
+                NextLineEntity = nextLineEntity;
+                NextLineName = nextLineName ?? string.Empty;
+            }
+
+            public Entity NextWaypointEntity { get; }
+
+            public Entity NextStopEntity { get; }
+
+            public string NextStopName { get; }
+
+            public Entity NextLineEntity { get; }
+
+            public string NextLineName { get; }
+        }
+
         private struct StopAggregate
         {
             public long WaitingPassengers;
@@ -344,6 +443,117 @@ namespace FastBoarding
                 air,
                 monthlyTotals.Tourists,
                 monthlyTotals.Citizens);
+        }
+
+        public FollowUpSnapshot BuildLateBoarderFollowUpSnapshot(
+            Entity passenger,
+            TransportType transportType,
+            Entity missedVehicle)
+        {
+            if (passenger == Entity.Null || !EntityManager.Exists(passenger))
+            {
+                return new FollowUpSnapshot(
+                    FollowUpOutcome.Other,
+                    "entity missing",
+                    Entity.Null,
+                    default,
+                    -1,
+                    -1,
+                    Entity.Null,
+                    Entity.Null,
+                    Entity.Null,
+                    string.Empty,
+                    Entity.Null,
+                    string.Empty,
+                    "entity missing");
+            }
+
+            if (EntityManager.HasComponent<Deleted>(passenger) ||
+                EntityManager.HasComponent<Destroyed>(passenger))
+            {
+                return new FollowUpSnapshot(
+                    FollowUpOutcome.Other,
+                    "deleted/destroyed",
+                    Entity.Null,
+                    default,
+                    -1,
+                    -1,
+                    Entity.Null,
+                    Entity.Null,
+                    Entity.Null,
+                    string.Empty,
+                    Entity.Null,
+                    string.Empty,
+                    "deleted/destroyed");
+            }
+
+            Entity currentVehicle = Entity.Null;
+            CreatureVehicleFlags currentVehicleFlags = default;
+            if (EntityManager.HasComponent<CurrentVehicle>(passenger))
+            {
+                CurrentVehicle currentVehicleData = EntityManager.GetComponentData<CurrentVehicle>(passenger);
+                currentVehicle = currentVehicleData.m_Vehicle;
+                currentVehicleFlags = currentVehicleData.m_Flags;
+            }
+
+            int pathElementCount = -1;
+            int pathIndex = EntityManager.HasComponent<PathOwner>(passenger)
+                ? EntityManager.GetComponentData<PathOwner>(passenger).m_ElementIndex
+                : -1;
+            Entity nextTargetEntity = Entity.Null;
+            if (EntityManager.HasBuffer<PathElement>(passenger))
+            {
+                DynamicBuffer<PathElement> pathElements = EntityManager.GetBuffer<PathElement>(passenger);
+                pathElementCount = pathElements.Length;
+                if (pathElements.Length > 0)
+                {
+                    int safeIndex = Math.Min(Math.Max(pathIndex, 0), pathElements.Length - 1);
+                    nextTargetEntity = pathElements[safeIndex].m_Target;
+                }
+            }
+
+            FollowUpTargetInfo targetInfo = ResolveFollowUpTarget(nextTargetEntity, transportType);
+
+            FollowUpOutcome outcome;
+            string outcomeLabel;
+            string hint;
+            if (currentVehicle != Entity.Null)
+            {
+                outcome = currentVehicle == missedVehicle
+                    ? FollowUpOutcome.SameVehicle
+                    : FollowUpOutcome.DifferentVehicle;
+                outcomeLabel = currentVehicle == missedVehicle
+                    ? "same vehicle"
+                    : "different vehicle";
+                hint = "assigned";
+            }
+            else if (pathElementCount > 0)
+            {
+                outcome = FollowUpOutcome.HasPathNotAssignedYet;
+                outcomeLabel = "has path, not assigned yet";
+                hint = "has path";
+            }
+            else
+            {
+                outcome = FollowUpOutcome.Other;
+                outcomeLabel = "no path yet";
+                hint = "no path yet";
+            }
+
+            return new FollowUpSnapshot(
+                outcome,
+                outcomeLabel,
+                currentVehicle,
+                currentVehicleFlags,
+                pathElementCount,
+                pathIndex,
+                nextTargetEntity,
+                targetInfo.NextWaypointEntity,
+                targetInfo.NextStopEntity,
+                targetInfo.NextStopName,
+                targetInfo.NextLineEntity,
+                targetInfo.NextLineName,
+                hint);
         }
 
         private MonthlyPassengerTotals BuildMonthlyPassengerTotals()
@@ -808,6 +1018,75 @@ namespace FastBoarding
             return IsGenericLineToolName(debugName)
                 ? string.Empty
                 : debugName;
+        }
+
+        private FollowUpTargetInfo ResolveFollowUpTarget(Entity nextTargetEntity, TransportType transportType)
+        {
+            if (nextTargetEntity == Entity.Null || !EntityManager.Exists(nextTargetEntity))
+            {
+                return default;
+            }
+
+            Entity waypointEntity = Entity.Null;
+            Entity stopEntity = Entity.Null;
+            Entity lineEntity = Entity.Null;
+
+            Entity current = nextTargetEntity;
+            for (int depth = 0; depth < 6; depth++)
+            {
+                if (current == Entity.Null || !EntityManager.Exists(current))
+                {
+                    break;
+                }
+
+                if (EntityManager.HasComponent<Connected>(current))
+                {
+                    waypointEntity = waypointEntity == Entity.Null ? current : waypointEntity;
+                    Entity connectedStop = EntityManager.GetComponentData<Connected>(current).m_Connected;
+                    if (connectedStop != Entity.Null)
+                    {
+                        stopEntity = connectedStop;
+                    }
+                }
+
+                if (lineEntity == Entity.Null && TryGetTransportType(current, out _))
+                {
+                    lineEntity = current;
+                }
+
+                if (!EntityManager.HasComponent<Owner>(current))
+                {
+                    break;
+                }
+
+                current = EntityManager.GetComponentData<Owner>(current).m_Owner;
+            }
+
+            string stopName = stopEntity != Entity.Null
+                ? ResolveStopName(stopEntity, transportType)
+                : string.Empty;
+
+            if (string.IsNullOrWhiteSpace(stopName))
+            {
+                string targetName = m_NameSystem.GetRenderedLabelName(nextTargetEntity);
+                if (string.IsNullOrWhiteSpace(targetName))
+                {
+                    targetName = m_NameSystem.GetDebugName(nextTargetEntity);
+                }
+
+                stopName = SimplifyStopName(targetName, transportType);
+            }
+
+            string lineName = lineEntity != Entity.Null
+                ? ResolveLineName(lineEntity)
+                : string.Empty;
+
+            return new FollowUpTargetInfo(
+                waypointEntity,
+                stopEntity,
+                stopName,
+                lineEntity,
+                lineName);
         }
 
         private static bool IsGenericLineToolName(string name)

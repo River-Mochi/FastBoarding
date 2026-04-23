@@ -81,7 +81,7 @@ namespace FastBoarding
 
         private struct FollowUpSample
         {
-            public FollowUpSample(TransportType transportType, Entity vehicle, Entity passenger, uint frame)
+            public FollowUpSample(TransportType transportType, Entity vehicle, Entity passenger, uint frame, DateTime localTime)
             {
                 Active = true;
                 Logged = false;
@@ -89,6 +89,7 @@ namespace FastBoarding
                 Vehicle = vehicle;
                 Passenger = passenger;
                 Frame = frame;
+                LocalTime = localTime;
             }
 
             public bool Active;
@@ -102,6 +103,8 @@ namespace FastBoarding
             public Entity Passenger;
 
             public uint Frame;
+
+            public DateTime LocalTime;
         }
 
         public override int GetUpdateInterval(SystemUpdatePhase phase)
@@ -468,7 +471,7 @@ namespace FastBoarding
             }
 
             m_FollowUpSamples[slot] =
-                new FollowUpSample(sample.TransportType, sample.Vehicle, sample.Passenger, frame);
+                new FollowUpSample(sample.TransportType, sample.Vehicle, sample.Passenger, frame, DateTime.Now);
 
             if (m_FollowUpCount < m_FollowUpSamples.Length)
             {
@@ -501,6 +504,7 @@ namespace FastBoarding
                 return;
             }
 
+            TransitWaitStatusSystem followUpStatusSystem = World.GetOrCreateSystemManaged<TransitWaitStatusSystem>();
             int loggedThisUpdate = 0;
             for (int i = 0; i < m_FollowUpCount; i++)
             {
@@ -515,10 +519,9 @@ namespace FastBoarding
                     continue;
                 }
 
-                uint elapsedFrames = frame >= sample.Frame
-                    ? frame - sample.Frame
-                    : uint.MaxValue;
-                if (elapsedFrames < FollowUpDelayFrames)
+                if ((frame >= sample.Frame
+                        ? frame - sample.Frame
+                        : uint.MaxValue) < FollowUpDelayFrames)
                 {
                     continue;
                 }
@@ -528,60 +531,46 @@ namespace FastBoarding
                 m_FollowUpSamples[i] = sample;
                 loggedThisUpdate++;
 
+                DateTime followUpLocalTime = DateTime.Now;
+                TransitWaitStatusSystem.FollowUpSnapshot followUpSnapshot =
+                    followUpStatusSystem.BuildLateBoarderFollowUpSnapshot(
+                        sample.Passenger,
+                        sample.TransportType,
+                        sample.Vehicle);
+                TransitWaitStatus.RecordLateBoarderFollowUp(
+                    World,
+                    sample.TransportType,
+                    sample.Vehicle,
+                    sample.Passenger,
+                    sample.LocalTime,
+                    followUpLocalTime,
+                    followUpSnapshot);
+
                 LogUtils.Info(
                     Mod.s_Log,
-                    () => $"Skipped Late Passenger: {sample.TransportType}, cim={sample.Passenger}, missed={sample.Vehicle}, +{elapsedFrames}f, {DescribePassengerState(sample.Passenger)}");
+                    () => $"Skipped Late Passenger: {sample.TransportType} | outcome {followUpSnapshot.OutcomeLabel} | cim={sample.Passenger} | missed={sample.Vehicle} | skipped={sample.LocalTime:HH:mm:ss} | followUp={followUpLocalTime:HH:mm:ss} | nowVehicle={followUpSnapshot.CurrentVehicleText} | nextStop={DescribeFollowUpStop(followUpSnapshot)} | nextWaypoint={EntityText(followUpSnapshot.NextWaypointEntity)} | nextLine={DescribeFollowUpLine(followUpSnapshot)}");
             }
-        }
-
-        private string DescribePassengerState(Entity passenger)
-        {
-            if (passenger == Entity.Null || !EntityManager.Exists(passenger))
-            {
-                return "state=entity missing";
-            }
-
-            if (EntityManager.HasComponent<Deleted>(passenger) ||
-                EntityManager.HasComponent<Destroyed>(passenger))
-            {
-                return "state=deleted/destroyed";
-            }
-
-            string currentVehicleText = "none";
-            if (EntityManager.HasComponent<CurrentVehicle>(passenger))
-            {
-                CurrentVehicle currentVehicle = EntityManager.GetComponentData<CurrentVehicle>(passenger);
-                currentVehicleText = $"{currentVehicle.m_Vehicle} ({currentVehicle.m_Flags})";
-            }
-
-            DynamicBuffer<PathElement> pathElements = default;
-            bool hasPathBuffer = EntityManager.HasBuffer<PathElement>(passenger);
-            int pathCount = hasPathBuffer
-                ? EntityManager.GetBuffer<PathElement>(passenger).Length
-                : -1;
-            int pathIndex = EntityManager.HasComponent<PathOwner>(passenger)
-                ? EntityManager.GetComponentData<PathOwner>(passenger).m_ElementIndex
-                : -1;
-            Entity nextPathTarget = Entity.Null;
-            if (hasPathBuffer && pathCount > 0)
-            {
-                pathElements = EntityManager.GetBuffer<PathElement>(passenger);
-                int safeIndex = Math.Min(Math.Max(pathIndex, 0), pathCount - 1);
-                nextPathTarget = pathElements[safeIndex].m_Target;
-            }
-
-            string hint = currentVehicleText != "none"
-                ? "assigned"
-                : pathCount > 0
-                    ? "has path"
-                    : "no path yet";
-
-            return $"currentVehicle={currentVehicleText}, pathElements={pathCount}, pathIndex={pathIndex}, nextTarget={EntityText(nextPathTarget)}, hint={hint}";
         }
 
         private static string EntityText(Entity entity)
         {
             return entity == Entity.Null ? "none" : entity.ToString();
+        }
+
+        private static string DescribeFollowUpStop(TransitWaitStatusSystem.FollowUpSnapshot snapshot)
+        {
+            string stopName = string.IsNullOrWhiteSpace(snapshot.NextStopName)
+                ? "(unknown)"
+                : snapshot.NextStopName;
+            return $"{stopName} {EntityText(snapshot.NextStopEntity)}";
+        }
+
+        private static string DescribeFollowUpLine(TransitWaitStatusSystem.FollowUpSnapshot snapshot)
+        {
+            string lineName = string.IsNullOrWhiteSpace(snapshot.NextLineName)
+                ? "(unknown)"
+                : snapshot.NextLineName;
+            return $"{lineName} {EntityText(snapshot.NextLineEntity)}";
         }
 
         private static bool ShouldLogDiagnostics()

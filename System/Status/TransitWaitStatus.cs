@@ -81,6 +81,13 @@ namespace FastBoarding
         private static long s_FerryLateBoardersToday;
         private static long s_AirLateBoardersToday;
         private static DateTime s_LastSnapshotLocalTime;
+        private static FollowUpOutcomeCounts s_BusFollowUpOutcomes;
+        private static FollowUpOutcomeCounts s_TrainFollowUpOutcomes;
+        private static FollowUpOutcomeCounts s_TramFollowUpOutcomes;
+        private static FollowUpOutcomeCounts s_SubwayFollowUpOutcomes;
+        private static FollowUpOutcomeCounts s_ShipFollowUpOutcomes;
+        private static FollowUpOutcomeCounts s_FerryFollowUpOutcomes;
+        private static FollowUpOutcomeCounts s_AirFollowUpOutcomes;
         private static readonly SkippedPassengerSampleRing s_BusSkippedSamples = new SkippedPassengerSampleRing();
         private static readonly SkippedPassengerSampleRing s_TrainSkippedSamples = new SkippedPassengerSampleRing();
         private static readonly SkippedPassengerSampleRing s_TramSkippedSamples = new SkippedPassengerSampleRing();
@@ -88,6 +95,13 @@ namespace FastBoarding
         private static readonly SkippedPassengerSampleRing s_ShipSkippedSamples = new SkippedPassengerSampleRing();
         private static readonly SkippedPassengerSampleRing s_FerrySkippedSamples = new SkippedPassengerSampleRing();
         private static readonly SkippedPassengerSampleRing s_AirSkippedSamples = new SkippedPassengerSampleRing();
+        private static readonly LateBoarderFollowUpSampleRing s_BusFollowUpSamples = new LateBoarderFollowUpSampleRing();
+        private static readonly LateBoarderFollowUpSampleRing s_TrainFollowUpSamples = new LateBoarderFollowUpSampleRing();
+        private static readonly LateBoarderFollowUpSampleRing s_TramFollowUpSamples = new LateBoarderFollowUpSampleRing();
+        private static readonly LateBoarderFollowUpSampleRing s_SubwayFollowUpSamples = new LateBoarderFollowUpSampleRing();
+        private static readonly LateBoarderFollowUpSampleRing s_ShipFollowUpSamples = new LateBoarderFollowUpSampleRing();
+        private static readonly LateBoarderFollowUpSampleRing s_FerryFollowUpSamples = new LateBoarderFollowUpSampleRing();
+        private static readonly LateBoarderFollowUpSampleRing s_AirFollowUpSamples = new LateBoarderFollowUpSampleRing();
 
         private readonly struct SkippedPassengerSample
         {
@@ -109,6 +123,95 @@ namespace FastBoarding
             public uint Frame { get; }
 
             public DateTime LocalTime { get; }
+        }
+
+        private readonly struct LateBoarderFollowUpSample
+        {
+            public LateBoarderFollowUpSample(
+                TransportType transportType,
+                Entity passenger,
+                Entity missedVehicle,
+                DateTime skippedLocalTime,
+                DateTime followUpLocalTime,
+                TransitWaitStatusSystem.FollowUpSnapshot snapshot)
+            {
+                TransportType = transportType;
+                Passenger = passenger;
+                MissedVehicle = missedVehicle;
+                SkippedLocalTime = skippedLocalTime;
+                FollowUpLocalTime = followUpLocalTime;
+                Outcome = snapshot.Outcome;
+                OutcomeLabel = snapshot.OutcomeLabel;
+                CurrentVehicle = snapshot.CurrentVehicle;
+                CurrentVehicleFlags = snapshot.CurrentVehicleFlags;
+                NextStopEntity = snapshot.NextStopEntity;
+                NextStopName = snapshot.NextStopName;
+                NextWaypointEntity = snapshot.NextWaypointEntity;
+                NextLineEntity = snapshot.NextLineEntity;
+                NextLineName = snapshot.NextLineName;
+            }
+
+            public TransportType TransportType { get; }
+
+            public Entity Passenger { get; }
+
+            public Entity MissedVehicle { get; }
+
+            public DateTime SkippedLocalTime { get; }
+
+            public DateTime FollowUpLocalTime { get; }
+
+            public TransitWaitStatusSystem.FollowUpOutcome Outcome { get; }
+
+            public string OutcomeLabel { get; }
+
+            public Entity CurrentVehicle { get; }
+
+            public CreatureVehicleFlags CurrentVehicleFlags { get; }
+
+            public Entity NextStopEntity { get; }
+
+            public string NextStopName { get; }
+
+            public Entity NextWaypointEntity { get; }
+
+            public Entity NextLineEntity { get; }
+
+            public string NextLineName { get; }
+
+            public string CurrentVehicleText => CurrentVehicle == Entity.Null
+                ? "none"
+                : $"{CurrentVehicle} ({CurrentVehicleFlags})";
+        }
+
+        private struct FollowUpOutcomeCounts
+        {
+            public int SameVehicle;
+
+            public int DifferentVehicle;
+
+            public int HasPathNotAssignedYet;
+
+            public int Other;
+
+            public void Record(TransitWaitStatusSystem.FollowUpOutcome outcome)
+            {
+                switch (outcome)
+                {
+                    case TransitWaitStatusSystem.FollowUpOutcome.SameVehicle:
+                        SameVehicle++;
+                        break;
+                    case TransitWaitStatusSystem.FollowUpOutcome.DifferentVehicle:
+                        DifferentVehicle++;
+                        break;
+                    case TransitWaitStatusSystem.FollowUpOutcome.HasPathNotAssignedYet:
+                        HasPathNotAssignedYet++;
+                        break;
+                    default:
+                        Other++;
+                        break;
+                }
+            }
         }
 
         private sealed class SkippedPassengerSampleRing
@@ -138,6 +241,39 @@ namespace FastBoarding
             }
 
             public SkippedPassengerSample GetNewest(int newestIndex)
+            {
+                int index = (m_NextIndex - 1 - newestIndex + m_Samples.Length) % m_Samples.Length;
+                return m_Samples[index];
+            }
+        }
+
+        private sealed class LateBoarderFollowUpSampleRing
+        {
+            private readonly LateBoarderFollowUpSample[] m_Samples =
+                new LateBoarderFollowUpSample[SkippedSampleCapacityPerMode];
+            private int m_Count;
+            private int m_NextIndex;
+
+            public int Count => m_Count;
+
+            public void Add(LateBoarderFollowUpSample sample)
+            {
+                m_Samples[m_NextIndex] = sample;
+                m_NextIndex = (m_NextIndex + 1) % m_Samples.Length;
+
+                if (m_Count < m_Samples.Length)
+                {
+                    m_Count++;
+                }
+            }
+
+            public void Clear()
+            {
+                m_Count = 0;
+                m_NextIndex = 0;
+            }
+
+            public LateBoarderFollowUpSample GetNewest(int newestIndex)
             {
                 int index = (m_NextIndex - 1 - newestIndex + m_Samples.Length) % m_Samples.Length;
                 return m_Samples[index];
@@ -295,13 +431,13 @@ namespace FastBoarding
                 AppendTesterHints(sb);
                 AppendSummaryReport(sb, snapshot);
 
-                AppendFamilyReport(sb, world, "Bus", snapshot.Bus, s_BusLateBoardersToday, s_BusSkippedSamples);
-                AppendFamilyReport(sb, world, "Tram", snapshot.Tram, s_TramLateBoardersToday, s_TramSkippedSamples);
-                AppendFamilyReport(sb, world, "Train", snapshot.Train, s_TrainLateBoardersToday, s_TrainSkippedSamples);
-                AppendFamilyReport(sb, world, "Subway", snapshot.Subway, s_SubwayLateBoardersToday, s_SubwaySkippedSamples);
-                AppendFamilyReport(sb, world, "Ferry", snapshot.Ferry, s_FerryLateBoardersToday, s_FerrySkippedSamples);
-                AppendFamilyReport(sb, world, "Ship", snapshot.Ship, s_ShipLateBoardersToday, s_ShipSkippedSamples);
-                AppendFamilyReport(sb, world, "Airplane", snapshot.Air, s_AirLateBoardersToday, s_AirSkippedSamples);
+                AppendFamilyReport(sb, "Bus", snapshot.Bus, s_BusLateBoardersToday, s_BusSkippedSamples, s_BusFollowUpOutcomes, s_BusFollowUpSamples);
+                AppendFamilyReport(sb, "Tram", snapshot.Tram, s_TramLateBoardersToday, s_TramSkippedSamples, s_TramFollowUpOutcomes, s_TramFollowUpSamples);
+                AppendFamilyReport(sb, "Train", snapshot.Train, s_TrainLateBoardersToday, s_TrainSkippedSamples, s_TrainFollowUpOutcomes, s_TrainFollowUpSamples);
+                AppendFamilyReport(sb, "Subway", snapshot.Subway, s_SubwayLateBoardersToday, s_SubwaySkippedSamples, s_SubwayFollowUpOutcomes, s_SubwayFollowUpSamples);
+                AppendFamilyReport(sb, "Ferry", snapshot.Ferry, s_FerryLateBoardersToday, s_FerrySkippedSamples, s_FerryFollowUpOutcomes, s_FerryFollowUpSamples);
+                AppendFamilyReport(sb, "Ship", snapshot.Ship, s_ShipLateBoardersToday, s_ShipSkippedSamples, s_ShipFollowUpOutcomes, s_ShipFollowUpSamples);
+                AppendFamilyReport(sb, "Airplane", snapshot.Air, s_AirLateBoardersToday, s_AirSkippedSamples, s_AirFollowUpOutcomes, s_AirFollowUpSamples);
 
                 AppendDivider(sb);
 
@@ -370,6 +506,28 @@ namespace FastBoarding
             uint frame = world.GetExistingSystemManaged<SimulationSystem>()?.frameIndex ?? 0;
             GetSkippedSampleRing(transportType).Add(
                 new SkippedPassengerSample(transportType, vehicle, passenger, frame, DateTime.Now));
+        }
+
+        internal static void RecordLateBoarderFollowUp(
+            World world,
+            TransportType transportType,
+            Entity missedVehicle,
+            Entity passenger,
+            DateTime skippedLocalTime,
+            DateTime followUpLocalTime,
+            TransitWaitStatusSystem.FollowUpSnapshot snapshot)
+        {
+            EnsureCounterDay(world);
+
+            RecordFollowUpOutcome(transportType, snapshot.Outcome);
+            GetFollowUpSampleRing(transportType).Add(
+                new LateBoarderFollowUpSample(
+                    transportType,
+                    passenger,
+                    missedVehicle,
+                    skippedLocalTime,
+                    followUpLocalTime,
+                    snapshot));
         }
 
         private static string FormatFamily(TransitWaitStatusSystem.FamilySnapshot family, long lateBoardersCanceledToday)
@@ -448,11 +606,12 @@ namespace FastBoarding
 
         private static void AppendFamilyReport(
             StringBuilder sb,
-            World world,
             string label,
             TransitWaitStatusSystem.FamilySnapshot family,
             long lateBoardersCanceledToday,
-            SkippedPassengerSampleRing skippedSamples)
+            SkippedPassengerSampleRing skippedSamples,
+            FollowUpOutcomeCounts followUpOutcomes,
+            LateBoarderFollowUpSampleRing followUpSamples)
         {
             sb.AppendLine();
             AppendSectionHeader(sb, FormatReport(KeyReportFamilyHeader, "{0}", label));
@@ -472,6 +631,7 @@ namespace FastBoarding
                 sb,
                 "Late groups not skipped",
                 $"{LocaleUtils.FormatN0(family.LateGroupPassengers)} passengers | {LocaleUtils.FormatN0(family.LateGroupGroups)} groups | {LocaleUtils.FormatN0(family.LateGroupVehicles)} vehicles");
+            AppendField(sb, "Follow-up outcomes (verbose)", FormatFollowUpOutcomes(followUpOutcomes));
 
             if (family.WaitingPassengers <= 0)
             {
@@ -482,7 +642,7 @@ namespace FastBoarding
                 AppendTopWorstStops(sb, family);
             }
 
-            AppendSkippedPassengerSamples(sb, world, skippedSamples);
+            AppendSkippedPassengerSamples(sb, skippedSamples, followUpSamples);
         }
 
         private static void AppendTopWorstStops(StringBuilder sb, TransitWaitStatusSystem.FamilySnapshot family)
@@ -510,11 +670,27 @@ namespace FastBoarding
 
         private static void AppendSkippedPassengerSamples(
             StringBuilder sb,
-            World world,
-            SkippedPassengerSampleRing skippedSamples)
+            SkippedPassengerSampleRing skippedSamples,
+            LateBoarderFollowUpSampleRing followUpSamples)
         {
             sb.AppendLine();
-            AppendSubHeader(sb, Localize(KeyReportLastSkippedSamplesHeader, "Skipped solo Late cim examples at this CURRENT time"));
+            AppendSubHeader(sb, "Skipped solo Late cim follow-up examples");
+
+            if (followUpSamples.Count > 0)
+            {
+                for (int i = 0; i < followUpSamples.Count; i++)
+                {
+                    LateBoarderFollowUpSample sample = followUpSamples.GetNewest(i);
+                    sb.AppendLine(
+                        $"{LocaleUtils.FormatN0(i + 1)}. {sample.TransportType} | outcome {sample.OutcomeLabel} | passenger {EntityText(sample.Passenger)} | missed vehicle {EntityText(sample.MissedVehicle)} | skipped {sample.SkippedLocalTime:HH:mm:ss} | follow-up {sample.FollowUpLocalTime:HH:mm:ss}");
+                    sb.AppendLine(
+                        $"   now vehicle {sample.CurrentVehicleText} | next stop {TextOrUnknown(sample.NextStopName)} {EntityText(sample.NextStopEntity)}");
+                    sb.AppendLine(
+                        $"   next waypoint {EntityText(sample.NextWaypointEntity)} | next line {TextOrUnknown(sample.NextLineName)} {EntityText(sample.NextLineEntity)}");
+                }
+
+                return;
+            }
 
             if (skippedSamples.Count == 0)
             {
@@ -522,76 +698,13 @@ namespace FastBoarding
                 return;
             }
 
+            sb.AppendLine("No verbose follow-up recorded yet. Leave verbose logging on a little longer after skips.");
             for (int i = 0; i < skippedSamples.Count; i++)
             {
                 SkippedPassengerSample sample = skippedSamples.GetNewest(i);
-                sb.AppendLine(LocaleUtils.SafeFormat(
-                    KeyReportLastSkippedSampleLine,
-                    "{0}. {1} | passenger {2} | missed vehicle {3} | time {4} | now {5}",
-                    LocaleUtils.FormatN0(i + 1),
-                    sample.TransportType,
-                    EntityText(sample.Passenger),
-                    EntityText(sample.Vehicle),
-                    sample.LocalTime.ToString("HH:mm:ss"),
-                    FormatPassengerState(world, sample.Passenger)));
+                sb.AppendLine(
+                    $"{LocaleUtils.FormatN0(i + 1)}. {sample.TransportType} | passenger {EntityText(sample.Passenger)} | missed vehicle {EntityText(sample.Vehicle)} | skipped {sample.LocalTime:HH:mm:ss}");
             }
-        }
-
-        private static string FormatPassengerState(World world, Entity passenger)
-        {
-            if (world == null || !world.IsCreated || passenger == Entity.Null)
-            {
-                return "unknown";
-            }
-
-            EntityManager entityManager = world.EntityManager;
-            if (!entityManager.Exists(passenger))
-            {
-                return "entity missing";
-            }
-
-            if (entityManager.HasComponent<Deleted>(passenger) ||
-                entityManager.HasComponent<Destroyed>(passenger))
-            {
-                return "deleted/destroyed";
-            }
-
-            bool hasCurrentVehicle = entityManager.HasComponent<CurrentVehicle>(passenger);
-            Entity currentVehicle = Entity.Null;
-            CreatureVehicleFlags vehicleFlags = default;
-            if (hasCurrentVehicle)
-            {
-                CurrentVehicle currentVehicleData = entityManager.GetComponentData<CurrentVehicle>(passenger);
-                currentVehicle = currentVehicleData.m_Vehicle;
-                vehicleFlags = currentVehicleData.m_Flags;
-            }
-
-            bool hasPathBuffer = entityManager.HasBuffer<PathElement>(passenger);
-            int pathCount = hasPathBuffer
-                ? entityManager.GetBuffer<PathElement>(passenger).Length
-                : -1;
-            int pathIndex = entityManager.HasComponent<PathOwner>(passenger)
-                ? entityManager.GetComponentData<PathOwner>(passenger).m_ElementIndex
-                : -1;
-            Entity nextPathTarget = Entity.Null;
-            if (hasPathBuffer && pathCount > 0)
-            {
-                DynamicBuffer<PathElement> pathElements = entityManager.GetBuffer<PathElement>(passenger);
-                int safeIndex = Math.Min(Math.Max(pathIndex, 0), pathCount - 1);
-                nextPathTarget = pathElements[safeIndex].m_Target;
-            }
-
-            string vehicleText = hasCurrentVehicle
-                ? $"{EntityText(currentVehicle)} ({vehicleFlags})"
-                : "none";
-
-            string hint = hasCurrentVehicle
-                ? "assigned"
-                : pathCount > 0
-                    ? "has path"
-                    : "no path yet";
-
-            return $"currentVehicle {vehicleText}; pathElements {pathCount}; pathIndex {pathIndex}; nextTarget {EntityText(nextPathTarget)}; hint {hint}";
         }
 
         private static SkippedPassengerSampleRing GetSkippedSampleRing(TransportType transportType)
@@ -614,6 +727,82 @@ namespace FastBoarding
                     return s_AirSkippedSamples;
                 default:
                     return s_BusSkippedSamples;
+            }
+        }
+
+        private static LateBoarderFollowUpSampleRing GetFollowUpSampleRing(TransportType transportType)
+        {
+            switch (transportType)
+            {
+                case TransportType.Bus:
+                    return s_BusFollowUpSamples;
+                case TransportType.Train:
+                    return s_TrainFollowUpSamples;
+                case TransportType.Tram:
+                    return s_TramFollowUpSamples;
+                case TransportType.Subway:
+                    return s_SubwayFollowUpSamples;
+                case TransportType.Ship:
+                    return s_ShipFollowUpSamples;
+                case TransportType.Ferry:
+                    return s_FerryFollowUpSamples;
+                case TransportType.Airplane:
+                    return s_AirFollowUpSamples;
+                default:
+                    return s_BusFollowUpSamples;
+            }
+        }
+
+        private static FollowUpOutcomeCounts GetFollowUpOutcomeCounts(TransportType transportType)
+        {
+            switch (transportType)
+            {
+                case TransportType.Bus:
+                    return s_BusFollowUpOutcomes;
+                case TransportType.Train:
+                    return s_TrainFollowUpOutcomes;
+                case TransportType.Tram:
+                    return s_TramFollowUpOutcomes;
+                case TransportType.Subway:
+                    return s_SubwayFollowUpOutcomes;
+                case TransportType.Ship:
+                    return s_ShipFollowUpOutcomes;
+                case TransportType.Ferry:
+                    return s_FerryFollowUpOutcomes;
+                case TransportType.Airplane:
+                    return s_AirFollowUpOutcomes;
+                default:
+                    return s_BusFollowUpOutcomes;
+            }
+        }
+
+        private static void RecordFollowUpOutcome(
+            TransportType transportType,
+            TransitWaitStatusSystem.FollowUpOutcome outcome)
+        {
+            switch (transportType)
+            {
+                case TransportType.Bus:
+                    s_BusFollowUpOutcomes.Record(outcome);
+                    break;
+                case TransportType.Train:
+                    s_TrainFollowUpOutcomes.Record(outcome);
+                    break;
+                case TransportType.Tram:
+                    s_TramFollowUpOutcomes.Record(outcome);
+                    break;
+                case TransportType.Subway:
+                    s_SubwayFollowUpOutcomes.Record(outcome);
+                    break;
+                case TransportType.Ship:
+                    s_ShipFollowUpOutcomes.Record(outcome);
+                    break;
+                case TransportType.Ferry:
+                    s_FerryFollowUpOutcomes.Record(outcome);
+                    break;
+                case TransportType.Airplane:
+                    s_AirFollowUpOutcomes.Record(outcome);
+                    break;
             }
         }
 
@@ -644,6 +833,29 @@ namespace FastBoarding
 
             sb.Append(": ");
             sb.AppendLine(value);
+        }
+
+        private static string FormatFollowUpOutcomes(FollowUpOutcomeCounts counts)
+        {
+            if (counts.SameVehicle == 0 &&
+                counts.DifferentVehicle == 0 &&
+                counts.HasPathNotAssignedYet == 0 &&
+                counts.Other == 0)
+            {
+                return "none recorded yet";
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append(LocaleUtils.FormatN0(counts.SameVehicle)).Append(" same vehicle");
+            sb.Append(" | ").Append(LocaleUtils.FormatN0(counts.DifferentVehicle)).Append(" different vehicle");
+            sb.Append(" | ").Append(LocaleUtils.FormatN0(counts.HasPathNotAssignedYet)).Append(" has path, not assigned yet");
+
+            if (counts.Other > 0)
+            {
+                sb.Append(" | ").Append(LocaleUtils.FormatN0(counts.Other)).Append(" other");
+            }
+
+            return sb.ToString();
         }
 
         private static string EntityText(Entity entity)
@@ -721,6 +933,13 @@ namespace FastBoarding
             s_ShipLateBoardersToday = 0;
             s_FerryLateBoardersToday = 0;
             s_AirLateBoardersToday = 0;
+            s_BusFollowUpOutcomes = default;
+            s_TrainFollowUpOutcomes = default;
+            s_TramFollowUpOutcomes = default;
+            s_SubwayFollowUpOutcomes = default;
+            s_ShipFollowUpOutcomes = default;
+            s_FerryFollowUpOutcomes = default;
+            s_AirFollowUpOutcomes = default;
             s_BusSkippedSamples.Clear();
             s_TrainSkippedSamples.Clear();
             s_TramSkippedSamples.Clear();
@@ -728,6 +947,13 @@ namespace FastBoarding
             s_ShipSkippedSamples.Clear();
             s_FerrySkippedSamples.Clear();
             s_AirSkippedSamples.Clear();
+            s_BusFollowUpSamples.Clear();
+            s_TrainFollowUpSamples.Clear();
+            s_TramFollowUpSamples.Clear();
+            s_SubwayFollowUpSamples.Clear();
+            s_ShipFollowUpSamples.Clear();
+            s_FerryFollowUpSamples.Clear();
+            s_AirFollowUpSamples.Clear();
         }
 
         private static string Localize(string entryId, string fallback) => LocaleUtils.Localize(entryId, fallback);
