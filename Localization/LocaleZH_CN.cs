@@ -183,8 +183,8 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportTopWorstStopsHeader, "平均等待最差的前 {0} 个站点：" },
                 { TransitWaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | 平均 {2} | 等待 {3} | 站点 {4} | 路径点 {5} | 线路 {6} | 提示 {7}" },
                 { TransitWaitStatus.KeyReportLateGroups, "未跳过的迟到群组：{0} 名乘客，{1} 个群组，{2} 辆车" },
-                { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "被跳过的单独市民示例" },
-                { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | 乘客 {2} | 车辆 {3} | 帧 {4} | 时间 {5} | 当前 {6}" },
+                { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "此当前时刻被跳过的迟到单独市民示例" },
+                { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | 乘客 {2} | 错过车辆 {3} | 时间 {4} | 当前 {5}" },
                 { TransitWaitStatus.KeyReportNone, "无" },
                 { TransitWaitStatus.KeyReportUnknown, "（未知）" },
 

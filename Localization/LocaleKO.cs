@@ -183,8 +183,8 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportTopWorstStopsHeader, "평균 대기 기준 최악 정류장 상위 {0}개:" },
                 { TransitWaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | 평균 {2} | 대기 {3} | 정류장 {4} | 웨이포인트 {5} | 노선 {6} | 힌트 {7}" },
                 { TransitWaitStatus.KeyReportLateGroups, "그대로 둔 늦은 그룹 승객: {0}명, {1}그룹, 차량 {2}대" },
-                { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "스킵된 혼자 이동 시민 예시" },
-                { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | 승객 {2} | 차량 {3} | 프레임 {4} | 시간 {5} | 현재 {6}" },
+                { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "현재 시점에 스킵된 늦은 혼자 이동 시민 예시" },
+                { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | 승객 {2} | 놓친 차량 {3} | 시간 {4} | 현재 {5}" },
                 { TransitWaitStatus.KeyReportNone, "없음" },
                 { TransitWaitStatus.KeyReportUnknown, "(알 수 없음)" },
 

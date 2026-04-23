@@ -185,7 +185,7 @@ namespace FastBoarding
 
         public static string DescribeVerboseForLog(bool enabled)
         {
-            return $"Verbose log [x] {enabled.ToString().ToLowerInvariant()}, {DescribeForLog()}";
+            return $"Options Settings: Verbose log Enabled [x] {enabled.ToString().ToLowerInvariant()}";
         }
 
         private static int ClampSpeedFactor(int value)

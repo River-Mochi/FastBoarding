@@ -183,8 +183,8 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportTopWorstStopsHeader, "平均待ち時間が最悪の停留所トップ {0}:" },
                 { TransitWaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | 平均 {2} | 待機 {3} | 停留所 {4} | ウェイポイント {5} | 路線 {6} | ヒント {7}" },
                 { TransitWaitStatus.KeyReportLateGroups, "残した遅れグループ乗客: {0}人、{1}グループ、{2}台の車両" },
-                { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "スキップされた単独シム例" },
-                { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | 乗客 {2} | 車両 {3} | フレーム {4} | 時刻 {5} | 現在 {6}" },
+                { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "この現在時点でスキップされた遅れ単独シム例" },
+                { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | 乗客 {2} | 乗り遅れた車両 {3} | 時刻 {4} | 現在 {5}" },
                 { TransitWaitStatus.KeyReportNone, "なし" },
                 { TransitWaitStatus.KeyReportUnknown, "(不明)" },
 

@@ -53,6 +53,7 @@ namespace FastBoarding
         public const string KeyReportUnknown = "FB_REPORT_UNKNOWN";
 
         private const int ReportHeaderWidth = 60;
+        private const int ReportFieldWidth = 24;
         private const int SkippedSampleCapacityPerMode = 3;
 
         public static int RefreshIntervalSeconds { get; set; } = 15;
@@ -288,7 +289,7 @@ namespace FastBoarding
                 sb.AppendLine();
                 AppendSectionHeader(sb, Localize(KeyReportTitle, "Fast Boarding transit status report"));
                 AppendField(sb, "Snapshot updated", s_LastSnapshotLocalTime == default ? "unknown" : s_LastSnapshotLocalTime.ToString("HH:mm:ss"));
-                AppendField(sb, "Settings", BoardingRuntimeSettings.DescribeForLog());
+                AppendField(sb, "Options Settings", BoardingRuntimeSettings.DescribeForLog());
                 AppendField(sb, "Note", Localize(KeyReportNote, "Worst line is a hint from the highest-wait waypoint at the worst stop."));
 
                 AppendTesterHints(sb);
@@ -513,7 +514,7 @@ namespace FastBoarding
             SkippedPassengerSampleRing skippedSamples)
         {
             sb.AppendLine();
-            AppendSubHeader(sb, Localize(KeyReportLastSkippedSamplesHeader, "Skipped solo cim examples"));
+            AppendSubHeader(sb, Localize(KeyReportLastSkippedSamplesHeader, "Skipped solo Late cim examples at this CURRENT time"));
 
             if (skippedSamples.Count == 0)
             {
@@ -526,12 +527,11 @@ namespace FastBoarding
                 SkippedPassengerSample sample = skippedSamples.GetNewest(i);
                 sb.AppendLine(LocaleUtils.SafeFormat(
                     KeyReportLastSkippedSampleLine,
-                    "{0}. {1} | passenger {2} | vehicle {3} | frame {4} | time {5} | now {6}",
+                    "{0}. {1} | passenger {2} | missed vehicle {3} | time {4} | now {5}",
                     LocaleUtils.FormatN0(i + 1),
                     sample.TransportType,
                     EntityText(sample.Passenger),
                     EntityText(sample.Vehicle),
-                    sample.Frame,
                     sample.LocalTime.ToString("HH:mm:ss"),
                     FormatPassengerState(world, sample.Passenger)));
             }
@@ -566,12 +566,20 @@ namespace FastBoarding
                 vehicleFlags = currentVehicleData.m_Flags;
             }
 
-            int pathCount = entityManager.HasBuffer<PathElement>(passenger)
+            bool hasPathBuffer = entityManager.HasBuffer<PathElement>(passenger);
+            int pathCount = hasPathBuffer
                 ? entityManager.GetBuffer<PathElement>(passenger).Length
                 : -1;
             int pathIndex = entityManager.HasComponent<PathOwner>(passenger)
                 ? entityManager.GetComponentData<PathOwner>(passenger).m_ElementIndex
                 : -1;
+            Entity nextPathTarget = Entity.Null;
+            if (hasPathBuffer && pathCount > 0)
+            {
+                DynamicBuffer<PathElement> pathElements = entityManager.GetBuffer<PathElement>(passenger);
+                int safeIndex = Math.Min(Math.Max(pathIndex, 0), pathCount - 1);
+                nextPathTarget = pathElements[safeIndex].m_Target;
+            }
 
             string vehicleText = hasCurrentVehicle
                 ? $"{EntityText(currentVehicle)} ({vehicleFlags})"
@@ -583,7 +591,7 @@ namespace FastBoarding
                     ? "has path"
                     : "no path yet";
 
-            return $"currentVehicle {vehicleText}; path {pathCount} elems idx {pathIndex}; hint {hint}";
+            return $"currentVehicle {vehicleText}; pathElements {pathCount}; pathIndex {pathIndex}; nextTarget {EntityText(nextPathTarget)}; hint {hint}";
         }
 
         private static SkippedPassengerSampleRing GetSkippedSampleRing(TransportType transportType)
@@ -629,9 +637,9 @@ namespace FastBoarding
         private static void AppendField(StringBuilder sb, string label, string value)
         {
             sb.Append(label);
-            if (label.Length < 32)
+            if (label.Length < ReportFieldWidth)
             {
-                sb.Append('.', 32 - label.Length);
+                sb.Append('.', ReportFieldWidth - label.Length);
             }
 
             sb.Append(": ");

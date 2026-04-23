@@ -141,7 +141,9 @@ namespace FastBoarding
             // One log line per retune is debug info and should not spam during normal play.
             LogUtils.Info(
                 Mod.s_Log,
-                () => $"Applied stop tuning to {updatedPrefabs} transport stop prefabs. {BoardingRuntimeSettings.DescribeForLog()}");
+                () =>
+                    $"StopTuning applied: {updatedPrefabs} transport stop prefabs" + Environment.NewLine +
+                    $"Options Settings: {BoardingRuntimeSettings.DescribeForLog()}");
         }
 
         private void WakeLateBoarderSystemIfNeeded()

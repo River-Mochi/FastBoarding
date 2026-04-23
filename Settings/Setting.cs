@@ -252,13 +252,13 @@ namespace FastBoarding
 
             if ((changes & BoardingRuntimeChangeFlags.StopTuning) != 0)
             {
-                LogUtils.Info(Mod.s_Log, () => $"Settings applied: {BoardingRuntimeSettings.DescribeForLog()}");
+                LogUtils.Info(Mod.s_Log, () => $"Options Settings: {BoardingRuntimeSettings.DescribeForLog()}");
                 TryEnableStopTuningSystem();
             }
 
             if ((changes & BoardingRuntimeChangeFlags.LateBoarders) != 0)
             {
-                LogUtils.Info(Mod.s_Log, () => $"Late-cim skip [x] {CancelLateBoarders.ToString().ToLowerInvariant()}, {BoardingRuntimeSettings.DescribeForLog()}");
+                LogUtils.Info(Mod.s_Log, () => $"Options Settings: skipLateSoloCim={CancelLateBoarders}");
                 TrySetLateBoarderSystemEnabled(CancelLateBoarders);
             }
 
@@ -312,7 +312,7 @@ namespace FastBoarding
                 // SettingsUISetter gives us immediate live behavior without adding an Apply button.
                 LogUtils.Info(
                     Mod.s_Log,
-                    () => $"Late-cim skip [x] {value.ToString().ToLowerInvariant()}, {BoardingRuntimeSettings.DescribeForLog()}");
+                    () => $"Options Settings: skipLateSoloCim={value}");
                 TrySetLateBoarderSystemEnabled(value);
             }
         }

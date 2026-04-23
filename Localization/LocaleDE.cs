@@ -183,8 +183,8 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportTopWorstStopsHeader, "Top {0} schlimmste Halte nach durchschnittlicher Wartezeit:" },
                 { TransitWaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | durchschn. {2} | wartend {3} | Halt {4} | Waypoint {5} | Linie {6} | Hinweis {7}" },
                 { TransitWaitStatus.KeyReportLateGroups, "Späte Gruppen nicht übersprungen: {0} Passagiere in {1} Gruppen auf {2} Fahrzeugen" },
-                { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "Beispiele übersprungener Solo-Cims" },
-                { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | Passagier {2} | Fahrzeug {3} | Frame {4} | Zeit {5} | jetzt {6}" },
+                { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "Beispiele übersprungener später Solo-Cims zu diesem AKTUELLEN Zeitpunkt" },
+                { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | Passagier {2} | verpasstes Fahrzeug {3} | Zeit {4} | jetzt {5}" },
                 { TransitWaitStatus.KeyReportNone, "keine" },
                 { TransitWaitStatus.KeyReportUnknown, "(unbekannt)" },
 
