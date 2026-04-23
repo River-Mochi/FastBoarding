@@ -51,9 +51,14 @@ namespace FastBoarding
 
             return new Dictionary<string, string>
             {
+                // Options mod name
                 { m_Setting.GetSettingsLocaleID(), title },
+
+                // Tabs
                 { m_Setting.GetOptionTabLocaleID(Setting.ActionsTab), "操作" },
                 { m_Setting.GetOptionTabLocaleID(Setting.AboutTab), "关于" },
+
+                // Groups
                 { m_Setting.GetOptionGroupLocaleID(Setting.SpeedGroup), "上车速度" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.BehaviorGroup), "行为" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.StatusGroup), "状态" },
@@ -61,45 +66,63 @@ namespace FastBoarding
                 { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGroup), "链接" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.DebugGroup), "调试" },
 
+                // Boarding speed sliders
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.BusBoardingSpeedFactor)), "公交上车速度" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.BusBoardingSpeedFactor)),
                     "<1x = 原版>\n" +
                     "更高的值会缩短公交站的上车/装载时间。\n" +
-                    "这会让正常队列更快清空，但原版设计中迟到乘客仍可能拖延发车。\n" +
+                    "这会让正常队列更快清空，但由于原版设计，迟到乘客仍可能拖延发车。\n" +
                     "如果想让迟到的单独市民错过车辆，请启用 [✓] <让车辆不等迟到市民而离开>。\n" +
-                    "2x 约等于两倍上车速度。"
+                    "2x 约等于两倍上车速度。\n" +
+                    "技术说明：更高的 loading factor 表示计划停站时间更短，而 boarding time 更像是乘客侧等待/上车估算。\n" +
+                    "这不等同于强制车辆离开。"
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "轨道上车速度" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.RailBoardingSpeedFactor)),
                     "<1x = 原版>\n" +
                     "适用于火车、电车和地铁站。\n" +
-                    "更高的值会缩短上车/装载时间。\n" +
-                    "如果迟到的单独市民仍在拖延车辆，请启用 [✓] <让车辆不等迟到市民而离开>。"
+                    "更高的值会缩短轨道站的上车/装载时间。\n" +
+                    "这会让正常队列更快清空，但由于原版设计，迟到乘客仍可能拖延发车。\n" +
+                    "如果想让迟到的单独市民错过车辆，请启用 [✓] <让车辆不等迟到市民而离开>。\n" +
+                    "2x 约等于两倍上车速度。"
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "船舶 + 渡轮速度" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.WaterBoardingSpeedFactor)),
                     "<1x = 原版>\n" +
                     "适用于客船和渡轮站。\n" +
-                    "更高的值会缩短上车/装载时间。\n" +
-                    "如果迟到的单独市民仍在拖延车辆，请启用 [✓] <让车辆不等迟到市民而离开>。"
+                    "更高的值会缩短客船和渡轮站的上车/装载时间。\n" +
+                    "这会让正常队列更快清空，但由于原版设计，迟到乘客仍可能拖延发车。\n" +
+                    "如果想让迟到的单独市民错过车辆，请启用 [✓] <让车辆不等迟到市民而离开>。\n" +
+                    "2x 约等于两倍上车速度。"
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "飞机登机速度" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AirBoardingSpeedFactor)),
                     "<1x = 原版>\n" +
                     "适用于客运飞机航站楼。\n" +
-                    "更高的值会缩短登机/装载时间。\n" +
-                    "如果迟到的单独市民仍在拖延车辆，请启用 [✓] <让车辆不等迟到市民而离开>。"
+                    "更高的值会缩短飞机航站楼的登机/装载时间。\n" +
+                    "这会让正常队列更快清空，但由于原版设计，迟到乘客仍可能拖延发车。\n" +
+                    "如果想让迟到的单独市民错过车辆，请启用 [✓] <让车辆不等迟到市民而离开>。\n" +
+                    "2x 约等于两倍上车速度。"
                 },
+
+                // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "让车辆不等迟到市民而离开" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
                     "**实验性 BETA**\n" +
                     "单独出行的市民如果在原版发车时间后仍然<未准备好>，可以错过该车辆。\n" +
                     "注意：同行群组/家庭目前<不会被跳过>；它们仍可能像原版一样造成延误。\n" +
-                    "被跳过的市民不会被删除；之后由原版系统继续处理。"
+                    "即使只跳过单独出行者也有帮助，因为他们通常是站点的大多数乘客。\n" +
+                    "被跳过的迟到市民不会被删除；之后由原版系统继续分配他们。"
                 },
 
+                // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "总使用量" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)), "来自游戏交通信息视图的每月公共交通使用量。\n更新时间显示此状态快照的生成时间。" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)),
+                    "来自游戏交通信息视图的每月公共交通使用量。\n" +
+                    "更新时间显示此状态快照的生成时间。"
+                },
+
+                // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "公交" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusBus)), StatusDescription("公交") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusTram)), "电车" },
@@ -115,16 +138,26 @@ namespace FastBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusAir)), "飞机" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusAir)), StatusDescription("飞机") },
 
+                // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatsToLog)), "统计到日志" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)), "向 **FastBoarding.log** 写入一次详细报告。\n包括等待总数、每种交通的最差 3 个站点、被跳过市民示例和实体 ID。" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)),
+                    "向 **FastBoarding.log** 写入一次详细报告。\n" +
+                    "包括等待总数、每种交通的最差 3 个站点、被跳过市民示例和实体 ID。"
+                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenLog)), "打开日志" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)), "如果存在则打开 **FastBoarding.log**。\n如果找不到文件，则打开 Logs 文件夹。" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)),
+                    "如果存在则打开 **FastBoarding.log**。\n" +
+                    "如果找不到文件，则打开 Logs 文件夹。"
+                },
 
+                // Runtime status strings
                 { TransitWaitStatus.KeyStatusNotLoaded, "状态未加载。" },
                 { TransitWaitStatus.KeyNoCityLoaded, "未加载城市。" },
                 { TransitWaitStatus.KeyNoStopsFound, "未找到站点。" },
                 { TransitWaitStatus.KeyStatusLine, "{0} 等待 | 平均 {1} | 最差 {2} | {3} 跳过" },
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} 游客/月 | {1} 市民/月 | 更新 {2}" },
+
+                // Stats-to-log report strings
                 { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] 请求统计报告，但未加载城市。" },
                 { TransitWaitStatus.KeyReportTitle, "统计到日志快照 - Fast Boarding" },
                 { TransitWaitStatus.KeyReportSettings, "设置：{0}" },
@@ -155,14 +188,23 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportNone, "无" },
                 { TransitWaitStatus.KeyReportUnknown, "（未知）" },
 
+                // About
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "模组" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "此模组的显示名称。" },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "版本" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "当前模组版本。" },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "打开作者的 Paradox Mods 页面。" },
+
+                // Debug
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableVerboseLogging)), "启用详细日志" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)), "**仅调试/测试使用**\n城市运行时向 <FastBoarding.log> 添加实时诊断信息。\n**正常游戏时请勿启用。**\n保持开启可能降低性能并生成巨大的日志文件。" }
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)),
+                    "**仅调试/测试使用**\n" +
+                    "城市运行时向 <FastBoarding.log> 添加实时诊断信息。\n" +
+                    "**正常游戏时请勿启用。**\n" +
+                    "保持开启可能降低性能并生成巨大的日志文件。\n" +
+                    "之后可以删除旧日志文件。"
+                },
             };
         }
 

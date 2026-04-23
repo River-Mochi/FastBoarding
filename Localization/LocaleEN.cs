@@ -51,11 +51,14 @@ namespace FastBoarding
 
             return new Dictionary<string, string>
             {
+                // Options mod name
                 { m_Setting.GetSettingsLocaleID(), title },
 
+                // Tabs
                 { m_Setting.GetOptionTabLocaleID(Setting.ActionsTab), "Actions" },
                 { m_Setting.GetOptionTabLocaleID(Setting.AboutTab), "About" },
 
+                // Groups
                 { m_Setting.GetOptionGroupLocaleID(Setting.SpeedGroup), "Boarding speed" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.BehaviorGroup), "Behavior" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.StatusGroup), "Status" },
@@ -63,17 +66,17 @@ namespace FastBoarding
                 { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGroup), "Links" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.DebugGroup), "Debug" },
 
+                // Boarding speed sliders
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.BusBoardingSpeedFactor)), "Bus boarding speed" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.BusBoardingSpeedFactor)),
                     "<1x = vanilla>\n" +
                     "Higher values reduce bus stop boarding/loading time.\n" +
                     "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
                     "Use [✓] <Let vehicles leave without late cims> if you want solo late cims to miss the vehicle.\n" +
-                    "2x means ~double boarding speed.\n"+
-                    "Tech notes: higher loading factor means shorter planned stop duration, and boarding time is more like the passenger-side wait/boarding estimate.\n"+
+                    "2x means ~double boarding speed.\n" +
+                    "Tech notes: higher loading factor means shorter planned stop duration, and boarding time is more like the passenger-side wait/boarding estimate.\n" +
                     "This is not the same as forcing the vehicle to leave."
                 },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "Rail boarding speed" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.RailBoardingSpeedFactor)),
                     "<1x = vanilla>\n" +
@@ -83,7 +86,6 @@ namespace FastBoarding
                     "Use [✓] <Let vehicles leave without late cims> if you want solo late cims to miss the vehicle.\n" +
                     "2x means ~double boarding speed."
                 },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "Ship + ferry speed" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.WaterBoardingSpeedFactor)),
                     "<1x = vanilla>\n" +
@@ -93,7 +95,6 @@ namespace FastBoarding
                     "Use [✓] <Let vehicles leave without late cims> if you want solo late cims to miss the vehicle.\n" +
                     "2x means ~double boarding speed."
                 },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "Airplane speed" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AirBoardingSpeedFactor)),
                     "<1x = vanilla>\n" +
@@ -104,59 +105,59 @@ namespace FastBoarding
                     "2x means ~double boarding speed."
                 },
 
+                // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "Let vehicles leave without late cims" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
-                    "**BETA Experimental**\n" +
-                    "Late solo citizens who are still <not ready> after vanilla Departure time are allowed to miss the vehicle.\n" +
-                    "Note: Groups/families traveling together are <not skipped> yet; they can still cause some delays like vanilla.\n" +
-                    "Even solo-only skipping helps because solo travelers are usually the majority at transit stops.\n" +
+                    "**BETA**\n" +
+                    "Late passengers who are still <not ready> after vanilla Departure time are allowed to miss the vehicle.\n" +
+                    "Note: we only skip solo late citizens for now, so groups/families travelling together are <not skipped> and may still cause delays like in vanilla.\n" +     
+                    "Group travelers are a small number compared to many solo passengers.\n" +
                     "Skipped Late citizens are not deleted; vanilla systems continue from there to assign them."
                 },
 
+                // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "Total usage" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)),
                     "Monthly public transit usage from the game's Transportation infoview.\n" +
                     "Updated time shows when this status snapshot was taken (usually after entering Options menu)."
                 },
 
+                // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "Bus" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusBus)), StatusDescription("bus") },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusTram)), "Tram" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusTram)), StatusDescription("tram") },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusTrain)), "Train" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusTrain)), StatusDescription("train") },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSubway)), "Subway" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSubway)), StatusDescription("subway") },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusFerry)), "Ferry" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusFerry)), StatusDescription("ferry") },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusShip)), "Ship" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusShip)), StatusDescription("ship") },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusAir)), "Airplane" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusAir)), StatusDescription("airplane") },
 
+                // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatsToLog)), "Stats to Log" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)),
                     "Writes a detailed one-time report to **FastBoarding.log**.\n" +
                     "Includes waiting totals, top 3 worst stops per mode, skipped cim examples, entity IDs, and line hints."
                 },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenLog)), "Open Log" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)),
                     "Opens **FastBoarding.log** if it exists.\n" +
                     "If the file is not found yet, opens the Logs folder instead."
                 },
 
+                // Runtime status strings
                 { TransitWaitStatus.KeyStatusNotLoaded, "Status not loaded." },
                 { TransitWaitStatus.KeyNoCityLoaded, "No city loaded." },
                 { TransitWaitStatus.KeyNoStopsFound, "No stops found." },
                 { TransitWaitStatus.KeyStatusLine, "{0} wait | avg {1} | worst {2} | {3} skipped" },
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} tourist/mo | {1} citizens/mo | updated {2}" },
+
+                // Stats-to-log report strings
                 { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] Stats report requested, but no city is loaded." },
                 { TransitWaitStatus.KeyReportTitle, "Stats to Log snapshot - Fast Boarding" },
                 { TransitWaitStatus.KeyReportSettings, "Settings: {0}" },
@@ -187,15 +188,15 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportNone, "none" },
                 { TransitWaitStatus.KeyReportUnknown, "(unknown)" },
 
+                // About
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "Mod" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "Display name of this mod." },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "Version" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "Current mod version." },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "Opens the author's Paradox Mods page." },
 
+                // Debug
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableVerboseLogging)), "Enable verbose logging" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)),
                     "**Debug / testing only**\n" +
@@ -203,7 +204,7 @@ namespace FastBoarding
                     "**Do not enable for normal gameplay.**\n" +
                     "Leaving this on can decrease performance and create huge log files.\n" +
                     "You can delete old log files later."
-                }
+                },
             };
         }
 

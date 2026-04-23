@@ -51,9 +51,14 @@ namespace FastBoarding
 
             return new Dictionary<string, string>
             {
+                // Options mod name
                 { m_Setting.GetSettingsLocaleID(), title },
+
+                // Tabs
                 { m_Setting.GetOptionTabLocaleID(Setting.ActionsTab), "동작" },
                 { m_Setting.GetOptionTabLocaleID(Setting.AboutTab), "정보" },
+
+                // Groups
                 { m_Setting.GetOptionGroupLocaleID(Setting.SpeedGroup), "탑승 속도" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.BehaviorGroup), "동작 방식" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.StatusGroup), "상태" },
@@ -61,19 +66,63 @@ namespace FastBoarding
                 { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGroup), "링크" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.DebugGroup), "디버그" },
 
+                // Boarding speed sliders
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.BusBoardingSpeedFactor)), "버스 탑승 속도" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.BusBoardingSpeedFactor)), "<1x = 바닐라>\n값이 높을수록 버스 정류장의 탑승/적재 시간이 줄어듭니다.\n일반 대기열은 더 빨리 처리되지만, 바닐라 설계상 늦은 승객이 여전히 출발을 지연시킬 수 있습니다.\n혼자 이동하는 늦은 시민이 차량을 놓치게 하려면 [✓] <늦은 시민 없이 차량 출발 허용>을 사용하세요.\n2x는 대략 두 배 탑승 속도입니다." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.BusBoardingSpeedFactor)),
+                    "<1x = 바닐라>\n" +
+                    "값이 높을수록 버스 정류장의 탑승/적재 시간이 줄어듭니다.\n" +
+                    "일반 대기열은 더 빨리 처리되지만, 바닐라 설계상 늦은 승객이 여전히 출발을 지연시킬 수 있습니다.\n" +
+                    "혼자 이동하는 늦은 시민이 차량을 놓치게 하려면 [✓] <늦은 시민 없이 차량 출발 허용>을 사용하세요.\n" +
+                    "2x는 대략 두 배 탑승 속도입니다.\n" +
+                    "기술 메모: loading factor가 높을수록 계획된 정차 시간이 짧아지고, boarding time은 승객 측 대기/탑승 추정에 더 가깝습니다.\n" +
+                    "이것은 차량을 강제로 출발시키는 것과는 다릅니다."
+                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "철도 탑승 속도" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "<1x = 바닐라>\n기차, 트램, 지하철 정류장에 적용됩니다.\n값이 높을수록 탑승/적재 시간이 줄어듭니다.\n혼자 이동하는 늦은 시민이 계속 막고 있다면 [✓] <늦은 시민 없이 차량 출발 허용>을 사용하세요." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.RailBoardingSpeedFactor)),
+                    "<1x = 바닐라>\n" +
+                    "기차, 트램, 지하철 정류장에 적용됩니다.\n" +
+                    "값이 높을수록 철도 정류장의 탑승/적재 시간이 줄어듭니다.\n" +
+                    "일반 대기열은 더 빨리 처리되지만, 바닐라 설계상 늦은 승객이 여전히 출발을 지연시킬 수 있습니다.\n" +
+                    "혼자 이동하는 늦은 시민이 차량을 놓치게 하려면 [✓] <늦은 시민 없이 차량 출발 허용>을 사용하세요.\n" +
+                    "2x는 대략 두 배 탑승 속도입니다."
+                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "선박 + 페리 속도" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "<1x = 바닐라>\n선박과 페리 정류장에 적용됩니다.\n값이 높을수록 탑승/적재 시간이 줄어듭니다.\n혼자 이동하는 늦은 시민이 계속 막고 있다면 [✓] <늦은 시민 없이 차량 출발 허용>을 사용하세요." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.WaterBoardingSpeedFactor)),
+                    "<1x = 바닐라>\n" +
+                    "선박과 페리 정류장에 적용됩니다.\n" +
+                    "값이 높을수록 선박과 페리 정류장의 탑승/적재 시간이 줄어듭니다.\n" +
+                    "일반 대기열은 더 빨리 처리되지만, 바닐라 설계상 늦은 승객이 여전히 출발을 지연시킬 수 있습니다.\n" +
+                    "혼자 이동하는 늦은 시민이 차량을 놓치게 하려면 [✓] <늦은 시민 없이 차량 출발 허용>을 사용하세요.\n" +
+                    "2x는 대략 두 배 탑승 속도입니다."
+                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "비행기 탑승 속도" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "<1x = 바닐라>\n여객기 터미널에 적용됩니다.\n값이 높을수록 탑승/적재 시간이 줄어듭니다.\n혼자 이동하는 늦은 시민이 계속 막고 있다면 [✓] <늦은 시민 없이 차량 출발 허용>을 사용하세요." },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "늦은 시민 없이 차량 출발 허용" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)), "**실험적 베타**\n바닐라 출발 시간 이후에도 <준비 안 됨> 상태인 혼자 이동하는 시민은 그 차량을 놓칠 수 있습니다.\n참고: 함께 이동하는 그룹/가족은 아직 <스킵하지 않습니다>. 바닐라처럼 일부 지연을 일으킬 수 있습니다.\n스킵된 시민은 삭제되지 않으며, 이후 바닐라 시스템이 계속 처리합니다." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AirBoardingSpeedFactor)),
+                    "<1x = 바닐라>\n" +
+                    "여객기 터미널에 적용됩니다.\n" +
+                    "값이 높을수록 비행기 터미널의 탑승/적재 시간이 줄어듭니다.\n" +
+                    "일반 대기열은 더 빨리 처리되지만, 바닐라 설계상 늦은 승객이 여전히 출발을 지연시킬 수 있습니다.\n" +
+                    "혼자 이동하는 늦은 시민이 차량을 놓치게 하려면 [✓] <늦은 시민 없이 차량 출발 허용>을 사용하세요.\n" +
+                    "2x는 대략 두 배 탑승 속도입니다."
+                },
 
+                // Late passenger behavior
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "늦은 시민 없이 차량 출발 허용" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
+                    "**실험적 베타**\n" +
+                    "바닐라 출발 시간 이후에도 <준비 안 됨> 상태인 혼자 이동하는 시민은 그 차량을 놓칠 수 있습니다.\n" +
+                    "참고: 함께 이동하는 그룹/가족은 아직 <스킵하지 않습니다>. 바닐라처럼 일부 지연을 일으킬 수 있습니다.\n" +
+                    "혼자 이동하는 시민만 스킵해도 도움이 됩니다. 보통 정류장에서는 혼자 이동하는 승객이 대부분이기 때문입니다.\n" +
+                    "스킵된 늦은 시민은 삭제되지 않으며, 이후 바닐라 시스템이 다시 배정합니다."
+                },
+
+                // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "전체 이용량" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)), "게임 교통 정보 보기의 월간 대중교통 이용량입니다.\n업데이트 시간은 이 상태 스냅샷을 만든 시간입니다." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)),
+                    "게임 교통 정보 보기의 월간 대중교통 이용량입니다.\n" +
+                    "업데이트 시간은 이 상태 스냅샷을 만든 시간입니다."
+                },
+
+                // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "버스" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusBus)), StatusDescription("버스") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusTram)), "트램" },
@@ -89,16 +138,26 @@ namespace FastBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusAir)), "비행기" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusAir)), StatusDescription("비행기") },
 
+                // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatsToLog)), "Stats to Log" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)), "**FastBoarding.log**에 1회 상세 보고서를 씁니다.\n대기 총계, 모드별 최악 정류장 상위 3개, 스킵된 시민 예시, 엔티티 ID, 노선 힌트를 포함합니다." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)),
+                    "**FastBoarding.log**에 1회 상세 보고서를 씁니다.\n" +
+                    "대기 총계, 모드별 최악 정류장 상위 3개, 스킵된 시민 예시, 엔티티 ID, 노선 힌트를 포함합니다."
+                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenLog)), "로그 열기" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)), "**FastBoarding.log**가 있으면 엽니다.\n파일이 아직 없으면 Logs 폴더를 엽니다." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)),
+                    "**FastBoarding.log**가 있으면 엽니다.\n" +
+                    "파일이 아직 없으면 Logs 폴더를 엽니다."
+                },
 
+                // Runtime status strings
                 { TransitWaitStatus.KeyStatusNotLoaded, "상태를 불러오지 못했습니다." },
                 { TransitWaitStatus.KeyNoCityLoaded, "도시가 로드되지 않았습니다." },
                 { TransitWaitStatus.KeyNoStopsFound, "정류장을 찾지 못했습니다." },
                 { TransitWaitStatus.KeyStatusLine, "{0} 대기 | 평균 {1} | 최악 {2} | {3} 스킵" },
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} 관광객/월 | {1} 시민/월 | 업데이트 {2}" },
+
+                // Stats-to-log report strings
                 { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] 통계 보고서를 요청했지만 도시가 로드되지 않았습니다." },
                 { TransitWaitStatus.KeyReportTitle, "Stats to Log 스냅샷 - Fast Boarding" },
                 { TransitWaitStatus.KeyReportSettings, "설정: {0}" },
@@ -129,14 +188,23 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportNone, "없음" },
                 { TransitWaitStatus.KeyReportUnknown, "(알 수 없음)" },
 
+                // About
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "모드" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "이 모드의 표시 이름입니다." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "버전" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "현재 모드 버전입니다." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "제작자의 Paradox Mods 페이지를 엽니다." },
+
+                // Debug
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableVerboseLogging)), "자세한 로그 켜기" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)), "**디버그 / 테스트 전용**\n도시가 실행되는 동안 <FastBoarding.log>에 실시간 진단 정보를 추가합니다.\n**일반 플레이에서는 켜지 마세요.**\n켜 둔 상태는 성능을 낮추고 큰 로그 파일을 만들 수 있습니다." }
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)),
+                    "**디버그 / 테스트 전용**\n" +
+                    "도시가 실행되는 동안 <FastBoarding.log>에 실시간 진단 정보를 추가합니다.\n" +
+                    "**일반 플레이에서는 켜지 마세요.**\n" +
+                    "켜 둔 상태는 성능을 낮추고 큰 로그 파일을 만들 수 있습니다.\n" +
+                    "이전 로그 파일은 나중에 삭제할 수 있습니다."
+                },
             };
         }
 

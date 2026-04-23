@@ -51,9 +51,14 @@ namespace FastBoarding
 
             return new Dictionary<string, string>
             {
+                // Options mod name
                 { m_Setting.GetSettingsLocaleID(), title },
+
+                // Tabs
                 { m_Setting.GetOptionTabLocaleID(Setting.ActionsTab), "Aktionen" },
                 { m_Setting.GetOptionTabLocaleID(Setting.AboutTab), "Info" },
+
+                // Groups
                 { m_Setting.GetOptionGroupLocaleID(Setting.SpeedGroup), "Einstiegsgeschwindigkeit" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.BehaviorGroup), "Verhalten" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.StatusGroup), "Status" },
@@ -61,19 +66,63 @@ namespace FastBoarding
                 { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGroup), "Links" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.DebugGroup), "Debug" },
 
+                // Boarding speed sliders
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.BusBoardingSpeedFactor)), "Bus-Einstieg" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.BusBoardingSpeedFactor)), "<1x = Vanilla>\nHöhere Werte verkürzen Einstiegs-/Ladezeit an Bushaltestellen.\nNormale Warteschlangen werden schneller abgearbeitet, aber ein verspäteter Fahrgast kann die Abfahrt weiterhin verzögern.\nNutze [✓] <Fahrzeuge ohne späte Cims abfahren lassen>, damit einzelne verspätete Cims das Fahrzeug verpassen.\n2x bedeutet etwa doppelte Einstiegsgeschwindigkeit." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.BusBoardingSpeedFactor)),
+                    "<1x = Vanilla>\n" +
+                    "Höhere Werte verkürzen Einstiegs-/Ladezeit an Bushaltestellen.\n" +
+                    "Normale Warteschlangen werden schneller abgearbeitet, aber ein verspäteter Fahrgast kann die Abfahrt durch das Vanilla-Design weiterhin verzögern.\n" +
+                    "Nutze [✓] <Fahrzeuge ohne späte Cims abfahren lassen>, wenn einzelne verspätete Cims das Fahrzeug verpassen sollen.\n" +
+                    "2x bedeutet etwa doppelte Einstiegsgeschwindigkeit.\n" +
+                    "Technische Notiz: Ein höherer Ladefaktor bedeutet kürzere geplante Haltezeit, und Boarding Time ist eher die passagierseitige Warte-/Einstiegsschätzung.\n" +
+                    "Das ist nicht dasselbe wie das Fahrzeug zum Abfahren zu zwingen."
+                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "Bahn-Einstieg" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "<1x = Vanilla>\nGilt für Zug, Tram und U-Bahn.\nHöhere Werte verkürzen Einstiegs-/Ladezeit.\nNutze [✓] <Fahrzeuge ohne späte Cims abfahren lassen>, wenn einzelne verspätete Cims weiter blockieren." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.RailBoardingSpeedFactor)),
+                    "<1x = Vanilla>\n" +
+                    "Gilt für Zug-, Tram- und U-Bahn-Halte.\n" +
+                    "Höhere Werte verkürzen Einstiegs-/Ladezeit an Schienenhalten.\n" +
+                    "Normale Warteschlangen werden schneller abgearbeitet, aber ein verspäteter Fahrgast kann die Abfahrt durch das Vanilla-Design weiterhin verzögern.\n" +
+                    "Nutze [✓] <Fahrzeuge ohne späte Cims abfahren lassen>, wenn einzelne verspätete Cims das Fahrzeug verpassen sollen.\n" +
+                    "2x bedeutet etwa doppelte Einstiegsgeschwindigkeit."
+                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "Schiff + Fähre" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "<1x = Vanilla>\nGilt für Schiffe und Fähren.\nHöhere Werte verkürzen Einstiegs-/Ladezeit.\nNutze [✓] <Fahrzeuge ohne späte Cims abfahren lassen>, wenn einzelne verspätete Cims weiter blockieren." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.WaterBoardingSpeedFactor)),
+                    "<1x = Vanilla>\n" +
+                    "Gilt für Schiffs- und Fährhaltestellen.\n" +
+                    "Höhere Werte verkürzen Einstiegs-/Ladezeit an Schiffs- und Fährhalten.\n" +
+                    "Normale Warteschlangen werden schneller abgearbeitet, aber ein verspäteter Fahrgast kann die Abfahrt durch das Vanilla-Design weiterhin verzögern.\n" +
+                    "Nutze [✓] <Fahrzeuge ohne späte Cims abfahren lassen>, wenn einzelne verspätete Cims das Fahrzeug verpassen sollen.\n" +
+                    "2x bedeutet etwa doppelte Einstiegsgeschwindigkeit."
+                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "Flugzeug-Einstieg" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "<1x = Vanilla>\nGilt für Passagierflugzeug-Terminals.\nHöhere Werte verkürzen Einstiegs-/Ladezeit.\nNutze [✓] <Fahrzeuge ohne späte Cims abfahren lassen>, wenn einzelne verspätete Cims weiter blockieren." },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "Ohne späte Cims abfahren" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)), "**Experimentelle BETA**\nEinzelne verspätete Bürger, die nach der Vanilla-Abfahrtszeit noch <nicht bereit> sind, dürfen das Fahrzeug verpassen.\nGruppen/Familien werden noch <nicht übersprungen>; sie können weiterhin Verzögerungen verursachen.\nÜbersprungene Bürger werden nicht gelöscht; Vanilla-Systeme übernehmen danach wieder." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AirBoardingSpeedFactor)),
+                    "<1x = Vanilla>\n" +
+                    "Gilt für Passagierflugzeug-Terminals.\n" +
+                    "Höhere Werte verkürzen Einstiegs-/Ladezeit an Flugzeug-Terminals.\n" +
+                    "Normale Warteschlangen werden schneller abgearbeitet, aber ein verspäteter Fahrgast kann die Abfahrt durch das Vanilla-Design weiterhin verzögern.\n" +
+                    "Nutze [✓] <Fahrzeuge ohne späte Cims abfahren lassen>, wenn einzelne verspätete Cims das Fahrzeug verpassen sollen.\n" +
+                    "2x bedeutet etwa doppelte Einstiegsgeschwindigkeit."
+                },
 
+                // Late passenger behavior
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "Ohne späte Cims abfahren" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
+                    "**Experimentelle BETA**\n" +
+                    "Einzelne verspätete Bürger, die nach der Vanilla-Abfahrtszeit noch <nicht bereit> sind, dürfen das Fahrzeug verpassen.\n" +
+                    "Hinweis: Gruppen/Familien, die zusammen reisen, werden noch <nicht übersprungen>; sie können weiterhin Verzögerungen wie Vanilla verursachen.\n" +
+                    "Auch nur Solo-Cims zu überspringen hilft, weil Solo-Reisende normalerweise die Mehrheit an Haltestellen sind.\n" +
+                    "Übersprungene späte Bürger werden nicht gelöscht; Vanilla-Systeme weisen sie danach weiter zu."
+                },
+
+                // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "Gesamtnutzung" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)), "Monatliche ÖPNV-Nutzung aus der Transport-Infoansicht des Spiels.\nDie Uhrzeit zeigt, wann dieser Schnappschuss erstellt wurde." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)),
+                    "Monatliche ÖPNV-Nutzung aus der Transport-Infoansicht des Spiels.\n" +
+                    "Die Uhrzeit zeigt, wann dieser Schnappschuss erstellt wurde."
+                },
+
+                // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "Bus" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusBus)), StatusDescription("Bus") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusTram)), "Tram" },
@@ -89,16 +138,26 @@ namespace FastBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusAir)), "Flugzeug" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusAir)), StatusDescription("Flugzeug") },
 
+                // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatsToLog)), "Stats ins Log" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)), "Schreibt einen einmaligen Detailbericht in **FastBoarding.log**.\nEnthält Wartesummen, Top 3 schlimmste Halte pro Modus, Beispiele übersprungener Cims und Entity-IDs." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)),
+                    "Schreibt einen einmaligen Detailbericht in **FastBoarding.log**.\n" +
+                    "Enthält Wartesummen, Top 3 schlimmste Halte pro Modus, Beispiele übersprungener Cims und Entity-IDs."
+                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenLog)), "Log öffnen" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)), "Öffnet **FastBoarding.log**, falls vorhanden.\nSonst wird der Logs-Ordner geöffnet." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)),
+                    "Öffnet **FastBoarding.log**, falls vorhanden.\n" +
+                    "Sonst wird der Logs-Ordner geöffnet."
+                },
 
+                // Runtime status strings
                 { TransitWaitStatus.KeyStatusNotLoaded, "Status nicht geladen." },
                 { TransitWaitStatus.KeyNoCityLoaded, "Keine Stadt geladen." },
                 { TransitWaitStatus.KeyNoStopsFound, "Keine Halte gefunden." },
                 { TransitWaitStatus.KeyStatusLine, "{0} warten | durchschn. {1} | schlimmster {2} | {3} übersprungen" },
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} Touristen/Monat | {1} Bürger/Monat | aktualisiert {2}" },
+
+                // Stats-to-log report strings
                 { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] Bericht angefordert, aber keine Stadt ist geladen." },
                 { TransitWaitStatus.KeyReportTitle, "Stats-ins-Log-Schnappschuss - Fast Boarding" },
                 { TransitWaitStatus.KeyReportSettings, "Einstellungen: {0}" },
@@ -129,14 +188,23 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportNone, "keine" },
                 { TransitWaitStatus.KeyReportUnknown, "(unbekannt)" },
 
+                // About
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "Mod" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "Anzeigename dieses Mods." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "Version" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "Aktuelle Mod-Version." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "Öffnet die Paradox-Mods-Seite des Autors." },
+
+                // Debug
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableVerboseLogging)), "Ausführliches Logging" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)), "**Nur Debug / Tests**\nFügt Live-Diagnosen zu <FastBoarding.log> hinzu, während die Stadt läuft.\n**Nicht für normales Spielen aktivieren.**\nKann Leistung verringern und sehr große Logdateien erzeugen." }
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)),
+                    "**Nur Debug / Tests**\n" +
+                    "Fügt Live-Diagnosen zu <FastBoarding.log> hinzu, während die Stadt läuft.\n" +
+                    "**Nicht für normales Spielen aktivieren.**\n" +
+                    "Aktiviert lassen kann Leistung verringern und sehr große Logdateien erzeugen.\n" +
+                    "Alte Logdateien können später gelöscht werden."
+                },
             };
         }
 

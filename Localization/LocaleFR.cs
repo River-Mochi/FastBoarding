@@ -51,9 +51,14 @@ namespace FastBoarding
 
             return new Dictionary<string, string>
             {
+                // Options mod name
                 { m_Setting.GetSettingsLocaleID(), title },
+
+                // Tabs
                 { m_Setting.GetOptionTabLocaleID(Setting.ActionsTab), "Actions" },
                 { m_Setting.GetOptionTabLocaleID(Setting.AboutTab), "À propos" },
+
+                // Groups
                 { m_Setting.GetOptionGroupLocaleID(Setting.SpeedGroup), "Vitesse d'embarquement" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.BehaviorGroup), "Comportement" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.StatusGroup), "Statut" },
@@ -61,45 +66,63 @@ namespace FastBoarding
                 { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGroup), "Liens" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.DebugGroup), "Débogage" },
 
+                // Boarding speed sliders
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.BusBoardingSpeedFactor)), "Vitesse bus" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.BusBoardingSpeedFactor)),
                     "<1x = vanilla>\n" +
                     "Les valeurs plus hautes réduisent le temps d'embarquement/chargement aux arrêts de bus.\n" +
-                    "Cela vide les files normales plus vite, mais un passager en retard peut encore bloquer le départ.\n" +
-                    "Utilisez [✓] <Laisser partir les véhicules sans cims en retard> pour laisser les cims solo en retard rater le véhicule.\n" +
-                    "2x signifie environ deux fois plus rapide."
+                    "Cela vide les files normales plus vite, mais un passager en retard peut encore retarder le départ à cause du design vanilla.\n" +
+                    "Utilisez [✓] <Laisser partir les véhicules sans cims en retard> si vous voulez que les cims solo en retard ratent le véhicule.\n" +
+                    "2x signifie environ deux fois plus rapide.\n" +
+                    "Note technique : un facteur de chargement plus élevé signifie une durée d'arrêt planifiée plus courte, et le temps d'embarquement ressemble davantage à une estimation côté passager attente/embarquement.\n" +
+                    "Ce n'est pas la même chose que forcer le véhicule à partir."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "Vitesse rail" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.RailBoardingSpeedFactor)),
                     "<1x = vanilla>\n" +
-                    "S'applique aux trains, trams et métros.\n" +
-                    "Les valeurs plus hautes réduisent le temps d'embarquement/chargement.\n" +
-                    "Utilisez [✓] <Laisser partir les véhicules sans cims en retard> si des cims solo en retard bloquent encore."
+                    "S'applique aux arrêts de train, tram et métro.\n" +
+                    "Les valeurs plus hautes réduisent le temps d'embarquement/chargement aux arrêts ferroviaires.\n" +
+                    "Cela vide les files normales plus vite, mais un passager en retard peut encore retarder le départ à cause du design vanilla.\n" +
+                    "Utilisez [✓] <Laisser partir les véhicules sans cims en retard> si vous voulez que les cims solo en retard ratent le véhicule.\n" +
+                    "2x signifie environ deux fois plus rapide."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "Vitesse bateau + ferry" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.WaterBoardingSpeedFactor)),
                     "<1x = vanilla>\n" +
                     "S'applique aux arrêts de bateaux et ferries.\n" +
-                    "Les valeurs plus hautes réduisent le temps d'embarquement/chargement.\n" +
-                    "Utilisez [✓] <Laisser partir les véhicules sans cims en retard> si des cims solo en retard bloquent encore."
+                    "Les valeurs plus hautes réduisent le temps d'embarquement/chargement aux arrêts de bateaux et ferries.\n" +
+                    "Cela vide les files normales plus vite, mais un passager en retard peut encore retarder le départ à cause du design vanilla.\n" +
+                    "Utilisez [✓] <Laisser partir les véhicules sans cims en retard> si vous voulez que les cims solo en retard ratent le véhicule.\n" +
+                    "2x signifie environ deux fois plus rapide."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "Vitesse avion" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AirBoardingSpeedFactor)),
                     "<1x = vanilla>\n" +
                     "S'applique aux terminaux d'avions passagers.\n" +
-                    "Les valeurs plus hautes réduisent le temps d'embarquement/chargement.\n" +
-                    "Utilisez [✓] <Laisser partir les véhicules sans cims en retard> si des cims solo en retard bloquent encore."
+                    "Les valeurs plus hautes réduisent le temps d'embarquement/chargement aux terminaux d'avions.\n" +
+                    "Cela vide les files normales plus vite, mais un passager en retard peut encore retarder le départ à cause du design vanilla.\n" +
+                    "Utilisez [✓] <Laisser partir les véhicules sans cims en retard> si vous voulez que les cims solo en retard ratent le véhicule.\n" +
+                    "2x signifie environ deux fois plus rapide."
                 },
+
+                // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "Laisser partir sans cims en retard" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
                     "**BÊTA expérimentale**\n" +
                     "Les citoyens solo en retard qui sont encore <pas prêts> après l'heure de départ vanilla peuvent rater le véhicule.\n" +
-                    "Les groupes/familles ne sont <pas ignorés> pour l'instant ; ils peuvent encore causer des retards.\n" +
-                    "Les citoyens ignorés ne sont pas supprimés ; les systèmes vanilla continuent ensuite."
+                    "Note : les groupes/familles voyageant ensemble ne sont <pas ignorés> pour l'instant ; ils peuvent encore causer des retards comme en vanilla.\n" +
+                    "Même le mode solo uniquement aide, car les voyageurs solo sont généralement la majorité aux arrêts de transit.\n" +
+                    "Les citoyens en retard ignorés ne sont pas supprimés ; les systèmes vanilla continuent ensuite à les assigner."
                 },
 
+                // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "Utilisation totale" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)), "Utilisation mensuelle du transport public depuis l'infovue Transport du jeu.\nL'heure indique quand cet instantané a été pris." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)),
+                    "Utilisation mensuelle du transport public depuis l'infovue Transport du jeu.\n" +
+                    "L'heure indique quand cet instantané a été pris."
+                },
+
+                // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "Bus" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusBus)), StatusDescription("bus") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusTram)), "Tram" },
@@ -115,16 +138,26 @@ namespace FastBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusAir)), "Avion" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusAir)), StatusDescription("avion") },
 
+                // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatsToLog)), "Stats vers le log" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)), "Écrit un rapport détaillé ponctuel dans **FastBoarding.log**.\nInclut totaux d'attente, 3 pires arrêts par mode, exemples de cims ignorés et ID d'entités." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)),
+                    "Écrit un rapport détaillé ponctuel dans **FastBoarding.log**.\n" +
+                    "Inclut totaux d'attente, 3 pires arrêts par mode, exemples de cims ignorés et ID d'entités."
+                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenLog)), "Ouvrir le log" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)), "Ouvre **FastBoarding.log** s'il existe.\nSinon ouvre le dossier Logs." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)),
+                    "Ouvre **FastBoarding.log** s'il existe.\n" +
+                    "Sinon ouvre le dossier Logs."
+                },
 
+                // Runtime status strings
                 { TransitWaitStatus.KeyStatusNotLoaded, "Statut non chargé." },
                 { TransitWaitStatus.KeyNoCityLoaded, "Aucune ville chargée." },
                 { TransitWaitStatus.KeyNoStopsFound, "Aucun arrêt trouvé." },
                 { TransitWaitStatus.KeyStatusLine, "{0} attente | moy {1} | pire {2} | {3} ignorés" },
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} touristes/mois | {1} citoyens/mois | maj {2}" },
+
+                // Stats-to-log report strings
                 { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] Rapport demandé, mais aucune ville n'est chargée." },
                 { TransitWaitStatus.KeyReportTitle, "Instantané Stats vers le log - Fast Boarding" },
                 { TransitWaitStatus.KeyReportSettings, "Réglages : {0}" },
@@ -155,14 +188,23 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportNone, "aucun" },
                 { TransitWaitStatus.KeyReportUnknown, "(inconnu)" },
 
+                // About
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "Mod" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "Nom affiché du mod." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "Version" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "Version actuelle du mod." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "Ouvre la page Paradox Mods de l'auteur." },
+
+                // Debug
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableVerboseLogging)), "Activer le log détaillé" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)), "**Débogage / tests uniquement**\nAjoute des diagnostics en direct à <FastBoarding.log> pendant que la ville tourne.\n**Ne pas activer en jeu normal.**\nPeut réduire les performances et créer de gros fichiers log." }
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)),
+                    "**Débogage / tests uniquement**\n" +
+                    "Ajoute des diagnostics en direct à <FastBoarding.log> pendant que la ville tourne.\n" +
+                    "**Ne pas activer en jeu normal.**\n" +
+                    "Laisser ceci activé peut réduire les performances et créer de gros fichiers log.\n" +
+                    "Vous pouvez supprimer les anciens fichiers log plus tard."
+                },
             };
         }
 
