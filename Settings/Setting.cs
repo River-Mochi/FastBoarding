@@ -327,6 +327,7 @@ namespace FastBoarding
 
         private static void LogSpeedChange()
         {
+            // Keep slider logs short because players may drag several sliders in one session.
             LogUtils.Info(Mod.s_Log, () => $"Speed changed: {BoardingRuntimeSettings.DescribeForLog()}");
         }
 
@@ -403,6 +404,7 @@ namespace FastBoarding
             world = World.DefaultGameObjectInjectionWorld;
 
             GameManager gameManager = GameManager.instance;
+            // UI setters can fire from the main menu too, so guard against a missing game world.
             if (!gameManager.gameMode.IsGame() || world == null)
             {
                 return false;

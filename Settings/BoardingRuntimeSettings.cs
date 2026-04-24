@@ -176,7 +176,7 @@ namespace FastBoarding
 
         public static string DescribeForLog()
         {
-            // Keep this compact because it is appended to support log lines.
+            // Keep this compact because it is reused in support logs and report headers.
             return
                 $"bus={BusBoardingSpeedFactor}x, rail={RailBoardingSpeedFactor}x, " +
                 $"ship+ferry={WaterBoardingSpeedFactor}x, air={AirBoardingSpeedFactor}x, " +

@@ -52,14 +52,16 @@ Feedback on: Github, Discord, etc., link icons on this page.
 - yenyang.......for testing and code feedback
 - Neco1996......for testing
 - MayorCheeks...for testing
+- 
 
 
 </LongDescription>
 	<!--Thumbnail-->
-	<Thumbnail Value="Properties/Thumbnail-Trainboard-Sm.jpg"/>
+	<Thumbnail Value="Properties/Thumbnail-Boarding.jpg"/>
 	<!--Screenshot, can be set multiple times-->
 	<Screenshot Value="Properties/image10-BoardingSpeed.jpg"/>
 	<Screenshot Value="Properties/image30-Status.jpg"/>
+    <Screenshot Value="Properties/image40-senryu-FastBoarding.jpg"/>
 
 	<!--Tag, can be set multiple times-->
 	<Tag Value=""/>

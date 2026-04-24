@@ -514,6 +514,7 @@ namespace FastBoarding
 
             FollowUpTargetInfo targetInfo = ResolveFollowUpTarget(nextTargetEntity, transportType);
 
+            // Keep outcomes simple for testers: same vehicle, different vehicle, has path but not assigned, or other.
             FollowUpOutcome outcome;
             string outcomeLabel;
             string hint;
@@ -757,6 +758,7 @@ namespace FastBoarding
             ref LateGroupStats air)
         {
             uint frame = m_SimulationSystem.frameIndex;
+            // Managed sets are fine here because this is an on-demand diagnostic scan, not scheduled job work.
             HashSet<Entity> busGroups = new HashSet<Entity>();
             HashSet<Entity> trainGroups = new HashSet<Entity>();
             HashSet<Entity> tramGroups = new HashSet<Entity>();
@@ -1032,6 +1034,7 @@ namespace FastBoarding
             Entity lineEntity = Entity.Null;
 
             Entity current = nextTargetEntity;
+            // Walk a short owner chain because the next target is often a lane/waypoint, not the stop itself.
             for (int depth = 0; depth < 6; depth++)
             {
                 if (current == Entity.Null || !EntityManager.Exists(current))

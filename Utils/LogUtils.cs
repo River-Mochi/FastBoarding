@@ -14,6 +14,7 @@ namespace FastBoarding
         private static readonly object s_WarnOnceLock = new object();
         private static readonly object s_FileWriteLock = new object();
 
+        // Per-process key cache so hot-path warnings show once instead of spamming every update.
         private static readonly HashSet<string> s_WarnOnceKeys =
             new HashSet<string>(StringComparer.Ordinal);
 
@@ -119,6 +120,7 @@ namespace FastBoarding
             lock (s_FileWriteLock)
             {
                 // Direct append keeps routine mod diagnostics out of Colossal's fragile UI-log path.
+                // ShareReadWrite lets the file stay viewable while the game keeps running.
                 Directory.CreateDirectory(Path.GetDirectoryName(logPath));
 
                 using FileStream stream = new FileStream(

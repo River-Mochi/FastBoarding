@@ -81,6 +81,7 @@ namespace FastBoarding
         private static long s_FerryLateBoardersToday;
         private static long s_AirLateBoardersToday;
         private static DateTime s_LastSnapshotLocalTime;
+        // Outcome counters/rings back the detailed log report without bloating the Options UI rows.
         private static FollowUpOutcomeCounts s_BusFollowUpOutcomes;
         private static FollowUpOutcomeCounts s_TrainFollowUpOutcomes;
         private static FollowUpOutcomeCounts s_TramFollowUpOutcomes;
@@ -504,6 +505,7 @@ namespace FastBoarding
             EnsureCounterDay(world);
 
             uint frame = world.GetExistingSystemManaged<SimulationSystem>()?.frameIndex ?? 0;
+            // Keep only the most recent few examples per mode so the report stays readable.
             GetSkippedSampleRing(transportType).Add(
                 new SkippedPassengerSample(transportType, vehicle, passenger, frame, DateTime.Now));
         }
@@ -678,6 +680,7 @@ namespace FastBoarding
 
             if (followUpSamples.Count > 0)
             {
+                // Prefer follow-up examples because they show what vanilla did after the skip.
                 for (int i = 0; i < followUpSamples.Count; i++)
                 {
                     LateBoarderFollowUpSample sample = followUpSamples.GetNewest(i);

@@ -61,6 +61,7 @@ namespace FastBoarding
 
         public static string FormatN0(long value)
         {
+            // Shared number formatting keeps UI rows and log reports visually consistent.
             return value.ToString("N0", CultureInfo.CurrentCulture);
         }
     }

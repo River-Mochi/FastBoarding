@@ -73,6 +73,7 @@ namespace FastBoarding
             try
             {
                 // Stop tuning is one-shot; late-boarder cancel runs only while the option is enabled.
+                // These order constraints keep us close to vanilla movement/boarding timing.
                 updateSystem.UpdateBefore<TransportStopTuningSystem, TransportStopSystem>(
                     SystemUpdatePhase.GameSimulation);
                 updateSystem.UpdateAfter<LateBoarderCancelSystem, ResidentAISystem.Actions>(

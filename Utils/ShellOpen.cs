@@ -83,6 +83,7 @@ namespace FastBoarding
                     return;
                 }
 
+                // If Unity's opener is ignored by the platform/Proton layer, fall back to OS shell tools.
                 TryOpenWithOsShell(fullPath);
             }
             catch (Exception ex)

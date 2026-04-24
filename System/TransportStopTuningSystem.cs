@@ -63,6 +63,7 @@ namespace FastBoarding
             }
 
             // Query first, then apply changes by entity so prefab tuning does not mutate during query enumeration.
+            // This stays a one-shot main-thread pass because slider changes are rare.
             m_StopPrefabQuery.CompleteDependency();
             var entities = m_StopPrefabQuery.ToEntityArray(Allocator.Temp);
             var updatedPrefabs = 0;
@@ -114,6 +115,7 @@ namespace FastBoarding
 
                     var marker = new TransportStopTuningMarker
                     {
+                        // Marker lets us restore only prefabs Fast Boarding previously touched.
                         m_LoadingFactor = tunedStop.m_LoadingFactor,
                         m_BoardingTime = tunedStop.m_BoardingTime
                     };

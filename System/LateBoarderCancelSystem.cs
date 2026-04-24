@@ -147,7 +147,7 @@ namespace FastBoarding
             {
                 if (!BoardingRuntimeSettings.CancelLateBoarders)
                 {
-                    // The Options UI setter wakes this system only when the toggle is enabled.
+                    // Options UI setter wakes this system only when the toggle is enabled.
                     Enabled = false;
                     return;
                 }
@@ -210,7 +210,9 @@ namespace FastBoarding
 
             try
             {
-                // Finish readers/writers for this query before we inspect buffers on the main thread.
+                // This pass reads vehicle/passenger data directly on the main thread.
+                // CompleteDependency is only a sync point: it does not change the query,
+                // it just waits for earlier ECS jobs touching the same data to finish first.
                 m_VehicleQuery.CompleteDependency();
                 vehicles = m_VehicleQuery.ToEntityArray(Allocator.Temp);
                 ecb = new EntityCommandBuffer(Allocator.Temp);
@@ -257,6 +259,8 @@ namespace FastBoarding
 
                     // Collect first, then mutate afterward, so we do not edit the passenger buffer
                     // while we are still scanning it for late passengers.
+                    // Managed HashSet is intentional here: this is short-lived main-thread scratch state,
+                    // not Burst/job code, so NativeHashSet would add allocator/dispose noise with no payoff.
                     var pendingCancellation = new HashSet<Entity>();
 
                     for (var i = 0; i < passengers.Length; i++)
@@ -504,6 +508,7 @@ namespace FastBoarding
                 return;
             }
 
+            // Follow-up logs answer the "what did vanilla do next?" question after we detach a cim.
             TransitWaitStatusSystem followUpStatusSystem = World.GetOrCreateSystemManaged<TransitWaitStatusSystem>();
             int loggedThisUpdate = 0;
             for (int i = 0; i < m_FollowUpCount; i++)
@@ -602,6 +607,7 @@ namespace FastBoarding
             var pathOwner = EntityManager.GetComponentData<PathOwner>(passenger);
             var pathElements = EntityManager.GetBuffer<PathElement>(passenger);
             int startIndex = Math.Max(0, pathOwner.m_ElementIndex);
+            // Only cancel when the cim still has this exact vehicle in the remaining path.
             for (var i = startIndex; i < pathElements.Length; i++)
             {
                 if (pathElements[i].m_Target == vehicleEntity)
@@ -759,6 +765,7 @@ namespace FastBoarding
                 newPath.Add(pathElements[i]);
             }
 
+            // Restart from the trimmed path so vanilla can re-evaluate the next travel leg cleanly.
             pathOwner.m_ElementIndex = 0;
             ecb.SetComponent(passenger, pathOwner);
             return true;
@@ -770,6 +777,7 @@ namespace FastBoarding
             DynamicBuffer<Passenger> passengers,
             HashSet<Entity> canceledPassengers)
         {
+            // Rebuild the passenger buffer once so we do not remove entries while iterating it.
             DynamicBuffer<Passenger> newPassengers = ecb.SetBuffer<Passenger>(vehicleEntity);
             for (var i = 0; i < passengers.Length; i++)
             {
