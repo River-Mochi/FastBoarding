@@ -2,13 +2,13 @@
 	<!--Id must be set in order to update existed mod. it is not required for publishing mod for the first time-->
 	<ModId Value=""/>
 	<!--Name of the mod to display to players-->
-	<DisplayName Value="Fast Boarding"/>
+	<DisplayName Value="Fast Boarding [Beta]"/>
 	<!--Short description of the mod-->
 	<ShortDescription Value="Improves traffic flow with Transit faster Boarding + Loading and Late passengers stop slowing transit down."/>
 	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
 	<!--LongDescription Value="This is a long description" /-->
 	<LongDescription>
-## Fast Boarding [Beta]
+## Fast Boarding (Beta)
 
 Faster public transit boarding
 - Improve traffic, increase transit usage, reduce bunching of transit vehicles, reduce car demand indirectly.
@@ -23,7 +23,7 @@ Tune boarding speeds for:
 - Bus, Rail (train, tram, subway), Water (ship, ferry), Air
 - Higher values shorten dwell by increasing loading speed at the stop and adjusting the boarding-time estimate used by the game.
 - ✅ When **Skip Late Passengers** is enabled, late passengers who are *still not ready* after *departure time* can miss that vehicle instead of holding it up.
-- Simple Goal: let the vehicle leave instead of waiting on passengers who are still late or far away. The game then naturally reassigns them.
+- Simple Goal: don't wait on passengers who are still late or far away. The game then naturally reassigns them.
 
 ### Status report included
 - After the city runs a bit, check the Options menu to see current status.
@@ -65,7 +65,7 @@ Tune boarding speeds for:
 	<!--Tag, can be set multiple times-->
 	<Tag Value=""/>
 	<!--Link to the forum post where the mod can be discussed-->
-	<ForumLink Value=""/>
+	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/fast-boarding.1918695/"/>
 	<!--Version of the mod-->
 	<ModVersion Value="1.0.2"/>
 	<!--Recommended version of the base game to use the mod-->
