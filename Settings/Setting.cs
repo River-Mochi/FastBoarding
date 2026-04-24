@@ -33,8 +33,10 @@ namespace FastBoarding
         private const string UrlParadox =
             "https://mods.paradoxplaza.com/authors/River-mochi/cities_skylines_2?games=cities_skylines_2&orderBy=desc&sortBy=best&time=alltime";
 
+        // 1x is the real vanilla/no-mod baseline. DefaultSpeedFactor is the first-run preset.
+        public const int VanillaSpeedFactor = 1;
         public const int DefaultSpeedFactor = 4;
-        public const int MinSpeedFactor = 1;
+        public const int MinSpeedFactor = VanillaSpeedFactor;
         public const int MaxSpeedFactor = 10;
         public const int SpeedStepFactor = 1;
 

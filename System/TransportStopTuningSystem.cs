@@ -85,7 +85,7 @@ namespace FastBoarding
                 int speedFactor = GetSpeedFactor(authoringStop.m_TransportType);
                 bool hasMarker = EntityManager.HasComponent<TransportStopTuningMarker>(prefabEntity);
 
-                if (speedFactor == Setting.DefaultSpeedFactor && !hasMarker)
+                if (speedFactor == Setting.VanillaSpeedFactor && !hasMarker)
                 {
                     // Strict vanilla/no-op path: leave untouched stop prefabs alone at 1x.
                     continue;
@@ -101,7 +101,7 @@ namespace FastBoarding
                 tunedStop.m_LoadingFactor = baseEffectiveLoading * speedMultiplier - 1f;
                 tunedStop.m_BoardingTime = authoringStop.m_BoardingTime / speedMultiplier;
 
-                if (speedFactor == Setting.DefaultSpeedFactor)
+                if (speedFactor == Setting.VanillaSpeedFactor)
                 {
                     // Restore only prefabs we previously marked, then remove our marker.
                     EntityManager.SetComponentData(prefabEntity, tunedStop);
@@ -196,7 +196,8 @@ namespace FastBoarding
                 case TransportType.Airplane:
                     return BoardingRuntimeSettings.AirBoardingSpeedFactor;
                 default:
-                    return Setting.DefaultSpeedFactor;
+                    // Unknown transport types should stay at the true vanilla baseline.
+                    return Setting.VanillaSpeedFactor;
             }
         }
     }
