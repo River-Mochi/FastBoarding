@@ -4,7 +4,7 @@
 	<!--Name of the mod to display to players-->
 	<DisplayName Value="Fast Boarding"/>
 	<!--Short description of the mod-->
-	<ShortDescription Value="Improves traffic flow for Transit with faster Boarding + Loading. Late passengers stop slowing transit down."/>
+	<ShortDescription Value="Improves traffic flow with Transit faster Boarding + Loading and Late passengers stop slowing transit down."/>
 	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
 	<!--LongDescription Value="This is a long description" /-->
 	<LongDescription>
@@ -43,17 +43,16 @@ Tune boarding speeds for:
 - No Harmony patches; lightweight design for low overhead and negligible performance impact.
 
 ### Support and feedback
-If mods make the game better, give it a Like. It's an easy way to support free mods :)
-Feedback on: Github, Discord, etc., link icons on this page.
+- If mods make the game better, give it a Like. It's an easy way to support free mods :)
+- Feedback on: Github, Discord, etc., link icons on this page.
 
 ### Credits
-- River-Mochi....mod author
+- River-Mochi.........mod author
 - Inspiration and thanks to bcallender's All Aboard mod and Wayze's old InstantBoarding.
-- yenyang.......for testing and code feedback
-- Neco1996......for testing
-- MayorCheeks...for testing
-- 
-
+- yenyang.............for testing and code feedback
+- Neco1996............for testing
+- MayorCheeks.........for testing
+- elGaucho87..........thumbnail enchancements/straightener
 
 </LongDescription>
 	<!--Thumbnail-->
