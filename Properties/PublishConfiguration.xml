@@ -4,7 +4,7 @@
 	<!--Name of the mod to display to players-->
 	<DisplayName Value="Fast Boarding"/>
 	<!--Short description of the mod-->
-	<ShortDescription Value="Improves traffic flow for Transit; faster Boarding + Loading. Late passengers stop slowing transit down."/>
+	<ShortDescription Value="Improves traffic flow for Transit with faster Boarding + Loading. Late passengers stop slowing transit down."/>
 	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
 	<!--LongDescription Value="This is a long description" /-->
 	<LongDescription>
@@ -21,8 +21,8 @@ Faster public transit boarding
 Tune boarding speeds for:
 
 - Bus, Rail (train, tram, subway), Water (ship, ferry), Air
-- Higher values shorten dwell time by increasing stop loading speed and adjusting the boarding-time estimate used by the game.
-- ✅ When **Skip Late Passengers** is enabled, late passengers who are *still not ready* after *departure time* can be dropped from that vehicle's boarding process.
+- Higher values shorten dwell by increasing loading speed at the stop and adjusting the boarding-time estimate used by the game.
+- ✅ When **Skip Late Passengers** is enabled, late passengers who are *still not ready* after *departure time* can miss that vehicle instead of holding it up.
 - Simple Goal: let the vehicle leave instead of waiting on passengers who are still late or far away. The game then naturally reassigns them.
 
 ### Status report included
@@ -35,9 +35,9 @@ Tune boarding speeds for:
 - When investigating, I like to click the button every 30 min, then compare the report later; it also shows exactly where the worst stops are and more.
 
 ### Notes
-- Compatibility: conflict will be with any mod that touches boarding behavior, like All-Aboard, so choose one or the other.
-- This is intended to be a lighter, safer alternative than replacing the game's entire Transport system files.
-- Group boarding is handled conservatively to avoid splitting groups across platform and vehicle.
+- Compatibility: this will conflict with any mod that changes boarding behavior, like All-Aboard, so choose one or the other.
+- Intended to be a lighter, safer alternative than replacing the game's Transport system files.
+- Group boarding is handled conservatively to avoid splitting groups (they are few compared to the many single travelers).
 - This mod works well with `Public Works Plus` to solve many transit issues.
 - Save-game safe. Safe to remove anytime.
 - No Harmony patches; lightweight design for low overhead and negligible performance impact.
@@ -54,7 +54,6 @@ Feedback on: Github, Discord, etc., link icons on this page.
 - MayorCheeks...for testing
 
 
-
 </LongDescription>
 	<!--Thumbnail-->
 	<Thumbnail Value="Properties/Thumbnail-Trainboard-Sm.jpg"/>
@@ -67,7 +66,7 @@ Feedback on: Github, Discord, etc., link icons on this page.
 	<!--Link to the forum post where the mod can be discussed-->
 	<ForumLink Value=""/>
 	<!--Version of the mod-->
-	<ModVersion Value="1.0.1"/>
+	<ModVersion Value="1.0.2"/>
 	<!--Recommended version of the base game to use the mod-->
 	<GameVersion Value="1.5.*"/>
 	<!--Dependency for the mod, can be set multiple times-->

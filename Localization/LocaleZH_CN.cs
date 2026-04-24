@@ -36,7 +36,7 @@ namespace FastBoarding
                 title = title + " (" + Mod.ModVersion + ")";
             }
 
-            const string ToggleLabel = "跳过迟到乘客";
+            const string ToggleName = "跳过迟到乘客";
 
             // One helper keeps all seven status tooltips in sync for future translations.
             string StatusDescription(string transitName)
@@ -47,7 +47,7 @@ namespace FastBoarding
                     "**平均** = 这些乘客的平均等待时间。\n" +
                     "**最差**站点 = 单个站点最高平均等待时间。\n" +
                     "最差站点很适合优先检查：可能有交通事故、被堵住/出错的站点，或附近车辆被卡住。\n" +
-                    $"**跳过** = 今天通过 <{ToggleLabel}> 跳过的迟到单独乘客。\n" +
+                    $"**跳过** = 今天通过 <{ToggleName}> 跳过的迟到单独乘客。\n" +
                     "使用 <统计到日志> 查看详细报告：站点名称、实体 ID 等。";
             }
 
@@ -74,12 +74,12 @@ namespace FastBoarding
                     "<1x = 原版>\n" +
                     "更高的数值会缩短公交站的上车/装载时间。\n" +
                     "普通排队会更快消化，但按照原版设计，迟到乘客仍可能拖慢发车。\n" +
-                    $"使用 [✓] <{ToggleLabel}>，让公交别一直等迟到的 Cim。\n" +
+                    $"使用 [✓] <{ToggleName}>，让公交别一直等迟到的 Cim。\n" +
                     "2x 大约是双倍上车速度。\n" +
-                    "技术说明：loading factor 越高，计划停站时间越短；boarding time 更像乘客侧的等待/上车估算。\n" +
-                    $"这和 <{ToggleLabel}> 不一样；这个勾选项决定了发车时间过后，迟到 Cim 是否可以错过这班车。\n" +
+                    "技术说明：装载值越高，计划停站时间越短；boarding time 更像乘客侧的等待/上车估算。\n" +
+                    $"这和 <{ToggleName}> 不一样；这个勾选项决定了发车时间过后，迟到 Cim 是否可以错过这班车。\n" +
                     "<==========================>\n" +
-                    "所有交通共用的 loading factor:\n" +
+                    "所有交通共用的装载值:\n" +
                     "1x  = 原版停站时间 100%\n" +
                     "2x  = 计划停站时间 ~ 1/2\n" +
                     "4x  = 计划停站时间 ~ 1/4\n" +
@@ -92,7 +92,7 @@ namespace FastBoarding
                     "适用于火车、电车和地铁。\n" +
                     "更高的数值会缩短轨道站的上车/装载时间。\n" +
                     "普通排队会更快消化，但按照原版设计，迟到乘客仍可能拖慢发车。\n" +
-                    $"使用 [✓] <{ToggleLabel}>，可以让迟到的 Cim 在发车时间过后错过这班车。\n" +
+                    $"使用 [✓] <{ToggleName}>，可以让迟到的 Cim 在发车时间过后错过这班车。\n" +
                     "之后游戏通常会自然重新分配该 Cim。\n" +
                     "2x 大约是双倍上车速度。"
                 },
@@ -102,7 +102,7 @@ namespace FastBoarding
                     "适用于客船和渡轮。\n" +
                     "更高的数值会缩短水上交通站点的上车/装载时间。\n" +
                     "普通排队会更快消化，但按照原版设计，迟到乘客仍可能拖慢发车。\n" +
-                    $"使用 [✓] <{ToggleLabel}>，可以让迟到的 Cim 在发车时间过后错过这班车。\n" +
+                    $"使用 [✓] <{ToggleName}>，可以让迟到的 Cim 在发车时间过后错过这班车。\n" +
                     "2x 大约是双倍上车速度。"
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "飞机上车速度" },
@@ -111,12 +111,12 @@ namespace FastBoarding
                     "适用于客运机场航站楼。\n" +
                     "更高的数值会缩短机场的上车/装载时间。\n" +
                     "普通排队会更快消化，但按照原版设计，迟到乘客仍可能拖慢发车。\n" +
-                    $"使用 [✓] <{ToggleLabel}>，可以让迟到的 Cim 在发车时间过后错过这班车。\n" +
+                    $"使用 [✓] <{ToggleName}>，可以让迟到的 Cim 在发车时间过后错过这班车。\n" +
                     "2x 大约是双倍上车速度。"
                 },
 
                 // Late passenger behavior
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleLabel },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
                     "在发车时间之后仍然 <未准备好> 的乘客，可以错过这班车。\n" +
                     "注意：目前我们只跳过迟到的单独市民。\n" +
@@ -178,7 +178,7 @@ namespace FastBoarding
                     "旧日志之后可以删掉。\n" +
                     "注意：<统计到日志> 只是当前瞬间的一次快照。\n" +
                     "如果你想看一段时间内发生了什么，就把详细日志开 15-30 分钟。\n" +
-                    "正常游玩前记得再切回 **OFF**。"
+                    "正常游玩前记得再切回 **关闭**。"
 
                 },
 

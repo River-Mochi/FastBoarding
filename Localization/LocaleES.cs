@@ -36,7 +36,7 @@ namespace FastBoarding
                 title = title + " (" + Mod.ModVersion + ")";
             }
 
-            const string ToggleLabel = "Saltar pasajeros tardíos";
+            const string ToggleName = "Saltar pasajeros tardíos";
 
             // One helper keeps all seven status tooltips in sync for future translations.
             string StatusDescription(string transitName)
@@ -47,7 +47,7 @@ namespace FastBoarding
                     "**Media** = tiempo medio de espera de esos pasajeros.\n" +
                     "**Peor** parada = mayor espera media en una sola parada.\n" +
                     "Las peores paradas son buenos lugares para revisar accidentes, paradas bloqueadas/con bug o vehículos atascados cerca.\n" +
-                    $"**Saltados** = pasajeros tarde que hoy se saltaron con <{ToggleLabel}>.\n" +
+                    $"**Saltados** = pasajeros tarde que hoy se saltaron con <{ToggleName}>.\n" +
                     "Usa <Stats al log> para más detalle: nombres de paradas, ID de entidades y más.";
             }
 
@@ -74,12 +74,12 @@ namespace FastBoarding
                     "<1x = vanilla>\n" +
                     "Valores más altos reducen el tiempo de embarque y carga en las paradas de bus.\n" +
                     "Esto ayuda a limpiar colas normales más rápido, pero un pasajero tarde aún puede retrasar la salida por diseño vanilla.\n" +
-                    $"Usa [✓] <{ToggleLabel}> para que los buses no se queden esperando cims tarde.\n" +
+                    $"Usa [✓] <{ToggleName}> para que los buses no se queden esperando cims tarde.\n" +
                     "2x significa aprox. el doble de velocidad de embarque.\n" +
-                    "Nota técnica: un loading factor más alto = menos tiempo de parada planeado; boarding time se parece más a la estimación de espera/subida del pasajero.\n" +
-                    $"No es lo mismo que <{ToggleLabel}>; esa casilla decide si los cims tarde pueden perder el vehículo después de la hora de salida.\n" +
+                    "Nota técnica: un valor de carga más alto = menos tiempo de parada planeado; boarding time se parece más a la estimación de espera/subida del pasajero.\n" +
+                    $"No es lo mismo que <{ToggleName}>; esa casilla decide si los cims tarde pueden perder el vehículo después de la hora de salida.\n" +
                     "<==========================>\n" +
-                    "Loading factor para todo el transporte:\n" +
+                    "Valor de carga para todo el transporte:\n" +
                     "1x  = 100% parada vanilla\n" +
                     "2x  = ~ 1/2 parada planeada\n" +
                     "4x  = ~ 1/4 parada planeada\n" +
@@ -92,7 +92,7 @@ namespace FastBoarding
                     "Aplica a tren, tranvía y metro.\n" +
                     "Valores más altos reducen el tiempo de embarque/carga en paradas de rail.\n" +
                     "Esto ayuda a limpiar colas normales más rápido, pero un pasajero tarde aún puede retrasar la salida por diseño vanilla.\n" +
-                    $"Usa [✓] <{ToggleLabel}> si quieres que los cims tarde pierdan el vehículo después de la hora de salida.\n" +
+                    $"Usa [✓] <{ToggleName}> si quieres que los cims tarde pierdan el vehículo después de la hora de salida.\n" +
                     "Luego el juego suele reasignar al cim.\n" +
                     "2x significa aprox. el doble de velocidad de embarque."
                 },
@@ -102,7 +102,7 @@ namespace FastBoarding
                     "Aplica a paradas de barco y ferry.\n" +
                     "Valores más altos reducen el tiempo de embarque/carga en barco y ferry.\n" +
                     "Esto ayuda a limpiar colas normales más rápido, pero un pasajero tarde aún puede retrasar la salida por diseño vanilla.\n" +
-                    $"Usa [✓] <{ToggleLabel}> si quieres que los cims tarde pierdan el vehículo después de la hora de salida.\n" +
+                    $"Usa [✓] <{ToggleName}> si quieres que los cims tarde pierdan el vehículo después de la hora de salida.\n" +
                     "2x significa aprox. el doble de velocidad de embarque."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "Velocidad avión" },
@@ -111,12 +111,12 @@ namespace FastBoarding
                     "Aplica a terminales de avión de pasajeros.\n" +
                     "Valores más altos reducen el tiempo de embarque/carga en terminales aéreas.\n" +
                     "Esto ayuda a limpiar colas normales más rápido, pero un pasajero tarde aún puede retrasar la salida por diseño vanilla.\n" +
-                    $"Usa [✓] <{ToggleLabel}> si quieres que los cims tarde pierdan el vehículo después de la hora de salida.\n" +
+                    $"Usa [✓] <{ToggleName}> si quieres que los cims tarde pierdan el vehículo después de la hora de salida.\n" +
                     "2x significa aprox. el doble de velocidad de embarque."
                 },
 
                 // Late passenger behavior
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleLabel },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
                     "Los pasajeros que sigan <no listos> después de la hora de salida pueden perder el vehículo.\n" +
                     "Nota: por ahora solo saltamos ciudadanos tarde que viajan solos.\n" +
@@ -178,10 +178,9 @@ namespace FastBoarding
                     "Luego puedes borrar logs viejos.\n" +
                     "Nota: <Stats al log> es solo una foto rápida del momento.\n" +
                     "Déjalo 15-30 min si quieres una línea de tiempo de lo que pasó.\n" +
-                    "Solo no olvides volver a dejarlo **OFF** antes de jugar normal."
+                    "Solo no olvides volver a dejarlo en **APAGADO** antes de jugar normal."
 
                 },
-
 
                 // Runtime status strings
                 { TransitWaitStatus.KeyStatusNotLoaded, "Estado no cargado." },
@@ -220,7 +219,6 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | pasajero {2} | vehículo perdido {3} | hora {4} | ahora {5}" },
                 { TransitWaitStatus.KeyReportNone, "ninguno" },
                 { TransitWaitStatus.KeyReportUnknown, "(desconocido)" },
-
 
             };
         }

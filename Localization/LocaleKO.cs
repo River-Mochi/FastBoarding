@@ -36,7 +36,7 @@ namespace FastBoarding
                 title = title + " (" + Mod.ModVersion + ")";
             }
 
-            const string ToggleLabel = "늦은 승객 건너뛰기";
+            const string ToggleName = "늦은 승객 건너뛰기";
 
             // One helper keeps all seven status tooltips in sync for future translations.
             string StatusDescription(string transitName)
@@ -47,7 +47,7 @@ namespace FastBoarding
                     "**평균** = 그 승객들의 평균 대기 시간입니다.\n" +
                     "**최악** 정류장 = 한 정류장에서 가장 높은 평균 대기 시간입니다.\n" +
                     "최악의 정류장은 사고, 막힌/버그 난 정류장, 근처에서 묶인 차량을 확인하기 좋은 곳입니다.\n" +
-                    $"**건너뜀** = 오늘 <{ToggleLabel}> 으로 건너뛴 늦은 솔로 승객입니다.\n" +
+                    $"**건너뜀** = 오늘 <{ToggleName}> 으로 건너뛴 늦은 솔로 승객입니다.\n" +
                     "<Stats to Log>를 쓰면 정류장 이름, Entity ID 같은 자세한 보고서를 볼 수 있습니다.";
             }
 
@@ -74,12 +74,12 @@ namespace FastBoarding
                     "<1x = vanilla>\n" +
                     "값을 높이면 버스 정류장의 탑승/적재 시간이 줄어듭니다.\n" +
                     "일반 대기열은 더 빨리 풀리지만, 바닐라 설계상 늦은 승객이 여전히 출발을 지연시킬 수 있습니다.\n" +
-                    $"[✓] <{ToggleLabel}> 를 쓰면 버스가 늦은 Cim을 계속 기다리지 않게 할 수 있습니다.\n" +
+                    $"[✓] <{ToggleName}> 를 쓰면 버스가 늦은 Cim을 계속 기다리지 않게 할 수 있습니다.\n" +
                     "2x 는 대략 2배 탑승 속도입니다.\n" +
-                    "기술 메모: loading factor 가 높을수록 계획된 정차 시간이 짧아지고, boarding time 은 승객 쪽 대기/탑승 추정치에 더 가깝습니다.\n" +
-                    $"이건 <{ToggleLabel}> 와는 다릅니다. 이 체크박스는 출발 시간 뒤에 늦은 Cim이 그 차량을 놓쳐도 되는지를 정합니다.\n" +
+                    "기술 메모: 적재 값이 높을수록 계획된 정차 시간이 짧아지고, boarding time 은 승객 쪽 대기/탑승 추정치에 더 가깝습니다.\n" +
+                    $"이건 <{ToggleName}> 와는 다릅니다. 이 체크박스는 출발 시간 뒤에 늦은 Cim이 그 차량을 놓쳐도 되는지를 정합니다.\n" +
                     "<==========================>\n" +
-                    "모든 대중교통 loading factor:\n" +
+                    "모든 대중교통 적재 값:\n" +
                     "1x  = 바닐라 정차 시간 100%\n" +
                     "2x  = 계획 정차 시간 ~ 1/2\n" +
                     "4x  = 계획 정차 시간 ~ 1/4\n" +
@@ -92,7 +92,7 @@ namespace FastBoarding
                     "기차, 트램, 지하철에 적용됩니다.\n" +
                     "값을 높이면 철도 정류장의 탑승/적재 시간이 줄어듭니다.\n" +
                     "일반 대기열은 더 빨리 풀리지만, 바닐라 설계상 늦은 승객이 여전히 출발을 지연시킬 수 있습니다.\n" +
-                    $"[✓] <{ToggleLabel}> 를 쓰면 출발 시간 뒤에 늦은 Cim이 그 차량을 놓치게 할 수 있습니다.\n" +
+                    $"[✓] <{ToggleName}> 를 쓰면 출발 시간 뒤에 늦은 Cim이 그 차량을 놓치게 할 수 있습니다.\n" +
                     "그 뒤에는 게임이 보통 자연스럽게 다시 배정합니다.\n" +
                     "2x 는 대략 2배 탑승 속도입니다."
                 },
@@ -102,7 +102,7 @@ namespace FastBoarding
                     "선박과 페리에 적용됩니다.\n" +
                     "값을 높이면 수상 교통 정류장의 탑승/적재 시간이 줄어듭니다.\n" +
                     "일반 대기열은 더 빨리 풀리지만, 바닐라 설계상 늦은 승객이 여전히 출발을 지연시킬 수 있습니다.\n" +
-                    $"[✓] <{ToggleLabel}> 를 쓰면 출발 시간 뒤에 늦은 Cim이 그 차량을 놓치게 할 수 있습니다.\n" +
+                    $"[✓] <{ToggleName}> 를 쓰면 출발 시간 뒤에 늦은 Cim이 그 차량을 놓치게 할 수 있습니다.\n" +
                     "2x 는 대략 2배 탑승 속도입니다."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "비행기 탑승 속도" },
@@ -111,12 +111,12 @@ namespace FastBoarding
                     "여객 공항 터미널에 적용됩니다.\n" +
                     "값을 높이면 공항의 탑승/적재 시간이 줄어듭니다.\n" +
                     "일반 대기열은 더 빨리 풀리지만, 바닐라 설계상 늦은 승객이 여전히 출발을 지연시킬 수 있습니다.\n" +
-                    $"[✓] <{ToggleLabel}> 를 쓰면 출발 시간 뒤에 늦은 Cim이 그 차량을 놓치게 할 수 있습니다.\n" +
+                    $"[✓] <{ToggleName}> 를 쓰면 출발 시간 뒤에 늦은 Cim이 그 차량을 놓치게 할 수 있습니다.\n" +
                     "2x 는 대략 2배 탑승 속도입니다."
                 },
 
                 // Late passenger behavior
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleLabel },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
                     "출발 시간 이후에도 아직 <준비 안 됨> 상태인 승객은 그 차량을 놓칠 수 있게 됩니다.\n" +
                     "참고: 지금은 늦은 솔로 시민만 건너뜁니다.\n" +
@@ -178,7 +178,7 @@ namespace FastBoarding
                     "오래된 로그는 나중에 지워도 됩니다.\n" +
                     "참고: <Stats to Log> 는 그 순간의 스냅샷일 뿐입니다.\n" +
                     "시간 흐름을 보고 싶다면 상세 로그를 15~30분 정도 켜 두세요.\n" +
-                    "일반 플레이 전에는 다시 **OFF** 로 돌려두는 걸 잊지 마세요."
+                    "일반 플레이 전에는 다시 **끔** 으로 돌려두는 걸 잊지 마세요."
 
                 },
 

@@ -36,7 +36,7 @@ namespace FastBoarding
                 title = title + " (" + Mod.ModVersion + ")";
             }
 
-            const string ToggleLabel = "Verspätete Fahrgäste überspringen";
+            const string ToggleName = "Verspätete Fahrgäste überspringen";
 
             // One helper keeps all seven status tooltips in sync for future translations.
             string StatusDescription(string transitName)
@@ -47,7 +47,7 @@ namespace FastBoarding
                     "**Schnitt** = durchschnittliche Wartezeit dieser Fahrgäste.\n" +
                     "**Schlimmster** Halt = höchste durchschnittliche Wartezeit an einem Halt.\n" +
                     "Schlimmste Halte sind gute Stellen, um Unfälle, blockierte/verbuggte Halte oder festhängende Fahrzeuge in der Nähe zu prüfen.\n" +
-                    $"**Übersprungen** = heute durch <{ToggleLabel}> übersprungene späte Solo-Fahrgäste.\n" +
+                    $"**Übersprungen** = heute durch <{ToggleName}> übersprungene späte Solo-Fahrgäste.\n" +
                     "Nutze <Stats ins Log> für Details: Haltestellennamen, Entity-IDs und mehr.";
             }
 
@@ -74,12 +74,12 @@ namespace FastBoarding
                     "<1x = Vanilla>\n" +
                     "Höhere Werte verkürzen Ein- und Ladezeit an Bushaltestellen.\n" +
                     "Normale Warteschlangen bauen sich schneller ab, aber verspätete Fahrgäste können die Abfahrt im Vanilla-Design weiter verzögern.\n" +
-                    $"Nutze [✓] <{ToggleLabel}>, damit Busse nicht auf späte Cims warten.\n" +
+                    $"Nutze [✓] <{ToggleName}>, damit Busse nicht auf späte Cims warten.\n" +
                     "2x bedeutet ungefähr doppelte Einstiegsgeschwindigkeit.\n" +
-                    "Technik: höherer Loading-Factor = kürzere geplante Haltezeit; Boarding Time ist eher die Fahrgast-Schätzung für Warten/Einsteigen.\n" +
-                    $"Das ist nicht dasselbe wie <{ToggleLabel}>; diese Checkbox entscheidet, ob späte Cims das Fahrzeug nach der Abfahrtszeit verpassen dürfen.\n" +
+                    "Technik: höherer Ladewert = kürzere geplante Haltezeit; Boarding Time ist eher die Fahrgast-Schätzung für Warten/Einsteigen.\n" +
+                    $"Das ist nicht dasselbe wie <{ToggleName}>; diese Checkbox entscheidet, ob späte Cims das Fahrzeug nach der Abfahrtszeit verpassen dürfen.\n" +
                     "<==========================>\n" +
-                    "Loading-Factor für alle Transitarten:\n" +
+                    "Ladewert für alle Transitarten:\n" +
                     "1x  = 100% Vanilla-Haltezeit\n" +
                     "2x  = ~ 1/2 geplante Haltezeit\n" +
                     "4x  = ~ 1/4 geplante Haltezeit\n" +
@@ -92,7 +92,7 @@ namespace FastBoarding
                     "Gilt für Zug-, Tram- und U-Bahn-Halte.\n" +
                     "Höhere Werte verkürzen Ein- und Ladezeit an Schienenhalten.\n" +
                     "Normale Warteschlangen bauen sich schneller ab, aber verspätete Fahrgäste können die Abfahrt im Vanilla-Design weiter verzögern.\n" +
-                    $"Nutze [✓] <{ToggleLabel}>, wenn späte Cims das Fahrzeug nach der Abfahrtszeit verpassen sollen.\n" +
+                    $"Nutze [✓] <{ToggleName}>, wenn späte Cims das Fahrzeug nach der Abfahrtszeit verpassen sollen.\n" +
                     "Das Spiel weist den Cim danach normalerweise neu zu.\n" +
                     "2x bedeutet ungefähr doppelte Einstiegsgeschwindigkeit."
                 },
@@ -102,7 +102,7 @@ namespace FastBoarding
                     "Gilt für Schiffs- und Fährhaltestellen.\n" +
                     "Höhere Werte verkürzen Ein- und Ladezeit an Schiffs- und Fährhalten.\n" +
                     "Normale Warteschlangen bauen sich schneller ab, aber verspätete Fahrgäste können die Abfahrt im Vanilla-Design weiter verzögern.\n" +
-                    $"Nutze [✓] <{ToggleLabel}>, wenn späte Cims das Fahrzeug nach der Abfahrtszeit verpassen sollen.\n" +
+                    $"Nutze [✓] <{ToggleName}>, wenn späte Cims das Fahrzeug nach der Abfahrtszeit verpassen sollen.\n" +
                     "2x bedeutet ungefähr doppelte Einstiegsgeschwindigkeit."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "Flugzeug-Einstieg" },
@@ -111,12 +111,12 @@ namespace FastBoarding
                     "Gilt für Passagierflugzeug-Terminals.\n" +
                     "Höhere Werte verkürzen Ein- und Ladezeit an Flugzeug-Terminals.\n" +
                     "Normale Warteschlangen bauen sich schneller ab, aber verspätete Fahrgäste können die Abfahrt im Vanilla-Design weiter verzögern.\n" +
-                    $"Nutze [✓] <{ToggleLabel}>, wenn späte Cims das Fahrzeug nach der Abfahrtszeit verpassen sollen.\n" +
+                    $"Nutze [✓] <{ToggleName}>, wenn späte Cims das Fahrzeug nach der Abfahrtszeit verpassen sollen.\n" +
                     "2x bedeutet ungefähr doppelte Einstiegsgeschwindigkeit."
                 },
 
                 // Late passenger behavior
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleLabel },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
                     "Verspätete Fahrgäste, die nach der Abfahrtszeit noch <nicht bereit> sind, dürfen das Fahrzeug verpassen.\n" +
                     "Hinweis: Aktuell überspringen wir nur einzelne verspätete Bürger.\n" +
@@ -181,7 +181,6 @@ namespace FastBoarding
                     "Denk nur daran, es vor normalem Spielen wieder **AUS** zu schalten."
 
                 },
-
 
                 // Runtime status strings
                 { TransitWaitStatus.KeyStatusNotLoaded, "Status nicht geladen." },

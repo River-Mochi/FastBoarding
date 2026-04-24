@@ -36,7 +36,7 @@ namespace FastBoarding
                 title = title + " (" + Mod.ModVersion + ")";
             }
 
-            const string ToggleLabel = "Ignorer passagers en retard";
+            const string ToggleName = "Ignorer passagers en retard";
 
             // One helper keeps all seven status tooltips in sync for future translations.
             string StatusDescription(string transitName)
@@ -47,7 +47,7 @@ namespace FastBoarding
                     "**Moy.** = temps d'attente moyen de ces passagers.\n" +
                     "**Pire** arrêt = attente moyenne la plus élevée sur un arrêt.\n" +
                     "Les pires arrêts sont de bons endroits à vérifier pour les accidents, arrêts bloqués/buggés ou véhicules coincés à proximité.\n" +
-                    $"**Sautés** = passagers solo en retard sautés aujourd'hui par <{ToggleLabel}>.\n" +
+                    $"**Sautés** = passagers solo en retard sautés aujourd'hui par <{ToggleName}>.\n" +
                     "Utilise <Stats vers log> pour le rapport détaillé : noms d'arrêts, ID d'entités et plus.";
             }
 
@@ -74,12 +74,12 @@ namespace FastBoarding
                     "<1x = vanilla>\n" +
                     "Des valeurs plus élevées réduisent le temps de montée et de chargement aux arrêts de bus.\n" +
                     "Les files normales se résorbent plus vite, mais un passager en retard peut encore retarder le départ à cause du design vanilla.\n" +
-                    $"Utilise [✓] <{ToggleLabel}> pour que les bus n'attendent pas les cims en retard.\n" +
+                    $"Utilise [✓] <{ToggleName}> pour que les bus n'attendent pas les cims en retard.\n" +
                     "2x = environ deux fois plus rapide pour embarquer.\n" +
-                    "Note technique : un loading factor plus élevé = arrêt planifié plus court ; boarding time ressemble davantage à l'estimation côté passager pour l'attente/la montée.\n" +
-                    $"Ce n'est pas la même chose que <{ToggleLabel}> ; cette case décide si les cims en retard peuvent rater le véhicule après l'heure de départ.\n" +
+                    "Note technique : une valeur de chargement plus élevée = arrêt planifié plus court ; boarding time ressemble davantage à l'estimation côté passager pour l'attente/la montée.\n" +
+                    $"Ce n'est pas la même chose que <{ToggleName}> ; cette case décide si les cims en retard peuvent rater le véhicule après l'heure de départ.\n" +
                     "<==========================>\n" +
-                    "Loading factor pour tous les transports :\n" +
+                    "Valeur de chargement pour tous les transports :\n" +
                     "1x  = 100% arrêt vanilla\n" +
                     "2x  = ~ 1/2 arrêt planifié\n" +
                     "4x  = ~ 1/4 arrêt planifié\n" +
@@ -92,7 +92,7 @@ namespace FastBoarding
                     "S'applique au train, tram et métro.\n" +
                     "Des valeurs plus élevées réduisent le temps de montée/chargement aux arrêts ferrés.\n" +
                     "Les files normales se résorbent plus vite, mais un passager en retard peut encore retarder le départ à cause du design vanilla.\n" +
-                    $"Utilise [✓] <{ToggleLabel}> si tu veux que les cims en retard ratent le véhicule après l'heure de départ.\n" +
+                    $"Utilise [✓] <{ToggleName}> si tu veux que les cims en retard ratent le véhicule après l'heure de départ.\n" +
                     "Le jeu réaffecte ensuite généralement le cim.\n" +
                     "2x = environ deux fois plus rapide pour embarquer."
                 },
@@ -102,7 +102,7 @@ namespace FastBoarding
                     "S'applique aux arrêts de bateau et ferry.\n" +
                     "Des valeurs plus élevées réduisent le temps de montée/chargement aux arrêts d'eau.\n" +
                     "Les files normales se résorbent plus vite, mais un passager en retard peut encore retarder le départ à cause du design vanilla.\n" +
-                    $"Utilise [✓] <{ToggleLabel}> si tu veux que les cims en retard ratent le véhicule après l'heure de départ.\n" +
+                    $"Utilise [✓] <{ToggleName}> si tu veux que les cims en retard ratent le véhicule après l'heure de départ.\n" +
                     "2x = environ deux fois plus rapide pour embarquer."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "Vitesse avion" },
@@ -111,12 +111,12 @@ namespace FastBoarding
                     "S'applique aux terminaux d'avion de passagers.\n" +
                     "Des valeurs plus élevées réduisent le temps de montée/chargement aux terminaux aériens.\n" +
                     "Les files normales se résorbent plus vite, mais un passager en retard peut encore retarder le départ à cause du design vanilla.\n" +
-                    $"Utilise [✓] <{ToggleLabel}> si tu veux que les cims en retard ratent le véhicule après l'heure de départ.\n" +
+                    $"Utilise [✓] <{ToggleName}> si tu veux que les cims en retard ratent le véhicule après l'heure de départ.\n" +
                     "2x = environ deux fois plus rapide pour embarquer."
                 },
 
                 // Late passenger behavior
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleLabel },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
                     "Les passagers encore <pas prêts> après l'heure de départ peuvent rater le véhicule.\n" +
                     "Note : pour l'instant on ne saute que les citoyens en retard qui voyagent seuls.\n" +
@@ -178,10 +178,9 @@ namespace FastBoarding
                     "Tu peux supprimer les anciens logs plus tard.\n" +
                     "Note : <Stats vers log> n'est qu'un snapshot instantané.\n" +
                     "Laisse le log détaillé tourner 15-30 min si tu veux une timeline de ce qui s'est passé.\n" +
-                    "Pense juste à le remettre sur **OFF** avant de jouer normalement."
+                    "Pense juste à le remettre sur **DÉSACTIVÉ** avant de jouer normalement."
 
                 },
-
 
                 // Runtime status strings
                 { TransitWaitStatus.KeyStatusNotLoaded, "Statut non chargé." },
@@ -221,10 +220,8 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportNone, "aucun" },
                 { TransitWaitStatus.KeyReportUnknown, "(inconnu)" },
 
-
             };
         }
-
         public void Unload()
         {
         }

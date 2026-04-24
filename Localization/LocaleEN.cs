@@ -36,6 +36,8 @@ namespace FastBoarding
                 title = title + " (" + Mod.ModVersion + ")";
             }
 
+            const string ToggleName = "Skip Late Passengers";
+
             // One helper keeps all seven status tooltips in sync for future translations.
             string StatusDescription(string transitName)
             {
@@ -45,7 +47,7 @@ namespace FastBoarding
                     "**Avg** = average wait time for those passengers.\n" +
                     "**Worst** stop = highest average wait at one stop.\n" +
                     "Worst stops are good places to inspect for traffic accidents, blocked/bugged stops, or vehicles held up nearby.\n" +
-                    "**Skipped** = late solo passengers skipped today by <Skip Late Passengers>.\n" +
+                    $"**Skipped** = late solo passengers skipped today by <{ToggleName}>.\n" +
                     "Use <Stats to Log> for detailed report: stop names, entity IDs, and more.";
             }
 
@@ -72,12 +74,12 @@ namespace FastBoarding
                     "<1x = vanilla>\n" +
                     "Higher values reduce bus stop boarding and loading time.\n" +
                     "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
-                    "Use [✓] <Skip Late Passengers> so buses are not forced to wait for late cims.\n" +
+                    $"Use [✓] <{ToggleName}> so buses are not forced to wait for late cims.\n" +
                     "2x means ~double boarding speed.\n" +
-                    "Tech notes: higher loading factor means shorter planned stop duration, and boarding time is more like passenger-side wait/boarding estimate.\n" +
-                    "This is not the same as <Skip Late Passengers>; that checkbox decides whether late cims can miss the vehicle after departure time.\n" +
+                    "Tech notes: higher loading value means shorter planned stop duration, and boarding time is more like passenger-side wait/boarding estimate.\n" +
+                    $"This is not the same as <{ToggleName}>; that checkbox decides whether late cims can miss the vehicle after departure time.\n" +
                     "<==========================>\n" +
-                    "Loading-factor for all transit:\n" +
+                    "Loading value for all transit:\n" +
                     "1x  = 100% vanilla dwell \n" +
                     "2x  = ~ 1/2 planned dwell\n" +
                     "4x  = ~ 1/4 planned dwell\n" +
@@ -90,7 +92,7 @@ namespace FastBoarding
                     "Applies to train, tram, and subway stops.\n" +
                     "Higher values reduce boarding/loading time at rail stops.\n" +
                     "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
-                    "Use [✓] <Skip Late Passengers> if you want late cims to miss the vehicle after departure time.\n" +
+                    $"Use [✓] <{ToggleName}> if you want late cims to miss the vehicle after departure time.\n" +
                     "Vanilla will naturally reroute the cim.\n" +
                     "2x means ~double boarding speed."
                 },
@@ -100,7 +102,7 @@ namespace FastBoarding
                     "Applies to ship and ferry stops.\n" +
                     "Higher values reduce boarding/loading time at ship and ferry stops.\n" +
                     "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
-                    "Use [✓] <Skip Late Passengers> if you want late cims to miss the vehicle after departure time.\n" +
+                    $"Use [✓] <{ToggleName}> if you want late cims to miss the vehicle after departure time.\n" +
                     "2x means ~double boarding speed."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "Airplane speed" },
@@ -109,12 +111,12 @@ namespace FastBoarding
                     "Applies to passenger airplane terminals.\n" +
                     "Higher values reduce boarding/loading time at airplane terminals.\n" +
                     "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
-                    "Use [✓] <Skip Late Passengers> if you want late cims to miss the vehicle after departure time.\n" +
+                    $"Use [✓] <{ToggleName}> if you want late cims to miss the vehicle after departure time.\n" +
                     "2x means ~double boarding speed."
                 },
 
                 // Late passenger behavior
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "Skip Late Passengers" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
                     "Late passengers who are still <not ready> after departure time are allowed to miss the vehicle.\n" +
                     "Note: we only skip solo late citizens.\n" +

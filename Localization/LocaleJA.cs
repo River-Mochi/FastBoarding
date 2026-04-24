@@ -36,7 +36,7 @@ namespace FastBoarding
                 title = title + " (" + Mod.ModVersion + ")";
             }
 
-            const string ToggleLabel = "遅れた乗客をスキップ";
+            const string ToggleName = "遅れた乗客をスキップ";
 
             // One helper keeps all seven status tooltips in sync for future translations.
             string StatusDescription(string transitName)
@@ -47,7 +47,7 @@ namespace FastBoarding
                     "**平均** = その乗客たちの平均待ち時間です。\n" +
                     "**最悪** 停留所 = 1つの停留所で平均待ち時間が最も高い場所です。\n" +
                     "最悪の停留所は、事故、詰まった/バグった停留所、近くで足止めされた車両を調べるのに向いています。\n" +
-                    $"**スキップ** = 今日 <{ToggleLabel}> でスキップされた遅れた単独乗客です。\n" +
+                    $"**スキップ** = 今日 <{ToggleName}> でスキップされた遅れた単独乗客です。\n" +
                     "<Stats to Log> を使うと、停留所名、Entity ID などを含む詳細レポートを出せます。";
             }
 
@@ -74,12 +74,12 @@ namespace FastBoarding
                     "<1x = vanilla>\n" +
                     "値を上げると、バス停での乗車/積み込み時間が短くなります。\n" +
                     "通常の列は早くさばけますが、原版の仕組みでは遅れた乗客がまだ発車を遅らせることがあります。\n" +
-                    $"[✓] <{ToggleLabel}> を使うと、バスが遅いCimを待ち続けにくくなります。\n" +
+                    $"[✓] <{ToggleName}> を使うと、バスが遅いCimを待ち続けにくくなります。\n" +
                     "2x はだいたい2倍の乗車速度です。\n" +
-                    "技術メモ: loading factor が高いほど予定停車時間は短くなり、boarding time は乗客側の待機/乗車見積りに近い値です。\n" +
-                    $"これは <{ToggleLabel}> とは別です。このチェックは、発車時刻後に遅いCimがその車両に乗り遅れてよいかを決めます。\n" +
+                    "技術メモ: 積み込み値が高いほど予定停車時間は短くなり、boarding time は乗客側の待機/乗車見積りに近い値です。\n" +
+                    $"これは <{ToggleName}> とは別です。このチェックは、発車時刻後に遅いCimがその車両に乗り遅れてよいかを決めます。\n" +
                     "<==========================>\n" +
-                    "全交通共通の loading factor:\n" +
+                    "全交通共通の積み込み値:\n" +
                     "1x  = 原版の停車時間 100%\n" +
                     "2x  = 予定停車時間 ~ 1/2\n" +
                     "4x  = 予定停車時間 ~ 1/4\n" +
@@ -92,7 +92,7 @@ namespace FastBoarding
                     "列車、路面電車、地下鉄に適用されます。\n" +
                     "値を上げると、鉄道系の停留所での乗車/積み込み時間が短くなります。\n" +
                     "通常の列は早くさばけますが、原版の仕組みでは遅れた乗客がまだ発車を遅らせることがあります。\n" +
-                    $"[✓] <{ToggleLabel}> を使うと、発車時刻後に遅いCimがその車両を逃すようにできます。\n" +
+                    $"[✓] <{ToggleName}> を使うと、発車時刻後に遅いCimがその車両を逃すようにできます。\n" +
                     "その後、ゲームがたいてい自然に再割り当てします。\n" +
                     "2x はだいたい2倍の乗車速度です。"
                 },
@@ -102,7 +102,7 @@ namespace FastBoarding
                     "客船とフェリーに適用されます。\n" +
                     "値を上げると、水上交通の停留所での乗車/積み込み時間が短くなります。\n" +
                     "通常の列は早くさばけますが、原版の仕組みでは遅れた乗客がまだ発車を遅らせることがあります。\n" +
-                    $"[✓] <{ToggleLabel}> を使うと、発車時刻後に遅いCimがその車両を逃すようにできます。\n" +
+                    $"[✓] <{ToggleName}> を使うと、発車時刻後に遅いCimがその車両を逃すようにできます。\n" +
                     "2x はだいたい2倍の乗車速度です。"
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "飛行機乗車速度" },
@@ -111,12 +111,12 @@ namespace FastBoarding
                     "旅客航空ターミナルに適用されます。\n" +
                     "値を上げると、空港での乗車/積み込み時間が短くなります。\n" +
                     "通常の列は早くさばけますが、原版の仕組みでは遅れた乗客がまだ発車を遅らせることがあります。\n" +
-                    $"[✓] <{ToggleLabel}> を使うと、発車時刻後に遅いCimがその車両を逃すようにできます。\n" +
+                    $"[✓] <{ToggleName}> を使うと、発車時刻後に遅いCimがその車両を逃すようにできます。\n" +
                     "2x はだいたい2倍の乗車速度です。"
                 },
 
                 // Late passenger behavior
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleLabel },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
                     "発車時刻を過ぎてもまだ <準備完了ではない> 乗客は、その車両に乗り遅れてもよくなります。\n" +
                     "注意: 今のところ、遅れている単独の市民だけをスキップします。\n" +
@@ -178,10 +178,9 @@ namespace FastBoarding
                     "古いログはあとで削除できます。\n" +
                     "注意: <Stats to Log> はその瞬間のスナップショットだけです。\n" +
                     "時間の流れを見たいなら、詳細ログを15〜30分ほど動かしてください。\n" +
-                    "通常プレイ前に **OFF** へ戻すのを忘れないでください。"
+                    "通常プレイ前に **オフ** へ戻すのを忘れないでください。"
 
                 },
-
 
                 // Runtime status strings
                 { TransitWaitStatus.KeyStatusNotLoaded, "状態が読み込まれていません。" },
@@ -221,10 +220,8 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportNone, "なし" },
                 { TransitWaitStatus.KeyReportUnknown, "(不明)" },
 
-
             };
         }
-
         public void Unload()
         {
         }

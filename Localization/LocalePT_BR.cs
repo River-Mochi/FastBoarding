@@ -36,7 +36,7 @@ namespace FastBoarding
                 title = title + " (" + Mod.ModVersion + ")";
             }
 
-            const string ToggleLabel = "Pular passageiros atrasados";
+            const string ToggleName = "Pular passageiros atrasados";
 
             // One helper keeps all seven status tooltips in sync for future translations.
             string StatusDescription(string transitName)
@@ -47,7 +47,7 @@ namespace FastBoarding
                     "**Média** = tempo médio de espera desses passageiros.\n" +
                     "**Pior** parada = maior média de espera em uma parada.\n" +
                     "As piores paradas são bons lugares para checar acidentes, parada travada/com bug ou veículos presos por perto.\n" +
-                    $"**Pulados** = passageiros solo atrasados pulados hoje por <{ToggleLabel}>.\n" +
+                    $"**Pulados** = passageiros solo atrasados pulados hoje por <{ToggleName}>.\n" +
                     "Use <Stats para log> para relatório detalhado: nomes de paradas, IDs de entidade e mais.";
             }
 
@@ -74,12 +74,12 @@ namespace FastBoarding
                     "<1x = vanilla>\n" +
                     "Valores maiores reduzem o tempo de embarque e carga nas paradas de ônibus.\n" +
                     "Filas normais andam mais rápido, mas um passageiro atrasado ainda pode segurar a saída por causa do design vanilla.\n" +
-                    $"Use [✓] <{ToggleLabel}> para o ônibus não ficar esperando cim atrasado.\n" +
+                    $"Use [✓] <{ToggleName}> para o ônibus não ficar esperando cim atrasado.\n" +
                     "2x significa mais ou menos o dobro da velocidade de embarque.\n" +
-                    "Nota técnica: loading factor maior = parada planejada mais curta; boarding time parece mais a estimativa de espera/embarque do lado do passageiro.\n" +
-                    $"Isso não é a mesma coisa que <{ToggleLabel}>; essa caixa decide se cims atrasados podem perder o veículo depois do horário de saída.\n" +
+                    "Nota técnica: valor de carga maior = parada planejada mais curta; boarding time parece mais a estimativa de espera/embarque do lado do passageiro.\n" +
+                    $"Isso não é a mesma coisa que <{ToggleName}>; essa caixa decide se cims atrasados podem perder o veículo depois do horário de saída.\n" +
                     "<==========================>\n" +
-                    "Loading factor para todo o transporte:\n" +
+                    "Valor de carga para todo o transporte:\n" +
                     "1x  = 100% da parada vanilla\n" +
                     "2x  = ~ 1/2 da parada planejada\n" +
                     "4x  = ~ 1/4 da parada planejada\n" +
@@ -92,7 +92,7 @@ namespace FastBoarding
                     "Vale para trem, bonde e metrô.\n" +
                     "Valores maiores reduzem o tempo de embarque/carga nas paradas sobre trilhos.\n" +
                     "Filas normais andam mais rápido, mas um passageiro atrasado ainda pode segurar a saída por causa do design vanilla.\n" +
-                    $"Use [✓] <{ToggleLabel}> se quiser que cims atrasados percam o veículo depois do horário de saída.\n" +
+                    $"Use [✓] <{ToggleName}> se quiser que cims atrasados percam o veículo depois do horário de saída.\n" +
                     "Depois disso, o jogo normalmente reassocia o cim.\n" +
                     "2x significa mais ou menos o dobro da velocidade de embarque."
                 },
@@ -102,7 +102,7 @@ namespace FastBoarding
                     "Vale para navio e balsa.\n" +
                     "Valores maiores reduzem o tempo de embarque/carga nas paradas aquáticas.\n" +
                     "Filas normais andam mais rápido, mas um passageiro atrasado ainda pode segurar a saída por causa do design vanilla.\n" +
-                    $"Use [✓] <{ToggleLabel}> se quiser que cims atrasados percam o veículo depois do horário de saída.\n" +
+                    $"Use [✓] <{ToggleName}> se quiser que cims atrasados percam o veículo depois do horário de saída.\n" +
                     "2x significa mais ou menos o dobro da velocidade de embarque."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "Velocidade do avião" },
@@ -111,12 +111,12 @@ namespace FastBoarding
                     "Vale para terminais de avião de passageiros.\n" +
                     "Valores maiores reduzem o tempo de embarque/carga nos terminais aéreos.\n" +
                     "Filas normais andam mais rápido, mas um passageiro atrasado ainda pode segurar a saída por causa do design vanilla.\n" +
-                    $"Use [✓] <{ToggleLabel}> se quiser que cims atrasados percam o veículo depois do horário de saída.\n" +
+                    $"Use [✓] <{ToggleName}> se quiser que cims atrasados percam o veículo depois do horário de saída.\n" +
                     "2x significa mais ou menos o dobro da velocidade de embarque."
                 },
 
                 // Late passenger behavior
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleLabel },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
                     "Passageiros que ainda estiverem <não prontos> depois do horário de saída podem perder o veículo.\n" +
                     "Nota: por enquanto, só pulamos cidadãos atrasados que estão viajando sozinhos.\n" +
@@ -178,7 +178,7 @@ namespace FastBoarding
                     "Você pode apagar logs antigos depois.\n" +
                     "Nota: <Stats para log> é só um retrato do momento.\n" +
                     "Deixe o log detalhado rodando por 15-30 min se quiser uma linha do tempo do que aconteceu.\n" +
-                    "Só não esqueça de voltar para **OFF** antes de jogar normal."
+                    "Só não esqueça de voltar para **DESLIGADO** antes de jogar normal."
 
                 },
 
