@@ -17,9 +17,9 @@ This mod map records the important assumptions from decompiled game code so I do
 - FB changes the game's `Game.Prefabs.TransportStopData`.
 - FB only tunes `m_LoadingFactor` and `m_BoardingTime`.
 - FB does not change `PublicTransport.m_DepartureFrame`, line schedules, vehicle AI systems, vehicle counts, or route counts.
-- At `1x` with `Let vehicles leave without late cims` OFF, behavior should be vanilla.
+- At `1x` with `Skip Late Passengers` OFF, behavior should be vanilla.
 - At `2x-10x`, FB reduces boarding/loading time by tuning stop data that vanilla already reads.
-- If `Let vehicles leave without late cims` is ON, FB also checks vehicles already past `PublicTransport.m_DepartureFrame`.
+- If `Skip Late Passengers` is ON, FB also checks vehicles already past `PublicTransport.m_DepartureFrame`.
 - If a solo cim is still not ready, FB detaches that cim from `CurrentVehicle` so the vehicle can leave.
 - The cim is not deleted. They miss the vehicle and vanilla can continue/repath them.
 - Groups/families are not skipped yet; a late group can still hold up a vehicle like vanilla.
@@ -33,7 +33,7 @@ The Status section in Options UI is a snapshot. `Skipped` is the number of solo 
 
 - Avoid Harmony and avoid replacing vanilla transport AI systems.
 - Keep normal behavior save-safe: prefab tuning is recomputed from authoring values and stored only as runtime ECS component changes.
-- Keep the risky behavior opt-in: `Let vehicles leave without late cims` is beta and only acts on solo passengers. Groups with a leader are avoided for now because of unknowns.
+- Keep the risky behavior opt-in: `Skip Late Passengers` is beta and only acts on solo passengers. Groups with a leader are avoided for now because of unknowns.
 - Use ECS queries and command-buffer playback patterns where we mutate gameplay state.
 
 ## Main Systems
@@ -94,7 +94,7 @@ The important detail is that the calculation always starts from the authoring `T
 
 At `1x`, FB uses a strict no-op rule: if a stop prefab has no `TransportStopTuningMarker`, the system does not write `TransportStopData`. If the marker exists, FB restores vanilla authoring values and removes the marker.
 
-## Let Vehicles Leave Without Late Cims
+## Skip Late Passengers
 
 The beta pass is deliberately conservative.
 

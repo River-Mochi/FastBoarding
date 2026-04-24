@@ -256,7 +256,7 @@ namespace FastBoarding
                     TransportType transportType = GetTransportType(vehicleEntity);
 
                     // Collect first, then mutate afterward, so we do not edit the passenger buffer
-                    // while we are still scanning it for late boarders.
+                    // while we are still scanning it for late passengers.
                     var pendingCancellation = new HashSet<Entity>();
 
                     for (var i = 0; i < passengers.Length; i++)

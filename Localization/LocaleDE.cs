@@ -7,14 +7,14 @@ namespace FastBoarding
     using System.Collections.Generic;
 
     /// <summary>
-    /// German localization source.
+    /// English localization source.
     /// </summary>
     public sealed class LocaleDE : IDictionarySource
     {
         private readonly Setting m_Setting;
 
         /// <summary>
-        /// Constructs the German locale.
+        /// Constructs the English locale.
         /// </summary>
         /// <param name="setting">Settings object used for locale IDs.</param>
         public LocaleDE(Setting setting)
@@ -23,7 +23,7 @@ namespace FastBoarding
         }
 
         /// <summary>
-        /// Creates all German localization entries for this mod.
+        /// Creates all English localization entries for this mod.
         /// </summary>
         public IEnumerable<KeyValuePair<string, string>> ReadEntries(
             IList<IDictionaryEntryError> errors,
@@ -36,17 +36,19 @@ namespace FastBoarding
                 title = title + " (" + Mod.ModVersion + ")";
             }
 
+            const string ToggleLabel = "Verspätete Fahrgäste überspringen";
+
             // One helper keeps all seven status tooltips in sync for future translations.
             string StatusDescription(string transitName)
             {
                 return
                     $"<Aktueller {transitName}-Status>\n" +
-                    "**Wartend** = alle Passagiere, die gerade warten.\n" +
-                    "**Durchschn.** = durchschnittliche Wartezeit dieser Passagiere.\n" +
+                    "**Wartend** = alle Fahrgäste, die gerade warten.\n" +
+                    "**Schnitt** = durchschnittliche Wartezeit dieser Fahrgäste.\n" +
                     "**Schlimmster** Halt = höchste durchschnittliche Wartezeit an einem Halt.\n" +
-                    "Schlimmste Halte sind gute Stellen zum Prüfen auf Unfälle, blockierte/verbuggte Halte oder Fahrzeuge, die in der Nähe festhängen.\n" +
-                    "**Übersprungen** = heute durch die Option abgebrochene späte Einstiege.\n" +
-                    "Nutze <Stats ins Log> für einen Detailbericht: Haltestellennamen, Entity-IDs und mehr.";
+                    "Schlimmste Halte sind gute Stellen, um Unfälle, blockierte/verbuggte Halte oder festhängende Fahrzeuge in der Nähe zu prüfen.\n" +
+                    $"**Übersprungen** = heute durch <{ToggleLabel}> übersprungene späte Solo-Fahrgäste.\n" +
+                    "Nutze <Stats ins Log> für Details: Haltestellennamen, Entity-IDs und mehr.";
             }
 
             return new Dictionary<string, string>
@@ -70,56 +72,64 @@ namespace FastBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.BusBoardingSpeedFactor)), "Bus-Einstieg" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.BusBoardingSpeedFactor)),
                     "<1x = Vanilla>\n" +
-                    "Höhere Werte verkürzen Einstiegs-/Ladezeit an Bushaltestellen.\n" +
-                    "Normale Warteschlangen werden schneller abgearbeitet, aber ein verspäteter Fahrgast kann die Abfahrt durch das Vanilla-Design weiterhin verzögern.\n" +
-                    "Nutze [✓] <Fahrzeuge ohne späte Cims abfahren lassen>, wenn einzelne verspätete Cims das Fahrzeug verpassen sollen.\n" +
-                    "2x bedeutet etwa doppelte Einstiegsgeschwindigkeit.\n" +
-                    "Technische Notiz: Ein höherer Ladefaktor bedeutet kürzere geplante Haltezeit, und Boarding Time ist eher die passagierseitige Warte-/Einstiegsschätzung.\n" +
-                    "Das ist nicht dasselbe wie das Fahrzeug zum Abfahren zu zwingen."
+                    "Höhere Werte verkürzen Ein- und Ladezeit an Bushaltestellen.\n" +
+                    "Normale Warteschlangen bauen sich schneller ab, aber verspätete Fahrgäste können die Abfahrt im Vanilla-Design weiter verzögern.\n" +
+                    $"Nutze [✓] <{ToggleLabel}>, damit Busse nicht auf späte Cims warten.\n" +
+                    "2x bedeutet ungefähr doppelte Einstiegsgeschwindigkeit.\n" +
+                    "Technik: höherer Loading-Factor = kürzere geplante Haltezeit; Boarding Time ist eher die Fahrgast-Schätzung für Warten/Einsteigen.\n" +
+                    $"Das ist nicht dasselbe wie <{ToggleLabel}>; diese Checkbox entscheidet, ob späte Cims das Fahrzeug nach der Abfahrtszeit verpassen dürfen.\n" +
+                    "<==========================>\n" +
+                    "Loading-Factor für alle Transitarten:\n" +
+                    "1x  = 100% Vanilla-Haltezeit\n" +
+                    "2x  = ~ 1/2 geplante Haltezeit\n" +
+                    "4x  = ~ 1/4 geplante Haltezeit\n" +
+                    "10x = ~ 1/10 geplante Haltezeit"
+
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "Bahn-Einstieg" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.RailBoardingSpeedFactor)),
                     "<1x = Vanilla>\n" +
                     "Gilt für Zug-, Tram- und U-Bahn-Halte.\n" +
-                    "Höhere Werte verkürzen Einstiegs-/Ladezeit an Schienenhalten.\n" +
-                    "Normale Warteschlangen werden schneller abgearbeitet, aber ein verspäteter Fahrgast kann die Abfahrt durch das Vanilla-Design weiterhin verzögern.\n" +
-                    "Nutze [✓] <Fahrzeuge ohne späte Cims abfahren lassen>, wenn einzelne verspätete Cims das Fahrzeug verpassen sollen.\n" +
-                    "2x bedeutet etwa doppelte Einstiegsgeschwindigkeit."
+                    "Höhere Werte verkürzen Ein- und Ladezeit an Schienenhalten.\n" +
+                    "Normale Warteschlangen bauen sich schneller ab, aber verspätete Fahrgäste können die Abfahrt im Vanilla-Design weiter verzögern.\n" +
+                    $"Nutze [✓] <{ToggleLabel}>, wenn späte Cims das Fahrzeug nach der Abfahrtszeit verpassen sollen.\n" +
+                    "Das Spiel weist den Cim danach normalerweise neu zu.\n" +
+                    "2x bedeutet ungefähr doppelte Einstiegsgeschwindigkeit."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "Schiff + Fähre" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.WaterBoardingSpeedFactor)),
                     "<1x = Vanilla>\n" +
                     "Gilt für Schiffs- und Fährhaltestellen.\n" +
-                    "Höhere Werte verkürzen Einstiegs-/Ladezeit an Schiffs- und Fährhalten.\n" +
-                    "Normale Warteschlangen werden schneller abgearbeitet, aber ein verspäteter Fahrgast kann die Abfahrt durch das Vanilla-Design weiterhin verzögern.\n" +
-                    "Nutze [✓] <Fahrzeuge ohne späte Cims abfahren lassen>, wenn einzelne verspätete Cims das Fahrzeug verpassen sollen.\n" +
-                    "2x bedeutet etwa doppelte Einstiegsgeschwindigkeit."
+                    "Höhere Werte verkürzen Ein- und Ladezeit an Schiffs- und Fährhalten.\n" +
+                    "Normale Warteschlangen bauen sich schneller ab, aber verspätete Fahrgäste können die Abfahrt im Vanilla-Design weiter verzögern.\n" +
+                    $"Nutze [✓] <{ToggleLabel}>, wenn späte Cims das Fahrzeug nach der Abfahrtszeit verpassen sollen.\n" +
+                    "2x bedeutet ungefähr doppelte Einstiegsgeschwindigkeit."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "Flugzeug-Einstieg" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AirBoardingSpeedFactor)),
                     "<1x = Vanilla>\n" +
                     "Gilt für Passagierflugzeug-Terminals.\n" +
-                    "Höhere Werte verkürzen Einstiegs-/Ladezeit an Flugzeug-Terminals.\n" +
-                    "Normale Warteschlangen werden schneller abgearbeitet, aber ein verspäteter Fahrgast kann die Abfahrt durch das Vanilla-Design weiterhin verzögern.\n" +
-                    "Nutze [✓] <Fahrzeuge ohne späte Cims abfahren lassen>, wenn einzelne verspätete Cims das Fahrzeug verpassen sollen.\n" +
-                    "2x bedeutet etwa doppelte Einstiegsgeschwindigkeit."
+                    "Höhere Werte verkürzen Ein- und Ladezeit an Flugzeug-Terminals.\n" +
+                    "Normale Warteschlangen bauen sich schneller ab, aber verspätete Fahrgäste können die Abfahrt im Vanilla-Design weiter verzögern.\n" +
+                    $"Nutze [✓] <{ToggleLabel}>, wenn späte Cims das Fahrzeug nach der Abfahrtszeit verpassen sollen.\n" +
+                    "2x bedeutet ungefähr doppelte Einstiegsgeschwindigkeit."
                 },
 
                 // Late passenger behavior
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "Ohne späte Cims abfahren" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleLabel },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
-                    "**BETA**\n" +
-                    "Verspätete Fahrgäste, die nach der Vanilla-Abfahrtszeit noch <nicht bereit> sind, dürfen das Fahrzeug verpassen.\n" +
-                    "Hinweis: Wir überspringen vorerst nur einzelne verspätete Bürger; Gruppen/Familien, die zusammen reisen, werden <nicht übersprungen> und können weiterhin Verzögerungen wie in Vanilla verursachen.\n" +
-                    "Gruppenreisende sind im Vergleich zu vielen Solo-Fahrgästen nur eine kleine Anzahl.\n" +
-                    "Übersprungene späte Bürger werden nicht gelöscht; Vanilla-Systeme weisen sie danach weiter zu."
+                    "Verspätete Fahrgäste, die nach der Abfahrtszeit noch <nicht bereit> sind, dürfen das Fahrzeug verpassen.\n" +
+                    "Hinweis: Aktuell überspringen wir nur einzelne verspätete Bürger.\n" +
+                    "Gruppen/Familien, die zusammen reisen und zu spät sind, werden <nicht übersprungen> und können wie in Vanilla weiter verzögern.\n" +
+                    "Gruppen sind nur ein kleiner Teil der Menge; der Hauptnutzen kommt vom Überspringen verspäteter Solo-Cims.\n" +
+                    "Übersprungene späte Bürger werden nicht gelöscht; das Spiel weist sie danach natürlich neu zu."
                 },
 
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "Gesamtnutzung" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)),
-                    "Monatliche ÖPNV-Nutzung aus der Transport-Infoansicht des Spiels.\n" +
-                    "Die Uhrzeit zeigt, wann dieser Schnappschuss erstellt wurde."
+                    "Monatliche ÖPNV-Nutzung aus der Transport-Infoview des Spiels.\n" +
+                    "Aktualisiert zeigt, wann dieser Status-Schnappschuss erstellt wurde (meist nach dem Öffnen der Optionen)."
                 },
 
                 // Status rows
@@ -142,51 +152,13 @@ namespace FastBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatsToLog)), "Stats ins Log" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)),
                     "Schreibt einen einmaligen Detailbericht in **FastBoarding.log**.\n" +
-                    "Enthält Wartesummen, Top 3 schlimmste Halte pro Modus, Beispiele übersprungener Cims und Entity-IDs."
+                    "Enthält Wartesummen, Top 3 schlimmste Halte pro Modus, Beispiele übersprungener Cims, Entity-IDs und Linienhinweise."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenLog)), "Log öffnen" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)),
                     "Öffnet **FastBoarding.log**, falls vorhanden.\n" +
-                    "Sonst wird der Logs-Ordner geöffnet."
+                    "Wenn die Datei noch nicht da ist, wird stattdessen der Logs-Ordner geöffnet."
                 },
-
-                // Runtime status strings
-                { TransitWaitStatus.KeyStatusNotLoaded, "Status nicht geladen." },
-                { TransitWaitStatus.KeyNoCityLoaded, "Keine Stadt geladen." },
-                { TransitWaitStatus.KeyNoStopsFound, "Keine Halte gefunden." },
-                { TransitWaitStatus.KeyStatusLine, "{0} warten | durchschn. {1} | schlimmster {2} | {3} übersprungen" },
-                { TransitWaitStatus.KeyStatusOverviewLine, "{0} Touristen/Monat | {1} Bürger/Monat | aktualisiert {2}" },
-
-                // Stats-to-log report strings
-                { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] Bericht angefordert, aber keine Stadt ist geladen." },
-                { TransitWaitStatus.KeyReportTitle, "Stats-ins-Log-Schnappschuss - Fast Boarding" },
-                { TransitWaitStatus.KeyReportSettings, "Einstellungen: {0}" },
-                { TransitWaitStatus.KeyReportNote, "Der Linienhinweis kommt vom Wegpunkt mit der höchsten Wartezeit an diesem Halt." },
-                { TransitWaitStatus.KeyReportTesterHintsHeader, "Tester-Hinweise" },
-                { TransitWaitStatus.KeyReportHintWorstStops, "Schlimmste Halte: zuerst im Spiel oder mit dem Scene Explorer Mod prüfen. Achte auf Unfälle, blockierten Verkehr, schlechte Halteposition oder einen verbuggten Halt." },
-                { TransitWaitStatus.KeyReportHintSkippedCims, "Übersprungene Solo-Cims: verspätete Passagiere, die übersprungen werden, damit der Verkehr abfahren kann. Der spätere Zustand sollte meist 'has path' oder 'assigned' werden. Wenn er bei 'no path yet' bleibt, prüfe diese Cim-Entity nach mehr Zeit." },
-                { TransitWaitStatus.KeyReportHintLateGroups, "Späte Gruppen: Familien/Gruppen, die Vanilla überlassen werden. Hohe Werte sind Hinweise für zukünftige sichere Unterstützung von Gruppenreisen." },
-                { TransitWaitStatus.KeyReportFamilyHeader, "{0}" },
-                { TransitWaitStatus.KeyReportServedStops, "Bediente Halte: {0}" },
-                { TransitWaitStatus.KeyReportStopsWithWaiting, "Halte mit Wartenden: {0}" },
-                { TransitWaitStatus.KeyReportWaitingPassengers, "Wartende Passagiere: {0}" },
-                { TransitWaitStatus.KeyReportAverageWait, "Durchschnittliche Wartezeit: {0}" },
-                { TransitWaitStatus.KeyReportLateBoardersSkipped, "Heute übersprungene späte Passagiere: {0}" },
-                { TransitWaitStatus.KeyReportWorstStopNone, "Schlimmster Halt: keiner, aktuell warten keine Passagiere." },
-                { TransitWaitStatus.KeyReportWorstStopAverageWait, "Durchschn. Wartezeit schlimmster Halt: {0}" },
-                { TransitWaitStatus.KeyReportWorstStopName, "Name schlimmster Halt: {0}" },
-                { TransitWaitStatus.KeyReportWorstStopEntity, "Entity schlimmster Halt: {0}" },
-                { TransitWaitStatus.KeyReportWorstWaypointEntity, "Waypoint-Entity: {0}" },
-                { TransitWaitStatus.KeyReportWorstLineHint, "Linienhinweis: {0}" },
-                { TransitWaitStatus.KeyReportWorstLineEntity, "Linien-Entity: {0}" },
-                { TransitWaitStatus.KeyReportWorstLineWaypointAverage, "Linien-Waypoint-Durchschnitt: {0} mit {1} wartend" },
-                { TransitWaitStatus.KeyReportTopWorstStopsHeader, "Top {0} schlimmste Halte nach durchschnittlicher Wartezeit:" },
-                { TransitWaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | durchschn. {2} | wartend {3} | Halt {4} | Waypoint {5} | Linie {6} | Hinweis {7}" },
-                { TransitWaitStatus.KeyReportLateGroups, "Späte Gruppen nicht übersprungen: {0} Passagiere in {1} Gruppen auf {2} Fahrzeugen" },
-                { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "Beispiele übersprungener später Solo-Cims zu diesem AKTUELLEN Zeitpunkt" },
-                { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | Passagier {2} | verpasstes Fahrzeug {3} | Zeit {4} | jetzt {5}" },
-                { TransitWaitStatus.KeyReportNone, "keine" },
-                { TransitWaitStatus.KeyReportUnknown, "(unbekannt)" },
 
                 // About
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "Mod" },
@@ -200,11 +172,56 @@ namespace FastBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableVerboseLogging)), "Ausführliches Logging" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)),
                     "**Nur Debug / Tests**\n" +
-                    "Fügt Live-Diagnosen zu <FastBoarding.log> hinzu, während die Stadt läuft.\n" +
+                    "Fügt <live> Details zu <Logs/FastBoarding.log> hinzu, während die Stadt läuft.\n" +
                     "**Nicht für normales Spielen aktivieren.**\n" +
-                    "Aktiviert lassen kann Leistung verringern und sehr große Logdateien erzeugen.\n" +
-                    "Alte Logdateien können später gelöscht werden."
+                    "Aktiv lassen kann Leistung kosten und riesige Logdateien erzeugen.\n" +
+                    "Alte Logdateien kannst du später löschen.\n" +
+                    "Hinweis: <Stats ins Log> ist nur ein aktueller Sofort-Schnappschuss.\n" +
+                    "Lass ausführliches Logging 15-30 Min. laufen, wenn du einen Zeitverlauf sehen willst.\n" +
+                    "Denk nur daran, es vor normalem Spielen wieder **AUS** zu schalten."
+
                 },
+
+
+                // Runtime status strings
+                { TransitWaitStatus.KeyStatusNotLoaded, "Status nicht geladen." },
+                { TransitWaitStatus.KeyNoCityLoaded, "Keine Stadt geladen." },
+                { TransitWaitStatus.KeyNoStopsFound, "Keine Halte gefunden." },
+                { TransitWaitStatus.KeyStatusLine, "{0} warten | Schnitt {1} | schlimmster {2} | {3} übersprungen" },
+                { TransitWaitStatus.KeyStatusOverviewLine, "{0} Touristen/Monat | {1} Bürger/Monat | aktualisiert {2}" },
+
+                // Stats-to-log report strings
+                { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] Stats-Bericht angefordert, aber keine Stadt ist geladen." },
+                { TransitWaitStatus.KeyReportTitle, "Stats-ins-Log-Schnappschuss - Fast Boarding" },
+                { TransitWaitStatus.KeyReportSettings, "Einstellungen: {0}" },
+                { TransitWaitStatus.KeyReportNote, "Der Linienhinweis kommt vom Wegpunkt mit der höchsten Wartezeit an diesem Halt." },
+                { TransitWaitStatus.KeyReportTesterHintsHeader, "Tester-Hinweise" },
+                { TransitWaitStatus.KeyReportHintWorstStops, "Schlimmste Halte: zuerst im Spiel oder mit dem Scene Explorer Mod prüfen. Achte auf Unfälle, Verkehr, schlechte Halteposition oder einen verbuggten Halt." },
+                { TransitWaitStatus.KeyReportHintSkippedCims, "Übersprungene Solo-Cims: verspätete Fahrgäste, die wir überspringen, damit der Transit abfahren kann. Der spätere Zustand sollte meist 'has path' oder 'assigned' werden. Wenn er bei 'no path yet' bleibt, prüfe diese Cim-Entity nach mehr Zeit." },
+                { TransitWaitStatus.KeyReportHintLateGroups, "Späte Gruppen: Familien/Gruppen, die Vanilla überlassen werden. Hohe Werte sind Hinweise für spätere sichere Unterstützung von Gruppenreisen." },
+                { TransitWaitStatus.KeyReportFamilyHeader, "{0}" },
+                { TransitWaitStatus.KeyReportServedStops, "Bediente Halte: {0}" },
+                { TransitWaitStatus.KeyReportStopsWithWaiting, "Halte mit Wartenden: {0}" },
+                { TransitWaitStatus.KeyReportWaitingPassengers, "Wartende Fahrgäste: {0}" },
+                { TransitWaitStatus.KeyReportAverageWait, "Durchschnittliche Wartezeit: {0}" },
+                { TransitWaitStatus.KeyReportLateBoardersSkipped, "Heute übersprungene späte Fahrgäste: {0}" },
+                { TransitWaitStatus.KeyReportWorstStopNone, "Schlimmster Halt: keiner, aktuell warten keine Fahrgäste." },
+                { TransitWaitStatus.KeyReportWorstStopAverageWait, "Schnitt schlimmster Halt: {0}" },
+                { TransitWaitStatus.KeyReportWorstStopName, "Name schlimmster Halt: {0}" },
+                { TransitWaitStatus.KeyReportWorstStopEntity, "Entity schlimmster Halt: {0}" },
+                { TransitWaitStatus.KeyReportWorstWaypointEntity, "Waypoint-Entity: {0}" },
+                { TransitWaitStatus.KeyReportWorstLineHint, "Linienhinweis: {0}" },
+                { TransitWaitStatus.KeyReportWorstLineEntity, "Linien-Entity: {0}" },
+                { TransitWaitStatus.KeyReportWorstLineWaypointAverage, "Linien-Wegpunkt-Schnitt: {0} mit {1} wartend" },
+                { TransitWaitStatus.KeyReportTopWorstStopsHeader, "Top {0} schlimmste Halte nach durchschnittlicher Wartezeit:" },
+                { TransitWaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | Schnitt {2} | wartend {3} | Halt {4} | Wegpunkt {5} | Linie {6} | Hinweis {7}" },
+                { TransitWaitStatus.KeyReportLateGroups, "Späte Gruppen nicht übersprungen: {0} Fahrgäste in {1} Gruppen auf {2} Fahrzeugen" },
+                { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "Beispiele übersprungener später Solo-Cims zu diesem AKTUELLEN Zeitpunkt" },
+                { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | Fahrgast {2} | verpasstes Fahrzeug {3} | Zeit {4} | jetzt {5}" },
+                { TransitWaitStatus.KeyReportNone, "keine" },
+                { TransitWaitStatus.KeyReportUnknown, "(unbekannt)" },
+
+
             };
         }
 

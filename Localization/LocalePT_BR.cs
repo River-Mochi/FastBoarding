@@ -1,5 +1,5 @@
 // File: Localization/LocalePT_BR.cs
-// Purpose: Portuguese Brazilian pt-BR locale entries for Fast Boarding.
+// Purpose: Brazilian Portuguese pt-BR locale entries for Fast Boarding.
 
 namespace FastBoarding
 {
@@ -7,14 +7,14 @@ namespace FastBoarding
     using System.Collections.Generic;
 
     /// <summary>
-    /// Portuguese Brazilian localization source.
+    /// English localization source.
     /// </summary>
     public sealed class LocalePT_BR : IDictionarySource
     {
         private readonly Setting m_Setting;
 
         /// <summary>
-        /// Constructs the Portuguese Brazilian locale.
+        /// Constructs the English locale.
         /// </summary>
         /// <param name="setting">Settings object used for locale IDs.</param>
         public LocalePT_BR(Setting setting)
@@ -23,7 +23,7 @@ namespace FastBoarding
         }
 
         /// <summary>
-        /// Creates all Portuguese Brazilian localization entries for this mod.
+        /// Creates all English localization entries for this mod.
         /// </summary>
         public IEnumerable<KeyValuePair<string, string>> ReadEntries(
             IList<IDictionaryEntryError> errors,
@@ -36,6 +36,8 @@ namespace FastBoarding
                 title = title + " (" + Mod.ModVersion + ")";
             }
 
+            const string ToggleLabel = "Pular passageiros atrasados";
+
             // One helper keeps all seven status tooltips in sync for future translations.
             string StatusDescription(string transitName)
             {
@@ -43,10 +45,10 @@ namespace FastBoarding
                     $"<Status atual de {transitName}>\n" +
                     "**Esperando** = total de passageiros esperando agora.\n" +
                     "**Média** = tempo médio de espera desses passageiros.\n" +
-                    "**Pior** parada = maior espera média em uma parada.\n" +
-                    "As piores paradas são bons pontos para verificar acidentes, paradas bloqueadas/bugadas ou veículos presos por perto.\n" +
-                    "**Pulados** = embarques atrasados cancelados hoje pela opção.\n" +
-                    "Use <Stats para Log> para relatório detalhado: nomes de paradas, IDs de entidade e mais.";
+                    "**Pior** parada = maior média de espera em uma parada.\n" +
+                    "As piores paradas são bons lugares para checar acidentes, parada travada/com bug ou veículos presos por perto.\n" +
+                    $"**Pulados** = passageiros solo atrasados pulados hoje por <{ToggleLabel}>.\n" +
+                    "Use <Stats para log> para relatório detalhado: nomes de paradas, IDs de entidade e mais.";
             }
 
             return new Dictionary<string, string>
@@ -67,59 +69,67 @@ namespace FastBoarding
                 { m_Setting.GetOptionGroupLocaleID(Setting.DebugGroup), "Debug" },
 
                 // Boarding speed sliders
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.BusBoardingSpeedFactor)), "Velocidade de ônibus" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.BusBoardingSpeedFactor)), "Velocidade do ônibus" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.BusBoardingSpeedFactor)),
                     "<1x = vanilla>\n" +
-                    "Valores maiores reduzem o tempo de embarque/carregamento nos pontos de ônibus.\n" +
-                    "Isso ajuda filas normais a andar mais rápido, mas um passageiro atrasado ainda pode atrasar a saída por causa do design vanilla.\n" +
-                    "Use [✓] <Deixar veículos saírem sem cims atrasados> se quiser que cims solo atrasados percam o veículo.\n" +
-                    "2x significa aproximadamente o dobro da velocidade de embarque.\n" +
-                    "Nota técnica: loading factor maior significa duração de parada planejada menor, e boarding time é mais como a estimativa de espera/embarque do lado do passageiro.\n" +
-                    "Isso não é o mesmo que forçar o veículo a sair."
+                    "Valores maiores reduzem o tempo de embarque e carga nas paradas de ônibus.\n" +
+                    "Filas normais andam mais rápido, mas um passageiro atrasado ainda pode segurar a saída por causa do design vanilla.\n" +
+                    $"Use [✓] <{ToggleLabel}> para o ônibus não ficar esperando cim atrasado.\n" +
+                    "2x significa mais ou menos o dobro da velocidade de embarque.\n" +
+                    "Nota técnica: loading factor maior = parada planejada mais curta; boarding time parece mais a estimativa de espera/embarque do lado do passageiro.\n" +
+                    $"Isso não é a mesma coisa que <{ToggleLabel}>; essa caixa decide se cims atrasados podem perder o veículo depois do horário de saída.\n" +
+                    "<==========================>\n" +
+                    "Loading factor para todo o transporte:\n" +
+                    "1x  = 100% da parada vanilla\n" +
+                    "2x  = ~ 1/2 da parada planejada\n" +
+                    "4x  = ~ 1/4 da parada planejada\n" +
+                    "10x = ~ 1/10 da parada planejada"
+
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "Velocidade ferroviária" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "Velocidade no trilho" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.RailBoardingSpeedFactor)),
                     "<1x = vanilla>\n" +
-                    "Aplica-se a paradas de trem, bonde e metrô.\n" +
-                    "Valores maiores reduzem o tempo de embarque/carregamento em paradas ferroviárias.\n" +
-                    "Isso ajuda filas normais a andar mais rápido, mas um passageiro atrasado ainda pode atrasar a saída por causa do design vanilla.\n" +
-                    "Use [✓] <Deixar veículos saírem sem cims atrasados> se quiser que cims solo atrasados percam o veículo.\n" +
-                    "2x significa aproximadamente o dobro da velocidade de embarque."
+                    "Vale para trem, bonde e metrô.\n" +
+                    "Valores maiores reduzem o tempo de embarque/carga nas paradas sobre trilhos.\n" +
+                    "Filas normais andam mais rápido, mas um passageiro atrasado ainda pode segurar a saída por causa do design vanilla.\n" +
+                    $"Use [✓] <{ToggleLabel}> se quiser que cims atrasados percam o veículo depois do horário de saída.\n" +
+                    "Depois disso, o jogo normalmente reassocia o cim.\n" +
+                    "2x significa mais ou menos o dobro da velocidade de embarque."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "Velocidade navio + balsa" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "Navio + balsa" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.WaterBoardingSpeedFactor)),
                     "<1x = vanilla>\n" +
-                    "Aplica-se a paradas de navios e balsas.\n" +
-                    "Valores maiores reduzem o tempo de embarque/carregamento em paradas de navios e balsas.\n" +
-                    "Isso ajuda filas normais a andar mais rápido, mas um passageiro atrasado ainda pode atrasar a saída por causa do design vanilla.\n" +
-                    "Use [✓] <Deixar veículos saírem sem cims atrasados> se quiser que cims solo atrasados percam o veículo.\n" +
-                    "2x significa aproximadamente o dobro da velocidade de embarque."
+                    "Vale para navio e balsa.\n" +
+                    "Valores maiores reduzem o tempo de embarque/carga nas paradas aquáticas.\n" +
+                    "Filas normais andam mais rápido, mas um passageiro atrasado ainda pode segurar a saída por causa do design vanilla.\n" +
+                    $"Use [✓] <{ToggleLabel}> se quiser que cims atrasados percam o veículo depois do horário de saída.\n" +
+                    "2x significa mais ou menos o dobro da velocidade de embarque."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "Velocidade de avião" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "Velocidade do avião" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AirBoardingSpeedFactor)),
                     "<1x = vanilla>\n" +
-                    "Aplica-se a terminais de aviões de passageiros.\n" +
-                    "Valores maiores reduzem o tempo de embarque/carregamento em terminais de avião.\n" +
-                    "Isso ajuda filas normais a andar mais rápido, mas um passageiro atrasado ainda pode atrasar a saída por causa do design vanilla.\n" +
-                    "Use [✓] <Deixar veículos saírem sem cims atrasados> se quiser que cims solo atrasados percam o veículo.\n" +
-                    "2x significa aproximadamente o dobro da velocidade de embarque."
+                    "Vale para terminais de avião de passageiros.\n" +
+                    "Valores maiores reduzem o tempo de embarque/carga nos terminais aéreos.\n" +
+                    "Filas normais andam mais rápido, mas um passageiro atrasado ainda pode segurar a saída por causa do design vanilla.\n" +
+                    $"Use [✓] <{ToggleLabel}> se quiser que cims atrasados percam o veículo depois do horário de saída.\n" +
+                    "2x significa mais ou menos o dobro da velocidade de embarque."
                 },
 
                 // Late passenger behavior
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "Deixar sair sem cims atrasados" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleLabel },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
-                    "**BETA**\n" +
-                    "Passageiros atrasados que ainda estão <não prontos> depois do horário vanilla de saída podem perder o veículo.\n" +
-                    "Nota: por enquanto só pulamos cidadãos atrasados que viajam sozinhos, então grupos/famílias viajando juntos <não são pulados> e ainda podem causar atrasos como no vanilla.\n" +
-                    "Viajantes em grupo são poucos comparados aos muitos passageiros solo.\n" +
-                    "Cidadãos atrasados pulados não são deletados; os sistemas vanilla continuam dali para atribuí-los."
+                    "Passageiros que ainda estiverem <não prontos> depois do horário de saída podem perder o veículo.\n" +
+                    "Nota: por enquanto, só pulamos cidadãos atrasados que estão viajando sozinhos.\n" +
+                    "Grupos/famílias viajando juntos e atrasados <não são pulados> e ainda podem causar atraso como no vanilla.\n" +
+                    "Grupos são parte pequena da multidão; o maior ganho vem de pular cims solo atrasados.\n" +
+                    "Esses cidadãos não são apagados; o jogo os reatribui naturalmente depois."
                 },
 
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "Uso total" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)),
-                    "Uso mensal do transporte público pela infovisão de Transporte do jogo.\n" +
-                    "A hora mostra quando este snapshot de status foi feito."
+                    "Uso mensal do transporte público da tela de transporte do jogo.\n" +
+                    "Atualizado mostra quando esse retrato de status foi tirado (normalmente ao abrir as opções)."
                 },
 
                 // Status rows
@@ -139,16 +149,39 @@ namespace FastBoarding
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusAir)), StatusDescription("avião") },
 
                 // Status buttons
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatsToLog)), "Stats para Log" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatsToLog)), "Stats para log" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)),
                     "Escreve um relatório detalhado único em **FastBoarding.log**.\n" +
-                    "Inclui totais de espera, 3 piores paradas por modo, exemplos de cims pulados, IDs de entidade e dicas de linha."
+                    "Inclui totais de espera, top 3 piores paradas por modo, exemplos de cims pulados, IDs de entidade e dicas de linha."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenLog)), "Abrir Log" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenLog)), "Abrir log" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)),
-                    "Abre **FastBoarding.log** se existir.\n" +
+                    "Abre **FastBoarding.log** se ele existir.\n" +
                     "Se o arquivo ainda não existir, abre a pasta Logs."
                 },
+
+                // About
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "Mod" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "Nome exibido deste mod." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "Versão" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "Versão atual do mod." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "Abre a página do autor no Paradox Mods." },
+
+                // Debug
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableVerboseLogging)), "Ativar log detalhado" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)),
+                    "**Só para debug / teste**\n" +
+                    "Adiciona detalhes <live> em <Logs/FastBoarding.log> enquanto a cidade roda.\n" +
+                    "**Não deixe isso ligado no jogo normal.**\n" +
+                    "Deixar ligado pode baixar desempenho e criar logs enormes.\n" +
+                    "Você pode apagar logs antigos depois.\n" +
+                    "Nota: <Stats para log> é só um retrato do momento.\n" +
+                    "Deixe o log detalhado rodando por 15-30 min se quiser uma linha do tempo do que aconteceu.\n" +
+                    "Só não esqueça de voltar para **OFF** antes de jogar normal."
+
+                },
+
 
                 // Runtime status strings
                 { TransitWaitStatus.KeyStatusNotLoaded, "Status não carregado." },
@@ -158,53 +191,37 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} turistas/mês | {1} cidadãos/mês | atualizado {2}" },
 
                 // Stats-to-log report strings
-                { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] Relatório solicitado, mas nenhuma cidade está carregada." },
-                { TransitWaitStatus.KeyReportTitle, "Snapshot Stats para Log - Fast Boarding" },
+                { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] Relatório pedido, mas nenhuma cidade está carregada." },
+                { TransitWaitStatus.KeyReportTitle, "Snapshot Stats para log - Fast Boarding" },
                 { TransitWaitStatus.KeyReportSettings, "Configurações: {0}" },
-                { TransitWaitStatus.KeyReportNote, "A dica de linha vem do waypoint com maior espera nessa parada." },
-                { TransitWaitStatus.KeyReportTesterHintsHeader, "Dicas para testes" },
-                { TransitWaitStatus.KeyReportHintWorstStops, "Piores paradas: inspecione primeiro no jogo ou com o mod Scene Explorer. Procure acidentes, tráfego bloqueado, localização ruim da parada ou uma parada bugada." },
-                { TransitWaitStatus.KeyReportHintSkippedCims, "Cims solo pulados: passageiros atrasados que pulamos para permitir que o transporte saia. O estado posterior geralmente deve virar 'has path' ou 'assigned'. Se ficar em 'no path yet', inspecione essa entidade cim depois de mais tempo." },
-                { TransitWaitStatus.KeyReportHintLateGroups, "Grupos atrasados: famílias/grupos deixados para o vanilla. Contagens altas dão pistas para suporte seguro a viagens em grupo no futuro." },
+                { TransitWaitStatus.KeyReportNote, "A dica da linha vem do waypoint com maior espera naquela parada." },
+                { TransitWaitStatus.KeyReportTesterHintsHeader, "Dicas para tester" },
+                { TransitWaitStatus.KeyReportHintWorstStops, "Piores paradas: olhe essas primeiro no jogo ou com o mod Scene Explorer. Veja acidentes, trânsito, posição ruim da parada ou uma parada bugada." },
+                { TransitWaitStatus.KeyReportHintSkippedCims, "Cims solo pulados: passageiros atrasados que pulamos para deixar o transporte sair. Depois, o estado normalmente vira 'has path' ou 'assigned'. Se continuar em 'no path yet', confira essa entidade mais tarde." },
+                { TransitWaitStatus.KeyReportHintLateGroups, "Grupos atrasados: famílias/grupos deixados para o vanilla. Números altos dão pistas para um suporte futuro e seguro a viagens em grupo." },
                 { TransitWaitStatus.KeyReportFamilyHeader, "{0}" },
                 { TransitWaitStatus.KeyReportServedStops, "Paradas atendidas: {0}" },
-                { TransitWaitStatus.KeyReportStopsWithWaiting, "Paradas com passageiros esperando: {0}" },
+                { TransitWaitStatus.KeyReportStopsWithWaiting, "Paradas com gente esperando: {0}" },
                 { TransitWaitStatus.KeyReportWaitingPassengers, "Passageiros esperando: {0}" },
                 { TransitWaitStatus.KeyReportAverageWait, "Espera média: {0}" },
                 { TransitWaitStatus.KeyReportLateBoardersSkipped, "Passageiros atrasados pulados hoje: {0}" },
-                { TransitWaitStatus.KeyReportWorstStopNone, "Pior parada: nenhuma, sem passageiros esperando agora." },
-                { TransitWaitStatus.KeyReportWorstStopAverageWait, "Espera média da pior parada: {0}" },
+                { TransitWaitStatus.KeyReportWorstStopNone, "Pior parada: nenhuma, ninguém esperando agora." },
+                { TransitWaitStatus.KeyReportWorstStopAverageWait, "Média da pior parada: {0}" },
                 { TransitWaitStatus.KeyReportWorstStopName, "Nome da pior parada: {0}" },
                 { TransitWaitStatus.KeyReportWorstStopEntity, "Entidade da pior parada: {0}" },
-                { TransitWaitStatus.KeyReportWorstWaypointEntity, "Entidade do pior waypoint: {0}" },
-                { TransitWaitStatus.KeyReportWorstLineHint, "Dica da pior linha: {0}" },
-                { TransitWaitStatus.KeyReportWorstLineEntity, "Entidade da pior linha: {0}" },
-                { TransitWaitStatus.KeyReportWorstLineWaypointAverage, "Média do pior waypoint da linha: {0} com {1} esperando" },
+                { TransitWaitStatus.KeyReportWorstWaypointEntity, "Entidade do waypoint: {0}" },
+                { TransitWaitStatus.KeyReportWorstLineHint, "Dica de linha: {0}" },
+                { TransitWaitStatus.KeyReportWorstLineEntity, "Entidade da linha: {0}" },
+                { TransitWaitStatus.KeyReportWorstLineWaypointAverage, "Média do waypoint da linha: {0} com {1} esperando" },
                 { TransitWaitStatus.KeyReportTopWorstStopsHeader, "Top {0} piores paradas por espera média:" },
                 { TransitWaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | média {2} | esperando {3} | parada {4} | waypoint {5} | linha {6} | dica {7}" },
-                { TransitWaitStatus.KeyReportLateGroups, "Passageiros em grupos atrasados deixados em paz: {0} passageiros em {1} grupos em {2} veículos" },
+                { TransitWaitStatus.KeyReportLateGroups, "Grupos atrasados não pulados: {0} passageiros em {1} grupos em {2} veículos" },
                 { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "Exemplos de cims solo atrasados pulados neste momento ATUAL" },
                 { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | passageiro {2} | veículo perdido {3} | hora {4} | agora {5}" },
                 { TransitWaitStatus.KeyReportNone, "nenhum" },
                 { TransitWaitStatus.KeyReportUnknown, "(desconhecido)" },
 
-                // About
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "Mod" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "Nome exibido deste mod." },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "Versão" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "Versão atual do mod." },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "Abre a página Paradox Mods da autora." },
 
-                // Debug
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableVerboseLogging)), "Ativar log detalhado" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)),
-                    "**Somente debug / testes**\n" +
-                    "Adiciona diagnósticos ao vivo em <FastBoarding.log> enquanto a cidade roda.\n" +
-                    "**Não ative para jogo normal.**\n" +
-                    "Deixar isso ligado pode reduzir desempenho e criar logs enormes.\n" +
-                    "Você pode deletar arquivos de log antigos depois."
-                },
             };
         }
 

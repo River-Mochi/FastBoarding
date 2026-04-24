@@ -4,34 +4,32 @@
 	<!--Name of the mod to display to players-->
 	<DisplayName Value="Fast Boarding"/>
 	<!--Short description of the mod-->
-	<ShortDescription Value="Limits total time transit waits at stops; Late passengers stop preventing transit from leaving, causing endless boarding."/>
+	<ShortDescription Value="Improves traffic flow for Transit; faster Boarding + Loading. Late passengers stop slowing transit down."/>
 	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
 	<!--LongDescription Value="This is a long description" /-->
 	<LongDescription>
 ## Fast Boarding [Beta]
 
 Faster public transit boarding
-- Increase transit usage, reduce blocked stops, reduce private car demand indirectly.
+- Improve traffic, increase transit usage, reduce bunching of transit vehicles, reduce car demand indirectly.
 - The larger your city, the more this mod will help.
-- Instead of replacing the transport system files, this build focuses on two behaviors:
+- This build focuses on two behaviors:
 
-- **Prefab stop tuning** for bus, tram, train, subway, ship, ferries, and air transit
-- **Optional Let Vehicles Leave** so tardy citizens can miss a vehicle instead of holding it forever.
-
-### What the sliders do
+- **Adjustable stop tuning** for all transit, not just buses and trains. You choose the speed.
+- **Skip Late Passengers** (optional) so tardy citizens can just miss a vehicle instead of holding it up.
 
 Tune boarding speeds for:
 
 - Bus, Rail (train, tram, subway), Water (ship, ferry), Air
 - Higher values shorten dwell time by increasing stop loading speed and adjusting the boarding-time estimate used by the game.
-- ✅ When **Let Vehicles Leave** is enabled, late passengers who are *still not ready* after *departure time* can be dropped from that vehicle's boarding process.
-- The goal is simple: let the vehicle leave instead of waiting on passengers who are late, possibly far away. The game then naturally reassigns them.
+- ✅ When **Skip Late Passengers** is enabled, late passengers who are *still not ready* after *departure time* can be dropped from that vehicle's boarding process.
+- Simple Goal: let the vehicle leave instead of waiting on passengers who are still late or far away. The game then naturally reassigns them.
 
 ### Status report included
 - After the city runs a bit, check the Options menu to see current status.
 - *Skipped* number shows how many late passengers have been skipped so the transit can leave on time.
-- This is a snapshot of right-now; if the skip number stays at "0" for a long time, make sure to enable the checkbox ✅.
-- For more detailed stats, use the [Stats to Log] button.
+- This is a right-now snapshot; if the skip number stays at "0" for a long time, make sure the checkbox ✅ is enabled.
+- Use the [Stats to Log] button for more detailed stats.
 - Example usage: Worst stop shows over 10 minutes, check it for traffic, bad placement, not enough vehicles, or replace the stop.
 - This is a one-shot button that does not run in the city per-frame, so no performance impact.
 - When investigating, I like to click the button every 30 min, then compare the report later; it also shows exactly where the worst stops are and more.
@@ -45,11 +43,11 @@ Tune boarding speeds for:
 - No Harmony patches; lightweight design for low overhead and negligible performance impact.
 
 ### Support and feedback
-If mods help you, give them a Like, it's easy way to show support for free mods :)
+If mods make the game better, give it a Like. It's an easy way to support free mods :)
 Feedback on: Github, Discord, etc., link icons on this page.
 
 ### Credits
-- RiverMochi....mod author
+- River-Mochi....mod author
 - Inspiration and thanks to bcallender's All Aboard mod and Wayze's old InstantBoarding.
 - yenyang.......for testing and code feedback
 - Neco1996......for testing
@@ -59,10 +57,11 @@ Feedback on: Github, Discord, etc., link icons on this page.
 
 </LongDescription>
 	<!--Thumbnail-->
-	<Thumbnail Value="Properties/Thumbnail-Trainboard02.jpg"/>
+	<Thumbnail Value="Properties/Thumbnail-Trainboard-Sm.jpg"/>
 	<!--Screenshot, can be set multiple times-->
 	<Screenshot Value="Properties/image10-BoardingSpeed.jpg"/>
-	<Screenshot Value="Properties/image20-Status.jpg"/>
+	<Screenshot Value="Properties/image30-Status.jpg"/>
+
 	<!--Tag, can be set multiple times-->
 	<Tag Value=""/>
 	<!--Link to the forum post where the mod can be discussed-->

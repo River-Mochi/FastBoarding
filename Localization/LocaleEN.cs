@@ -4,10 +4,7 @@
 namespace FastBoarding
 {
     using Colossal;
-    using Game.Settings;
-    using Game.Zones;
     using System.Collections.Generic;
-    using System.Numerics;
 
     /// <summary>
     /// English localization source.
@@ -48,7 +45,7 @@ namespace FastBoarding
                     "**Avg** = average wait time for those passengers.\n" +
                     "**Worst** stop = highest average wait at one stop.\n" +
                     "Worst stops are good places to inspect for traffic accidents, blocked/bugged stops, or vehicles held up nearby.\n" +
-                    "**Skipped** = late solo passengers skipped today by <Let Vehicles Leave>.\n" +
+                    "**Skipped** = late solo passengers skipped today by <Skip Late Passengers>.\n" +
                     "Use <Stats to Log> for detailed report: stop names, entity IDs, and more.";
             }
 
@@ -75,16 +72,16 @@ namespace FastBoarding
                     "<1x = vanilla>\n" +
                     "Higher values reduce bus stop boarding and loading time.\n" +
                     "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
-                    "Use [✓] <Let Vehicles Leave> so buses are not forced to wait for late cims.\n" +
+                    "Use [✓] <Skip Late Passengers> so buses are not forced to wait for late cims.\n" +
                     "2x means ~double boarding speed.\n" +
                     "Tech notes: higher loading factor means shorter planned stop duration, and boarding time is more like passenger-side wait/boarding estimate.\n" +
-                    "This is not the same as forcing the vehicle to leave.\n" +
+                    "This is not the same as <Skip Late Passengers>; that checkbox decides whether late cims can miss the vehicle after departure time.\n" +
                     "<==========================>\n" +
-                    "Loading-factor:\n"+
-                    "1x = 100% vanilla dwell\n" +
-                    "2x = ~50% vanilla dwell = about 50% shorter\n" +
-                    "4x = ~25% vanilla dwell = about 75% shorter\n+" +
-                    "10x = ~10% vanilla dwell = about 90% shorter"
+                    "Loading-factor for all transit:\n" +
+                    "1x  = 100% vanilla dwell \n" +
+                    "2x  = ~ 1/2 planned dwell\n" +
+                    "4x  = ~ 1/4 planned dwell\n" +
+                    "10x = ~ 1/10 planned dwell"
 
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "Rail boarding speed" },
@@ -93,7 +90,7 @@ namespace FastBoarding
                     "Applies to train, tram, and subway stops.\n" +
                     "Higher values reduce boarding/loading time at rail stops.\n" +
                     "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
-                    "Use [✓] <Let Vehicles Leave> to allow the vehicle to leave if it's past departure time.\n" +
+                    "Use [✓] <Skip Late Passengers> if you want late cims to miss the vehicle after departure time.\n" +
                     "Vanilla will naturally reroute the cim.\n" +
                     "2x means ~double boarding speed."
                 },
@@ -103,7 +100,7 @@ namespace FastBoarding
                     "Applies to ship and ferry stops.\n" +
                     "Higher values reduce boarding/loading time at ship and ferry stops.\n" +
                     "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
-                    "Use [✓] <Let Vehicles Leave> to allow the vehicle to leave if it's past departure time.\n" +
+                    "Use [✓] <Skip Late Passengers> if you want late cims to miss the vehicle after departure time.\n" +
                     "2x means ~double boarding speed."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "Airplane speed" },
@@ -112,12 +109,12 @@ namespace FastBoarding
                     "Applies to passenger airplane terminals.\n" +
                     "Higher values reduce boarding/loading time at airplane terminals.\n" +
                     "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
-                    "Use [✓] <Let Vehicles Leave> so that late cims don't hold up the vehicle.\n" +
+                    "Use [✓] <Skip Late Passengers> if you want late cims to miss the vehicle after departure time.\n" +
                     "2x means ~double boarding speed."
                 },
 
                 // Late passenger behavior
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "Let Vehicles Leave" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "Skip Late Passengers" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
                     "Late passengers who are still <not ready> after departure time are allowed to miss the vehicle.\n" +
                     "Note: we only skip solo late citizens.\n" +
@@ -205,7 +202,7 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportStopsWithWaiting, "Stops with waiting passengers: {0}" },
                 { TransitWaitStatus.KeyReportWaitingPassengers, "Waiting passengers: {0}" },
                 { TransitWaitStatus.KeyReportAverageWait, "Average wait: {0}" },
-                { TransitWaitStatus.KeyReportLateBoardersSkipped, "Late boarders skipped today: {0}" },
+                { TransitWaitStatus.KeyReportLateBoardersSkipped, "Late passengers skipped today: {0}" },
                 { TransitWaitStatus.KeyReportWorstStopNone, "Worst stop: none, no waiting passengers right now." },
                 { TransitWaitStatus.KeyReportWorstStopAverageWait, "Worst stop avg wait: {0}" },
                 { TransitWaitStatus.KeyReportWorstStopName, "Worst stop name: {0}" },

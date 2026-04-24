@@ -7,14 +7,14 @@ namespace FastBoarding
     using System.Collections.Generic;
 
     /// <summary>
-    /// Traditional Chinese localization source.
+    /// English localization source.
     /// </summary>
     public sealed class LocaleZH_HANT : IDictionarySource
     {
         private readonly Setting m_Setting;
 
         /// <summary>
-        /// Constructs the Traditional Chinese locale.
+        /// Constructs the English locale.
         /// </summary>
         /// <param name="setting">Settings object used for locale IDs.</param>
         public LocaleZH_HANT(Setting setting)
@@ -23,7 +23,7 @@ namespace FastBoarding
         }
 
         /// <summary>
-        /// Creates all Traditional Chinese localization entries for this mod.
+        /// Creates all English localization entries for this mod.
         /// </summary>
         public IEnumerable<KeyValuePair<string, string>> ReadEntries(
             IList<IDictionaryEntryError> errors,
@@ -36,6 +36,8 @@ namespace FastBoarding
                 title = title + " (" + Mod.ModVersion + ")";
             }
 
+            const string ToggleLabel = "跳過遲到乘客";
+
             // One helper keeps all seven status tooltips in sync for future translations.
             string StatusDescription(string transitName)
             {
@@ -44,8 +46,8 @@ namespace FastBoarding
                     "**等待中** = 目前正在等待的乘客總數。\n" +
                     "**平均** = 這些乘客的平均等待時間。\n" +
                     "**最差**站點 = 單一站點最高平均等待時間。\n" +
-                    "最差站點適合優先檢查：可能有交通事故、被堵住/出錯的站點，或附近車輛被卡住。\n" +
-                    "**跳過** = 今天由選項取消的遲到上車。\n" +
+                    "最差站點很適合優先檢查：可能有交通事故、被堵住/出錯的站點，或附近車輛被卡住。\n" +
+                    $"**跳過** = 今天透過 <{ToggleLabel}> 跳過的遲到單獨乘客。\n" +
                     "使用 <統計到日誌> 查看詳細報告：站點名稱、實體 ID 等。";
             }
 
@@ -70,56 +72,64 @@ namespace FastBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.BusBoardingSpeedFactor)), "公車上車速度" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.BusBoardingSpeedFactor)),
                     "<1x = 原版>\n" +
-                    "較高的值會縮短公車站的上車/裝載時間。\n" +
-                    "這會讓正常隊列更快清空，但由於原版設計，遲到乘客仍可能拖延發車。\n" +
-                    "如果想讓遲到的單獨市民錯過車輛，請啟用 [✓] <讓車輛不等遲到市民而離開>。\n" +
-                    "2x 約等於兩倍上車速度。\n" +
-                    "技術說明：更高的 loading factor 表示計畫停站時間更短，而 boarding time 更像是乘客側等待/上車估算。\n" +
-                    "這不等同於強制車輛離開。"
+                    "較高的數值會縮短公車站的上車/裝載時間。\n" +
+                    "一般排隊會更快消化，但依照原版設計，遲到乘客仍可能拖慢發車。\n" +
+                    $"使用 [✓] <{ToggleLabel}>，讓公車不要一直等遲到的 Cim。\n" +
+                    "2x 大約是雙倍上車速度。\n" +
+                    "技術說明：loading factor 越高，計畫停站時間越短；boarding time 更像乘客端的等待/上車估算。\n" +
+                    $"這和 <{ToggleLabel}> 不一樣；這個勾選項決定了發車時間過後，遲到 Cim 是否可以錯過這班車。\n" +
+                    "<==========================>\n" +
+                    "所有交通共用的 loading factor:\n" +
+                    "1x  = 原版停站時間 100%\n" +
+                    "2x  = 計畫停站時間 ~ 1/2\n" +
+                    "4x  = 計畫停站時間 ~ 1/4\n" +
+                    "10x = 計畫停站時間 ~ 1/10"
+
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "軌道上車速度" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.RailBoardingSpeedFactor)),
                     "<1x = 原版>\n" +
-                    "適用於火車、電車和地鐵站。\n" +
-                    "較高的值會縮短軌道站的上車/裝載時間。\n" +
-                    "這會讓正常隊列更快清空，但由於原版設計，遲到乘客仍可能拖延發車。\n" +
-                    "如果想讓遲到的單獨市民錯過車輛，請啟用 [✓] <讓車輛不等遲到市民而離開>。\n" +
-                    "2x 約等於兩倍上車速度。"
+                    "適用於火車、電車和地鐵。\n" +
+                    "較高的數值會縮短軌道站的上車/裝載時間。\n" +
+                    "一般排隊會更快消化，但依照原版設計，遲到乘客仍可能拖慢發車。\n" +
+                    $"使用 [✓] <{ToggleLabel}>，可以讓遲到的 Cim 在發車時間過後錯過這班車。\n" +
+                    "之後遊戲通常會自然重新分配該 Cim。\n" +
+                    "2x 大約是雙倍上車速度。"
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "船舶 + 渡輪速度" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.WaterBoardingSpeedFactor)),
                     "<1x = 原版>\n" +
-                    "適用於客船和渡輪站。\n" +
-                    "較高的值會縮短客船和渡輪站的上車/裝載時間。\n" +
-                    "這會讓正常隊列更快清空，但由於原版設計，遲到乘客仍可能拖延發車。\n" +
-                    "如果想讓遲到的單獨市民錯過車輛，請啟用 [✓] <讓車輛不等遲到市民而離開>。\n" +
-                    "2x 約等於兩倍上車速度。"
+                    "適用於客船和渡輪。\n" +
+                    "較高的數值會縮短水上交通站點的上車/裝載時間。\n" +
+                    "一般排隊會更快消化，但依照原版設計，遲到乘客仍可能拖慢發車。\n" +
+                    $"使用 [✓] <{ToggleLabel}>，可以讓遲到的 Cim 在發車時間過後錯過這班車。\n" +
+                    "2x 大約是雙倍上車速度。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "飛機登機速度" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "飛機上車速度" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AirBoardingSpeedFactor)),
                     "<1x = 原版>\n" +
-                    "適用於客運飛機航廈。\n" +
-                    "較高的值會縮短飛機航廈的登機/裝載時間。\n" +
-                    "這會讓正常隊列更快清空，但由於原版設計，遲到乘客仍可能拖延發車。\n" +
-                    "如果想讓遲到的單獨市民錯過車輛，請啟用 [✓] <讓車輛不等遲到市民而離開>。\n" +
-                    "2x 約等於兩倍上車速度。"
+                    "適用於客運機場航廈。\n" +
+                    "較高的數值會縮短機場的上車/裝載時間。\n" +
+                    "一般排隊會更快消化，但依照原版設計，遲到乘客仍可能拖慢發車。\n" +
+                    $"使用 [✓] <{ToggleLabel}>，可以讓遲到的 Cim 在發車時間過後錯過這班車。\n" +
+                    "2x 大約是雙倍上車速度。"
                 },
 
                 // Late passenger behavior
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), "讓車輛不等遲到市民而離開" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleLabel },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
-                    "**BETA**\n" +
-                    "在原版發車時間後仍然<未準備好>的遲到乘客，可以錯過該車輛。\n" +
-                    "注意：目前我們只跳過單獨出行的遲到市民，因此同行群組/家庭<不會被跳過>，仍可能像原版一樣造成延誤。\n" +
-                    "與大量單獨乘客相比，群組出行者數量較少。\n" +
-                    "被跳過的遲到市民不會被刪除；之後由原版系統繼續分配他們。"
+                    "在發車時間之後仍然 <未準備好> 的乘客，可以錯過這班車。\n" +
+                    "注意：目前我們只跳過遲到的單獨市民。\n" +
+                    "一起出行的群組/家庭如果遲到，<不會被跳過>，仍然可能像原版一樣造成延誤。\n" +
+                    "群組只佔人群中的一小部分，主要收益還是來自跳過遲到的單獨 Cim。\n" +
+                    "被跳過的市民不會被刪除；之後會由遊戲自然重新分配。"
                 },
 
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "總使用量" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)),
                     "來自遊戲交通資訊視圖的每月公共交通使用量。\n" +
-                    "更新時間顯示此狀態快照的生成時間。"
+                    "更新時間顯示這次狀態快照是什麼時候取的（通常是在打開選項時）。"
                 },
 
                 // Status rows
@@ -142,13 +152,36 @@ namespace FastBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatsToLog)), "統計到日誌" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)),
                     "向 **FastBoarding.log** 寫入一次詳細報告。\n" +
-                    "包括等待總數、每種交通的最差 3 個站點、被跳過市民範例、實體 ID 和路線提示。"
+                    "包括等待總數、每種交通的最差 3 個站點、被跳過的 Cim 範例、實體 ID 和路線提示。"
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenLog)), "開啟日誌" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)),
-                    "如果存在則開啟 **FastBoarding.log**。\n" +
-                    "如果找不到檔案，則開啟 Logs 資料夾。"
+                    "如果存在就開啟 **FastBoarding.log**。\n" +
+                    "如果還沒有這個檔案，就開啟 Logs 資料夾。"
                 },
+
+                // About
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "模組" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "這個模組的顯示名稱。" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "版本" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "目前模組版本。" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "開啟作者的 Paradox Mods 頁面。" },
+
+                // Debug
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableVerboseLogging)), "啟用詳細日誌" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)),
+                    "**僅除錯/測試使用**\n" +
+                    "城市運行時向 <Logs/FastBoarding.log> 加入 <live> 詳細資訊。\n" +
+                    "**正常遊玩時不要開啟。**\n" +
+                    "一直開著可能會降低效能，還會生成很大的日誌檔案。\n" +
+                    "舊日誌之後可以刪掉。\n" +
+                    "注意：<統計到日誌> 只是當前瞬間的一次快照。\n" +
+                    "如果你想看一段時間內發生了什麼，就把詳細日誌開 15-30 分鐘。\n" +
+                    "正常遊玩前記得再切回 **OFF**。"
+
+                },
+
 
                 // Runtime status strings
                 { TransitWaitStatus.KeyStatusNotLoaded, "狀態未載入。" },
@@ -163,9 +196,9 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportSettings, "設定：{0}" },
                 { TransitWaitStatus.KeyReportNote, "路線提示來自該站點等待最高的路徑點。" },
                 { TransitWaitStatus.KeyReportTesterHintsHeader, "測試提示" },
-                { TransitWaitStatus.KeyReportHintWorstStops, "最差站點：請先在遊戲內或使用 Scene Explorer 模組檢查。查看是否有事故、交通堵塞、站點位置不佳或站點出錯。" },
-                { TransitWaitStatus.KeyReportHintSkippedCims, "被跳過的單獨市民：這些是為了讓公交/列車離開而跳過的遲到乘客。之後狀態通常應變成 'has path' 或 'assigned'。如果一直是 'no path yet'，請過一段時間再檢查該市民實體。" },
-                { TransitWaitStatus.KeyReportHintLateGroups, "遲到群組：這些家庭/群組仍交給原版處理。數量高時，可作為以後安全支援群組出行的線索。" },
+                { TransitWaitStatus.KeyReportHintWorstStops, "最差站點：先在遊戲內或用 Scene Explorer 模組檢查。看看有沒有事故、交通堵塞、站點位置不好，或站點出錯。" },
+                { TransitWaitStatus.KeyReportHintSkippedCims, "被跳過的單獨 Cim：這些是為了讓交通工具先走而跳過的遲到乘客。之後狀態通常會變成 'has path' 或 'assigned'。如果一直是 'no path yet'，就過一會兒再檢查這個實體。" },
+                { TransitWaitStatus.KeyReportHintLateGroups, "遲到群組：這些家庭/群組還是交給原版處理。數量高的話，可以作為以後安全支援群組出行的線索。" },
                 { TransitWaitStatus.KeyReportFamilyHeader, "{0}" },
                 { TransitWaitStatus.KeyReportServedStops, "服務站點：{0}" },
                 { TransitWaitStatus.KeyReportStopsWithWaiting, "有等待乘客的站點：{0}" },
@@ -183,28 +216,12 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportTopWorstStopsHeader, "平均等待最差的前 {0} 個站點：" },
                 { TransitWaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | 平均 {2} | 等待 {3} | 站點 {4} | 路徑點 {5} | 路線 {6} | 提示 {7}" },
                 { TransitWaitStatus.KeyReportLateGroups, "未跳過的遲到群組：{0} 名乘客，{1} 個群組，{2} 輛車" },
-                { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "此目前時刻被跳過的遲到單獨市民範例" },
+                { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "這個目前時刻被跳過的遲到單獨 Cim 範例" },
                 { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | 乘客 {2} | 錯過車輛 {3} | 時間 {4} | 目前 {5}" },
                 { TransitWaitStatus.KeyReportNone, "無" },
                 { TransitWaitStatus.KeyReportUnknown, "（未知）" },
 
-                // About
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "模組" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "此模組的顯示名稱。" },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "版本" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "目前模組版本。" },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "開啟作者的 Paradox Mods 頁面。" },
 
-                // Debug
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableVerboseLogging)), "啟用詳細日誌" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)),
-                    "**僅除錯/測試使用**\n" +
-                    "城市運行時向 <FastBoarding.log> 加入即時診斷資訊。\n" +
-                    "**正常遊戲時請勿啟用。**\n" +
-                    "保持開啟可能降低效能並生成巨大的日誌檔案。\n" +
-                    "之後可以刪除舊日誌檔案。"
-                },
             };
         }
 
