@@ -81,7 +81,10 @@ namespace FastBoarding
                 updateSystem.UpdateBefore<LateBoarderCancelSystem, HumanMoveSystem>(
                     SystemUpdatePhase.GameSimulation);
 
+                // Ensure the one-shot prefab retune pass runs on startup/load without needing the player
+                // to open Options first.
                 updateSystem.World.GetOrCreateSystemManaged<TransportStopTuningSystem>().Enabled = true;
+                // Start the late-cim skip system in the same ON/OFF state saved in the mod settings file.
                 updateSystem.World.GetOrCreateSystemManaged<LateBoarderCancelSystem>().Enabled =
                     BoardingRuntimeSettings.CancelLateBoarders;
             }
