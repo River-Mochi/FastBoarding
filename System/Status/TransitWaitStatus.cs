@@ -686,6 +686,8 @@ namespace FastBoarding
         {
             sb.AppendLine();
             AppendSubHeader(sb, "Skipped solo Late cim follow-up examples");
+            sb.AppendLine("Legend: state=same vehicle/different vehicle means assigned; has path means repathing or walking; no path yet means unresolved.");
+            sb.AppendLine("        next=stop/lane/waypoint/vehicle/target shows the cim's next path target.");
 
             if (followUpSamples.Count > 0)
             {

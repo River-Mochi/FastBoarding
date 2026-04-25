@@ -38,6 +38,7 @@ namespace FastBoarding
         private DefaultToolSystem? m_DefaultToolSystem;
         private uint m_LastDiagnosticFrame;
         private long m_TotalCanceled;
+        private static bool s_FollowUpLegendLogged;
         private int m_SkippedForTool;
         private bool m_LoggedActive;
         private readonly FollowUpSample[] m_FollowUpSamples = new FollowUpSample[MaxFollowUpSamples];
@@ -535,6 +536,7 @@ namespace FastBoarding
                 sample.Active = false;
                 m_FollowUpSamples[i] = sample;
                 loggedThisUpdate++;
+                LogFollowUpLegendOnce();
 
                 DateTime followUpLocalTime = DateTime.Now;
                 TransitWaitStatusSystem.FollowUpSnapshot followUpSnapshot =
@@ -555,6 +557,19 @@ namespace FastBoarding
                     Mod.s_Log,
                     () => $"Skipped Late Passenger: {sample.TransportType} | cim={sample.Passenger} | missed={sample.Vehicle} | skipped={sample.LocalTime:HH:mm:ss} | followUp={followUpLocalTime:HH:mm:ss} | state={DescribeFollowUpState(followUpSnapshot)}");
             }
+        }
+
+        private static void LogFollowUpLegendOnce()
+        {
+            if (s_FollowUpLegendLogged)
+            {
+                return;
+            }
+
+            s_FollowUpLegendLogged = true;
+            LogUtils.Info(
+                Mod.s_Log,
+                () => "Skip follow-up legend: state=same vehicle/different vehicle means assigned; has path means repathing or walking; no path yet means unresolved. next=stop/lane/waypoint/vehicle/target shows the cim's next path target.");
         }
 
         private static string EntityText(Entity entity)
