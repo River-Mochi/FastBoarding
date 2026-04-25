@@ -46,7 +46,7 @@ namespace FastBoarding
                     "**Waiting** = total passengers waiting right now.\n" +
                     "**Avg** = average wait time for those passengers.\n" +
                     "**Worst** stop = highest average wait at one stop.\n" +
-                    "Worst stops are good places to inspect for traffic accidents, blocked/bugged stops, or vehicles held up nearby.\n" +
+                    "Worst stops are good places to inspect for traffic accidents, blocked/bugged stops, or need more vehicles assigned.\n" +
                     $"**Skipped** = late solo passengers skipped today by <{ToggleName}>.\n" +
                     "Use <Stats to Log> for detailed report: stop names, entity IDs, and more.";
             }
@@ -187,7 +187,7 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyStatusNotLoaded, "Status not loaded." },
                 { TransitWaitStatus.KeyNoCityLoaded, "No city loaded." },
                 { TransitWaitStatus.KeyNoStopsFound, "No stops found." },
-                { TransitWaitStatus.KeyStatusLine, "{0} wait | avg {1} | worst {2} | {3} skipped" },
+                { TransitWaitStatus.KeyStatusLine, "{0} waiting | avg {1} | worst {2} | {3} skipped" },
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} tourist/mo | {1} citizens/mo | updated {2}" },
 
                 // Stats-to-log report strings
