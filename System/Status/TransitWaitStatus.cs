@@ -383,7 +383,7 @@ namespace FastBoarding
         {
             try
             {
-                // Snapshot work is on demand; this does not run every simulation frame.
+                // Snapshot work is on demand; this does not run in the city per frame.
                 TransitWaitStatusSystem system = world.GetOrCreateSystemManaged<TransitWaitStatusSystem>();
                 TransitWaitStatusSystem.Snapshot snapshot = system.BuildSnapshot();
                 ApplySnapshot(snapshot);
@@ -541,7 +541,7 @@ namespace FastBoarding
 
             return LocaleUtils.SafeFormat(
                 KeyStatusLine,
-                "{0} wait | avg {1} | worst {2} | {3} skipped",
+                "{0} waiting | avg {1} | worst {2} | {3} skipped",
                 LocaleUtils.FormatN0(family.WaitingPassengers),
                 FormatDuration(family.AverageWaitSeconds),
                 FormatDuration(family.WorstStopWaitSeconds),
