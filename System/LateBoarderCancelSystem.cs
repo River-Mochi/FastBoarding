@@ -30,7 +30,7 @@ namespace FastBoarding
         private const int MaxSampledCimsPerUpdate = MaxSampledCimsPerModePerUpdate * 7;
         private const uint FollowUpDelayFrames = 4096;
         private const int MaxFollowUpSamples = 256;
-        private const int MaxFollowUpLogsPerUpdate = 12;
+        private const int MaxFollowUpLogsPerUpdate = 6;
 
         private EntityQuery m_VehicleQuery;
         private SimulationSystem? m_SimulationSystem;
@@ -553,7 +553,7 @@ namespace FastBoarding
 
                 LogUtils.Info(
                     Mod.s_Log,
-                    () => $"Skipped Late Passenger: {sample.TransportType} | outcome {followUpSnapshot.OutcomeLabel} | cim={sample.Passenger} | missed={sample.Vehicle} | skipped={sample.LocalTime:HH:mm:ss} | followUp={followUpLocalTime:HH:mm:ss} | nowVehicle={followUpSnapshot.CurrentVehicleText} | nextStop={DescribeFollowUpStop(followUpSnapshot)} | nextWaypoint={EntityText(followUpSnapshot.NextWaypointEntity)} | nextLine={DescribeFollowUpLine(followUpSnapshot)}");
+                    () => $"Skipped Late Passenger: {sample.TransportType} | cim={sample.Passenger} | missed={sample.Vehicle} | skipped={sample.LocalTime:HH:mm:ss} | followUp={followUpLocalTime:HH:mm:ss} | state={DescribeFollowUpState(followUpSnapshot)}");
             }
         }
 
@@ -562,20 +562,70 @@ namespace FastBoarding
             return entity == Entity.Null ? "none" : entity.ToString();
         }
 
-        private static string DescribeFollowUpStop(TransitWaitStatusSystem.FollowUpSnapshot snapshot)
+        private static string DescribeFollowUpState(TransitWaitStatusSystem.FollowUpSnapshot snapshot)
         {
-            string stopName = string.IsNullOrWhiteSpace(snapshot.NextStopName)
-                ? "(unknown)"
-                : snapshot.NextStopName;
-            return $"{stopName} {EntityText(snapshot.NextStopEntity)}";
+            if (snapshot.CurrentVehicle != Entity.Null)
+            {
+                string assignment = snapshot.Outcome == TransitWaitStatusSystem.FollowUpOutcome.SameVehicle
+                    ? $"same vehicle {snapshot.CurrentVehicleText}"
+                    : $"different vehicle {snapshot.CurrentVehicleText}";
+                return AppendFollowUpTargetDetails(assignment, snapshot);
+            }
+
+            if (snapshot.Outcome == TransitWaitStatusSystem.FollowUpOutcome.HasPathNotAssignedYet)
+            {
+                return AppendFollowUpTargetDetails("has path", snapshot);
+            }
+
+            return "no path yet";
         }
 
-        private static string DescribeFollowUpLine(TransitWaitStatusSystem.FollowUpSnapshot snapshot)
+        private static string AppendFollowUpTargetDetails(
+            string summary,
+            TransitWaitStatusSystem.FollowUpSnapshot snapshot)
         {
-            string lineName = string.IsNullOrWhiteSpace(snapshot.NextLineName)
-                ? "(unknown)"
-                : snapshot.NextLineName;
-            return $"{lineName} {EntityText(snapshot.NextLineEntity)}";
+            string nextTarget = DescribeFollowUpTarget(snapshot);
+            if (!string.IsNullOrWhiteSpace(nextTarget))
+            {
+                summary += $" | next={nextTarget}";
+            }
+
+            if (snapshot.NextTargetKind == TransitWaitStatusSystem.FollowUpTargetKind.Stop &&
+                !string.IsNullOrWhiteSpace(snapshot.NextLineName))
+            {
+                summary += $" | line={snapshot.NextLineName}";
+            }
+
+            return summary;
+        }
+
+        private static string DescribeFollowUpTarget(TransitWaitStatusSystem.FollowUpSnapshot snapshot)
+        {
+            switch (snapshot.NextTargetKind)
+            {
+                case TransitWaitStatusSystem.FollowUpTargetKind.Stop:
+                    return DescribeNamedEntity("stop", snapshot.NextStopName, snapshot.NextStopEntity);
+                case TransitWaitStatusSystem.FollowUpTargetKind.Lane:
+                    return DescribeNamedEntity("lane", snapshot.NextTargetName, Entity.Null);
+                case TransitWaitStatusSystem.FollowUpTargetKind.Waypoint:
+                    return DescribeNamedEntity("waypoint", snapshot.NextTargetName, snapshot.NextTargetEntity);
+                case TransitWaitStatusSystem.FollowUpTargetKind.Vehicle:
+                    return DescribeNamedEntity("vehicle", snapshot.NextTargetName, snapshot.NextTargetEntity);
+                case TransitWaitStatusSystem.FollowUpTargetKind.Target:
+                    return DescribeNamedEntity("target", snapshot.NextTargetName, snapshot.NextTargetEntity);
+                default:
+                    return string.Empty;
+            }
+        }
+
+        private static string DescribeNamedEntity(string kind, string name, Entity entity)
+        {
+            string label = string.IsNullOrWhiteSpace(name)
+                ? kind
+                : $"{kind} {name}";
+            return entity == Entity.Null
+                ? label
+                : $"{label} {EntityText(entity)}";
         }
 
         private static bool ShouldLogDiagnostics()

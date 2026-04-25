@@ -145,6 +145,9 @@ namespace FastBoarding
                 OutcomeLabel = snapshot.OutcomeLabel;
                 CurrentVehicle = snapshot.CurrentVehicle;
                 CurrentVehicleFlags = snapshot.CurrentVehicleFlags;
+                NextTargetEntity = snapshot.NextTargetEntity;
+                NextTargetKind = snapshot.NextTargetKind;
+                NextTargetName = snapshot.NextTargetName;
                 NextStopEntity = snapshot.NextStopEntity;
                 NextStopName = snapshot.NextStopName;
                 NextWaypointEntity = snapshot.NextWaypointEntity;
@@ -169,6 +172,12 @@ namespace FastBoarding
             public Entity CurrentVehicle { get; }
 
             public CreatureVehicleFlags CurrentVehicleFlags { get; }
+
+            public Entity NextTargetEntity { get; }
+
+            public TransitWaitStatusSystem.FollowUpTargetKind NextTargetKind { get; }
+
+            public string NextTargetName { get; }
 
             public Entity NextStopEntity { get; }
 
@@ -687,9 +696,7 @@ namespace FastBoarding
                     sb.AppendLine(
                         $"{LocaleUtils.FormatN0(i + 1)}. {sample.TransportType} | outcome {sample.OutcomeLabel} | passenger {EntityText(sample.Passenger)} | missed vehicle {EntityText(sample.MissedVehicle)} | skipped {sample.SkippedLocalTime:HH:mm:ss} | follow-up {sample.FollowUpLocalTime:HH:mm:ss}");
                     sb.AppendLine(
-                        $"   now vehicle {sample.CurrentVehicleText} | next stop {TextOrUnknown(sample.NextStopName)} {EntityText(sample.NextStopEntity)}");
-                    sb.AppendLine(
-                        $"   next waypoint {EntityText(sample.NextWaypointEntity)} | next line {TextOrUnknown(sample.NextLineName)} {EntityText(sample.NextLineEntity)}");
+                        $"   state {DescribeFollowUpState(sample)}");
                 }
 
                 return;
@@ -701,7 +708,7 @@ namespace FastBoarding
                 return;
             }
 
-            sb.AppendLine("No verbose follow-up recorded yet. Leave verbose logging on a little longer after skips.");
+            sb.AppendLine(GetFollowUpWaitingMessage());
             for (int i = 0; i < skippedSamples.Count; i++)
             {
                 SkippedPassengerSample sample = skippedSamples.GetNewest(i);
@@ -845,7 +852,9 @@ namespace FastBoarding
                 counts.HasPathNotAssignedYet == 0 &&
                 counts.Other == 0)
             {
-                return "none recorded yet";
+                return IsVerboseFollowUpCollectionEnabled()
+                    ? "none recorded yet"
+                    : "verbose follow-up OFF";
             }
 
             StringBuilder sb = new StringBuilder();
@@ -869,6 +878,88 @@ namespace FastBoarding
         private static string TextOrUnknown(string value)
         {
             return string.IsNullOrWhiteSpace(value) ? Localize(KeyReportUnknown, "(unknown)") : value;
+        }
+
+        private static string GetFollowUpWaitingMessage()
+        {
+            return IsVerboseFollowUpCollectionEnabled()
+                ? "No verbose follow-up recorded yet. Leave verbose logging on a little longer after skips."
+                : "Verbose follow-up collection is OFF. Enable [Verbose log] to record what skipped cims do next.";
+        }
+
+        private static bool IsVerboseFollowUpCollectionEnabled()
+        {
+#if DEBUG
+            return true;
+#else
+            return BoardingRuntimeSettings.EnableVerboseLogging;
+#endif
+        }
+
+        private static string DescribeFollowUpState(LateBoarderFollowUpSample sample)
+        {
+            if (sample.CurrentVehicle != Entity.Null)
+            {
+                string assignment = sample.Outcome == TransitWaitStatusSystem.FollowUpOutcome.SameVehicle
+                    ? $"same vehicle {sample.CurrentVehicleText}"
+                    : $"different vehicle {sample.CurrentVehicleText}";
+                return AppendFollowUpTargetDetails(assignment, sample);
+            }
+
+            if (sample.Outcome == TransitWaitStatusSystem.FollowUpOutcome.HasPathNotAssignedYet)
+            {
+                return AppendFollowUpTargetDetails("has path", sample);
+            }
+
+            return "no path yet";
+        }
+
+        private static string AppendFollowUpTargetDetails(
+            string summary,
+            LateBoarderFollowUpSample sample)
+        {
+            string nextTarget = DescribeFollowUpTarget(sample);
+            if (!string.IsNullOrWhiteSpace(nextTarget))
+            {
+                summary += $" | next {nextTarget}";
+            }
+
+            if (sample.NextTargetKind == TransitWaitStatusSystem.FollowUpTargetKind.Stop &&
+                !string.IsNullOrWhiteSpace(sample.NextLineName))
+            {
+                summary += $" | line {sample.NextLineName}";
+            }
+
+            return summary;
+        }
+
+        private static string DescribeFollowUpTarget(LateBoarderFollowUpSample sample)
+        {
+            switch (sample.NextTargetKind)
+            {
+                case TransitWaitStatusSystem.FollowUpTargetKind.Stop:
+                    return DescribeNamedEntity("stop", sample.NextStopName, sample.NextStopEntity);
+                case TransitWaitStatusSystem.FollowUpTargetKind.Lane:
+                    return DescribeNamedEntity("lane", sample.NextTargetName, Entity.Null);
+                case TransitWaitStatusSystem.FollowUpTargetKind.Waypoint:
+                    return DescribeNamedEntity("waypoint", sample.NextTargetName, sample.NextTargetEntity);
+                case TransitWaitStatusSystem.FollowUpTargetKind.Vehicle:
+                    return DescribeNamedEntity("vehicle", sample.NextTargetName, sample.NextTargetEntity);
+                case TransitWaitStatusSystem.FollowUpTargetKind.Target:
+                    return DescribeNamedEntity("target", sample.NextTargetName, sample.NextTargetEntity);
+                default:
+                    return string.Empty;
+            }
+        }
+
+        private static string DescribeNamedEntity(string kind, string name, Entity entity)
+        {
+            string label = string.IsNullOrWhiteSpace(name)
+                ? kind
+                : $"{kind} {name}";
+            return entity == Entity.Null
+                ? label
+                : $"{label} {EntityText(entity)}";
         }
 
         private static string FormatReport(string entryId, string fallbackFormat, params object[] args)
