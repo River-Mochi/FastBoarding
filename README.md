@@ -45,7 +45,7 @@ Groups/families travelling together are not skipped yet. They can still delay a 
 
 ### Compared to other boarding mod approaches
 
-Older boarding mods solved the waiting problem inside the vehicle AI systems itself by disabling/replacing the vanilla road and train transport AI systems with Harmony patched copies.
+Older boarding mods often solved the waiting problem inside the vehicle AI systems itself by disabling/replacing the vanilla road and train transport AI systems with Harmony patched copies.
 
 Fast Boarding takes a smaller no-Harmony route:
 
