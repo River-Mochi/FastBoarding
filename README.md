@@ -43,15 +43,15 @@ The cim is not deleted; they simply miss that vehicle and vanilla systems contin
 
 Groups/families travelling together are not skipped yet. They can still delay a vehicle like in vanilla game, (this needs more research/testing before changing it safely).
 
-### Compared With All Aboard
+### Compared With other Boarding mod approaches
 
-All Aboard solved the waiting problem inside the vehicle AI itself by disabling/replacing the vanilla road and train transport AI systems with patched copies.
+Older boarding mods solved the waiting problem inside the vehicle AI systems itself by disabling/replacing the vanilla road and train transport AI systems with Harmony patched copies.
 
 Fast Boarding takes a smaller no-Harmony route:
 
-- It tunes the stop data vanilla already reads.
-- It optionally lets late solo cims miss a vehicle after vanilla departure time.
-- It works with the vanilla transport AI instead of replacing it.
+- tunes the stop data vanilla already reads.
+- optionally lets late solo cims miss a vehicle after vanilla departure time.
+- works with the vanilla's own transport AI system files and does not replace it.
 
 ### Notes
 
