@@ -61,9 +61,9 @@ Fast Boarding takes a smaller no-Harmony route:
 
 ### Credits
 
-River-Mochi____mod author
-Inspiration and thanks to bcallender's All Aboard mod and Wayze's old InstantBoarding.
-yenyang_______for testing and code feedback
-Neco1996______for testing
-MayorCheeks___for testing
-elGaucho87____thumbnail straightener
+- River-Mochi____mod author
+- Inspiration and thanks to bcallender's All Aboard mod and Wayze's old InstantBoarding.
+- yenyang_______for testing and code feedback
+- Neco1996______for testing
+- MayorCheeks___for testing
+- elGaucho87____thumbnail straightener
