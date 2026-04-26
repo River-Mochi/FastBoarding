@@ -45,7 +45,7 @@ namespace FastBoarding
         private static bool s_FollowUpLegendLogged;
         private int m_SkippedForTool;
         private bool m_LoggedActive;
-        // Fixed-size storage for delayed follow-up checks. We reuse slots instead of allocating every update.
+        // Fixed-size storage for delayed follow-up checks. Reuse slots instead of allocating every update.
         private readonly FollowUpSample[] m_FollowUpSamples = new FollowUpSample[MaxFollowUpSamples];
         private int m_FollowUpCount;
         private int m_NextFollowUpSample;
@@ -218,7 +218,7 @@ namespace FastBoarding
             try
             {
                 // This pass reads vehicle/passenger data directly on the main thread.
-                // CompleteDependency is only a sync point: it does not change the query,
+                // Safety: CompleteDependency is only a sync point: it does not change the query,
                 // it just waits for earlier ECS jobs touching the same data to finish first.
                 m_VehicleQuery.CompleteDependency();
                 vehicles = m_VehicleQuery.ToEntityArray(Allocator.Temp);
@@ -264,8 +264,8 @@ namespace FastBoarding
 
                     TransportType transportType = GetTransportType(vehicleEntity);
 
-                    // Collect first, then mutate afterward, so we do not edit the passenger buffer
-                    // while we are still scanning it for late passengers.
+                    // Collect first, then mutate afterward, so do not edit the passenger buffer
+                    // while still scanning it for late passengers.
                     // Managed HashSet is intentional here: this is short-lived main-thread scratch state,
                     // not Burst/job code, so NativeHashSet would add allocator/dispose noise with no payoff.
                     var pendingCancellation = new HashSet<Entity>();

@@ -86,7 +86,7 @@ namespace FastBoarding
 
             try
             {
-                // Routine BT logs bypass Colossal's Unity logger path; that path can show
+                // Routine FB logs bypass Colossal's Unity logger path; that path can show
                 // a UI popup if its internal file stream fails while writing.
                 AppendDirect(log, level, message, exception);
             }
