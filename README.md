@@ -1,6 +1,6 @@
 ## Fast Boarding
 
-Fast Boarding is a transit mod focused on helping public transport board faster without replacing the game's whole transport AI systems.
+Fast Boarding is a transit mod for Cities Skylines 2. It is focused on helping public transport board faster without replacing the game's whole transport AI systems.
 
 ### Uses two lighter-touch ideas:
 
