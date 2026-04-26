@@ -41,7 +41,7 @@ The optional `Skip Late Passengers` toggle watches vehicles that are already pas
 If a solo cim assigned to that vehicle is still *not ready*, the mod detaches that cim from the current vehicle and removes the missed vehicle leg from their current path. 
 The cim is not deleted; they simply miss that vehicle and vanilla systems continue from there.
 
-Groups/families travelling together are not skipped yet. They can still delay a vehicle like vanilla, because group leader/member behavior needs more research before changing it safely.
+Groups/families travelling together are not skipped yet. They can still delay a vehicle like in vanilla game, (this needs more research/testing before changing it safely).
 
 ### Compared With All Aboard
 
