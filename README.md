@@ -43,7 +43,7 @@ The cim is not deleted; they simply miss that vehicle and vanilla systems contin
 
 Groups/families travelling together are not skipped yet. They can still delay a vehicle like in vanilla game, (this needs more research/testing before changing it safely).
 
-### Compared With other Boarding mod approaches
+### Compared to other boarding mod approaches
 
 Older boarding mods solved the waiting problem inside the vehicle AI systems itself by disabling/replacing the vanilla road and train transport AI systems with Harmony patched copies.
 
@@ -56,8 +56,7 @@ Fast Boarding takes a smaller no-Harmony route:
 ### Notes
 
 - The mod is designed to be save-game safe and safe to remove.
-- `Skip Late Passengers` is still experimental, so test on a copy of a save first until there is more live testing.
-- Game errors and warnings still appear in the game's normal logs, but mod-specific logging goes to `FastBoarding.log`.
+- `Skip Late Passengers` is still Beta, so test on a copy of a save first until there is more live testing.
 - Verbose logging is for testers only and should stay OFF during normal gameplay.
 
 ### Credits
