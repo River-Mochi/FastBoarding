@@ -51,14 +51,6 @@ Fast Boarding takes a smaller no-Harmony route:
 - It optionally lets late solo cims miss a vehicle after vanilla departure time.
 - It works with the vanilla transport AI instead of replacing it.
 
-### Design Goals
-
-- Avoid Harmony
-- Avoid wholesale AI system replacement
-- Keep the mod compatible with the standard CS2 toolchain and Options UI patterns
-- Give players broad tuning ranges for testing what feels best
-- Keep `1x` as close to vanilla as possible
-
 ### Notes
 
 - The mod is designed to be save-game safe and safe to remove.
