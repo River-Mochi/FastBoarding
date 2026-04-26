@@ -24,7 +24,7 @@ Fast Boarding is a transit mod focused on helping public transport board faster 
   - Airplane
 - `Skip Late Passengers` toggle
 - Status report for current waits, worst stops, and skipped cims (in Options menu to not affect city performance).
-- `Stats to Log` report with even more details for the curious
+- `Stats to Log` button with even more details for the curious
 
 ### How It Works
 
