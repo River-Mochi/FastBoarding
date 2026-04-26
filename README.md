@@ -37,7 +37,9 @@ Fast Boarding does not change `PublicTransport.m_DepartureFrame`, line schedules
 
 At `1x`, untouched stops are left alone. At `2x-10x`, the mod reduces boarding/loading time so normal queues clear faster through vanilla systems.
 
-The optional `Skip Late Passengers` toggle watches vehicles that are already past their vanilla departure frame. If a solo cim assigned to that vehicle is still not ready, the mod detaches that cim from the current vehicle and removes the missed vehicle leg from their current path. The cim is not deleted; they simply miss that vehicle and vanilla systems continue from there.
+The optional `Skip Late Passengers` toggle watches vehicles that are already past their vanilla departure frame. 
+If a solo cim assigned to that vehicle is still *not ready*, the mod detaches that cim from the current vehicle and removes the missed vehicle leg from their current path. 
+The cim is not deleted; they simply miss that vehicle and vanilla systems continue from there.
 
 Groups/families travelling together are not skipped yet. They can still delay a vehicle like vanilla, because group leader/member behavior needs more research before changing it safely.
 
