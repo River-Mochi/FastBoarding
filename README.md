@@ -55,7 +55,7 @@ Fast Boarding takes a smaller no-Harmony route:
 
 ### Notes
 
-- The mod is designed to be save-game safe and safe to remove.
+- save-game safe and safe to remove.
 - `Skip Late Passengers` is still Beta, so test on a copy of a save first until there is more live testing.
 - Verbose logging is for testers only and should stay OFF during normal gameplay.
 
