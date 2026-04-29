@@ -1,10 +1,12 @@
 // File: Utils/LogUtils.cs
+// version : 0.5.2
 // Purpose: popup-safe logging helpers for CS2 mods.
 // Based on River-Mochi shared CS2 utilities.
 
-namespace FastBoarding
+namespace RiderControl
 {
     using Colossal.Logging;
+    using FastBoarding;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -59,6 +61,11 @@ namespace FastBoarding
         public static void Warn(ILog log, Func<string> messageFactory, Exception? exception = null)
         {
             TryLog(log, Level.Warn, messageFactory, exception);
+        }
+
+        public static void Debug(ILog log, Func<string> messageFactory)
+        {
+            TryLog(log, Level.Debug, messageFactory);
         }
 
         public static void TryLog(ILog log, Level level, Func<string> messageFactory, Exception? exception = null)
@@ -121,7 +128,11 @@ namespace FastBoarding
             {
                 // Direct append keeps routine mod diagnostics out of Colossal's fragile UI-log path.
                 // ShareReadWrite lets the file stay viewable while the game keeps running.
-                Directory.CreateDirectory(Path.GetDirectoryName(logPath));
+                string? dir = Path.GetDirectoryName(logPath);
+                if (!string.IsNullOrEmpty(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
 
                 using FileStream stream = new FileStream(
                     logPath,
