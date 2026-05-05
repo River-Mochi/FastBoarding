@@ -26,9 +26,10 @@ namespace FastBoarding
         // 1. Scan boarding vehicles for solo passengers who are now late.
         // 2. Detach only the passengers whose remaining path still contains that exact vehicle.
         // 3. Optionally record a delayed "what happened next?" sample for verbose diagnostics.
-        // 4096/day means every 64 simulation frames; cancellation work is also capped below.
-        public const int UpdatesPerDay = 4096;
+        // 2048/day means every 128 simulation frames (~42 game seconds); cancellation work is also capped below.
+        public const int UpdatesPerDay = 2048;
         private const int MaxCancellationsPerUpdate = 64;
+
         private const uint DiagnosticFrameInterval = 4096;
         private const int MaxSampledCimsPerModePerUpdate = 3;
         private const int MaxSampledCimsPerUpdate = MaxSampledCimsPerModePerUpdate * 7;
@@ -250,9 +251,10 @@ namespace FastBoarding
                     }
 
                     if (m_SimulationSystem == null ||
-                        m_SimulationSystem.frameIndex < publicTransport.m_DepartureFrame)
+                        publicTransport.m_DepartureFrame == 0 ||
+                        m_SimulationSystem.frameIndex <= publicTransport.m_DepartureFrame)
                     {
-                        // Before the vanilla departure frame, passengers are not late yet.
+                        // Solo passengers still not ready after departure frame are treated as late.
                         continue;
                     }
 

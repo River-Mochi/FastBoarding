@@ -3,10 +3,9 @@
 // Purpose: popup-safe logging helpers for CS2 mods.
 // Based on River-Mochi shared CS2 utilities.
 
-namespace RiderControl
+namespace FastBoarding
 {
     using Colossal.Logging;
-    using FastBoarding;
     using System;
     using System.Collections.Generic;
     using System.IO;

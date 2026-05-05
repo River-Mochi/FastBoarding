@@ -187,7 +187,7 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyStatusNotLoaded, "Status not loaded." },
                 { TransitWaitStatus.KeyNoCityLoaded, "No city loaded." },
                 { TransitWaitStatus.KeyNoStopsFound, "No stops found." },
-                { TransitWaitStatus.KeyStatusLine, "{0} waiting | avg {1} | worst {2} | {3} skipped" },
+                { TransitWaitStatus.KeyStatusLine, "{0} waiting | avg {1} | worst {2} | {3} Late skipped" },
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} tourist/mo | {1} citizens/mo | updated {2}" },
 
                 // Stats-to-log report strings
