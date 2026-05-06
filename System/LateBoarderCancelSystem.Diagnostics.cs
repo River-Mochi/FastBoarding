@@ -4,8 +4,9 @@
 namespace FastBoarding
 {
     using Game; // GameSystemBase
+    using Game.Common; // Deleted, Destroyed
     using Game.Routes; // CurrentRoute
-    using Game.Vehicles; // PublicTransport
+    using Game.Vehicles; // PublicTransport, Passenger, CurrentVehicle
     using System; // DateTime
     using Unity.Entities; // Entity
     using TransportType = Game.Prefabs.TransportType; // bus/train/etc.
@@ -256,7 +257,7 @@ namespace FastBoarding
 
                 LogUtils.Info(
                     Mod.s_Log,
-                    () => $"Skipped Late Passenger: {sample.TransportType} | cim={sample.Passenger} | missed={sample.Vehicle} | skipped={sample.LocalTime:HH:mm:ss} | followUp={followUpLocalTime:HH:mm:ss} | state={DescribeFollowUpState(followUpSnapshot)}");
+                    () => $"Skipped Late Passenger: {sample.TransportType} | cim={sample.Passenger} | missed={sample.Vehicle} | skipped={sample.LocalTime:HH:mm:ss} | followUp={followUpLocalTime:HH:mm:ss} | state={DescribeFollowUpState(followUpSnapshot, sample.Vehicle, sample.Passenger, frame)}");
             }
         }
 
@@ -270,7 +271,7 @@ namespace FastBoarding
             s_FollowUpLegendLogged = true;
             LogUtils.Info(
                 Mod.s_Log,
-                () => "Skip follow-up legend: state=same vehicle/different vehicle means assigned; has path means repathing or walking; no path yet means unresolved. next=stop/lane/waypoint/vehicle/target shows the cim's next path target.");
+                () => "Skip follow-up legend: state=same vehicle/different vehicle means assigned; has path means repathing or walking; no path yet means unresolved. next=stop/lane/waypoint/vehicle/target shows the cim's next path target. same vehicle entries include missed vehicle proof.");
         }
 
         private static string EntityText(Entity entity)
@@ -278,14 +279,26 @@ namespace FastBoarding
             return entity == Entity.Null ? "none" : entity.ToString();
         }
 
-        private static string DescribeFollowUpState(TransitWaitStatusSystem.FollowUpSnapshot snapshot)
+        private string DescribeFollowUpState(
+            TransitWaitStatusSystem.FollowUpSnapshot snapshot,
+            Entity missedVehicle,
+            Entity passenger,
+            uint frame)
         {
             if (snapshot.CurrentVehicle != Entity.Null)
             {
                 string assignment = snapshot.Outcome == TransitWaitStatusSystem.FollowUpOutcome.SameVehicle
                     ? $"same vehicle {snapshot.CurrentVehicleText}"
                     : $"different vehicle {snapshot.CurrentVehicleText}";
-                return AppendFollowUpTargetDetails(assignment, snapshot);
+
+                string details = AppendFollowUpTargetDetails(assignment, snapshot);
+
+                if (snapshot.Outcome == TransitWaitStatusSystem.FollowUpOutcome.SameVehicle)
+                {
+                    details = AppendMissedVehicleProof(details, missedVehicle, passenger, frame);
+                }
+
+                return details;
             }
 
             if (snapshot.Outcome == TransitWaitStatusSystem.FollowUpOutcome.HasPathNotAssignedYet)
@@ -294,6 +307,97 @@ namespace FastBoarding
             }
 
             return "no path yet";
+        }
+
+        private string AppendMissedVehicleProof(string summary, Entity missedVehicle, Entity passenger, uint frame)
+        {
+            if (missedVehicle == Entity.Null)
+            {
+                return summary + " | missedVehicle=none";
+            }
+
+            if (!EntityManager.Exists(missedVehicle))
+            {
+                return summary + " | missedVehicle=gone";
+            }
+
+            if (EntityManager.HasComponent<Deleted>(missedVehicle) ||
+                EntityManager.HasComponent<Destroyed>(missedVehicle))
+            {
+                return summary + " | missedVehicle=deleted/destroyed";
+            }
+
+            if (!EntityManager.HasComponent<Game.Vehicles.PublicTransport>(missedVehicle))
+            {
+                return summary + " | missedVehicle=noPublicTransport";
+            }
+
+            Game.Vehicles.PublicTransport publicTransport =
+                EntityManager.GetComponentData<Game.Vehicles.PublicTransport>(missedVehicle);
+
+            bool stillBoarding = (publicTransport.m_State & PublicTransportFlags.Boarding) != 0;
+            string boardingText = stillBoarding ? "stillBoarding" : "notBoarding";
+
+            string pastDepartureText = "n/a";
+            if (publicTransport.m_DepartureFrame != 0)
+            {
+                uint framesPastDeparture = frame >= publicTransport.m_DepartureFrame
+                    ? frame - publicTransport.m_DepartureFrame
+                    : 0u;
+
+                pastDepartureText = FramesToGameMinutes(framesPastDeparture).ToString("F1") + "m";
+            }
+
+            string passengerProof = BuildMissedVehiclePassengerProof(missedVehicle, passenger);
+
+            return summary +
+                $" | missedVehicle={boardingText}, pastDeparture={pastDepartureText}, {passengerProof}, state={publicTransport.m_State}";
+        }
+
+        private string BuildMissedVehiclePassengerProof(Entity vehicleEntity, Entity followedPassenger)
+        {
+            if (!EntityManager.HasBuffer<Passenger>(vehicleEntity))
+            {
+                return "passengerBuffer=none";
+            }
+
+            DynamicBuffer<Passenger> passengers = EntityManager.GetBuffer<Passenger>(vehicleEntity);
+            int readyCount = 0;
+            int notReadyCount = 0;
+            bool containsFollowedPassenger = false;
+
+            for (int i = 0; i < passengers.Length; i++)
+            {
+                Entity passenger = passengers[i].m_Passenger;
+                if (passenger == followedPassenger)
+                {
+                    containsFollowedPassenger = true;
+                }
+
+                if (!EntityManager.Exists(passenger) ||
+                    !EntityManager.HasComponent<CurrentVehicle>(passenger))
+                {
+                    continue;
+                }
+
+                CurrentVehicle currentVehicle = EntityManager.GetComponentData<CurrentVehicle>(passenger);
+                if (currentVehicle.m_Vehicle != vehicleEntity)
+                {
+                    continue;
+                }
+
+                if ((currentVehicle.m_Flags & CreatureVehicleFlags.Ready) != 0)
+                {
+                    readyCount++;
+                }
+                else
+                {
+                    notReadyCount++;
+                }
+            }
+
+            return
+                $"passengerBuffer={passengers.Length}, ready={readyCount}, notReady={notReadyCount}, containsCim={containsFollowedPassenger}";
         }
 
         private static string AppendFollowUpTargetDetails(
