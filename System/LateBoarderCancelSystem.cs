@@ -1,5 +1,6 @@
 // File: System/LateBoarderCancelSystem.cs
-// Purpose: Experimental system that lets solo late passengers miss a departing transit vehicle.
+// Purpose: lets solo late passengers miss a departing transit vehicle instead of holding it for a long time
+// patch 1.5.7f1 added feature that limits stuck transit to 9.9minutes. This system will be faster than game.
 
 namespace FastBoarding
 {
@@ -8,6 +9,7 @@ namespace FastBoarding
     using Game.Common;
     using Game.Creatures;
     using Game.Pathfind;
+    using Game.Routes;
     using Game.SceneFlow;
     using Game.Simulation;
     using Game.Tools;
@@ -28,20 +30,30 @@ namespace FastBoarding
         // 3. Optionally record a delayed "what happened next?" sample for verbose diagnostics.
         // 2048/day means every 128 simulation frames (~42 game seconds); cancellation work is also capped below.
         public const int UpdatesPerDay = 2048;
-        private const int MaxCancellationsPerUpdate = 64;
 
+        // 128 keeps the old daily throughput ceiling after halving UpdatesPerDay from 4096 to 2048.
+        // Higher caps process large crowds faster but can create larger one-frame edits.
+        private const int MaxCancellationsPerUpdate = 128;
+
+        // Verbose summary throttles. 4096 frames is about 22.5 in-game minutes.
         private const uint DiagnosticFrameInterval = 4096;
+
+
         private const int MaxSampledCimsPerModePerUpdate = 3;
         private const int MaxSampledCimsPerUpdate = MaxSampledCimsPerModePerUpdate * 7;
-        private const uint FollowUpDelayFrames = 4096;
+        private const uint FollowUpDelayFrames = 2048;  // ~ 11.25 in-game minutes.
         private const int MaxFollowUpSamples = 256;
         private const int MaxFollowUpLogsPerUpdate = 6;
+
+        private const uint BoardingHoldProbeFrameInterval = 4096;
+        private const int MaxBoardingHoldProbeLogsPerUpdate = 6;
 
         private EntityQuery m_VehicleQuery;
         private SimulationSystem? m_SimulationSystem;
         private ToolSystem? m_ToolSystem;
         private DefaultToolSystem? m_DefaultToolSystem;
         private uint m_LastDiagnosticFrame;
+        private uint m_LastBoardingHoldProbeFrame;
         private long m_TotalCanceled;
         private static bool s_FollowUpLegendLogged;
         private int m_SkippedForTool;
@@ -215,6 +227,8 @@ namespace FastBoarding
             int airSampleCount = 0;
             CanceledPassengerSample[]? sampledCanceledPassengers = null;
             int sampledCanceledPassengerCount = 0;
+            int boardingHoldProbeLogs = 0;
+            uint frame = m_SimulationSystem?.frameIndex ?? 0;
 
             try
             {
@@ -252,25 +266,44 @@ namespace FastBoarding
 
                     if (m_SimulationSystem == null ||
                         publicTransport.m_DepartureFrame == 0 ||
-                        m_SimulationSystem.frameIndex <= publicTransport.m_DepartureFrame)
+                        frame <= publicTransport.m_DepartureFrame)
                     {
                         // Solo passengers still not ready after departure frame are treated as late.
                         continue;
                     }
 
+                    TransportType transportType = GetTransportType(vehicleEntity);
+
                     var passengers = EntityManager.GetBuffer<Passenger>(vehicleEntity);
                     if (!passengers.IsCreated || passengers.Length == 0)
                     {
+                        TryLogBoardingHoldProbe(
+                            frame,
+                            vehicleEntity,
+                            transportType,
+                            publicTransport,
+                            passengerCount: 0,
+                            readyCount: 0,
+                            notReadyCount: 0,
+                            groupNotReadyCount: 0,
+                            unsafeNotReadyCount: 0,
+                            candidateCount: 0,
+                            note: "empty-past-departure",
+                            ref boardingHoldProbeLogs);
+
                         continue;
                     }
-
-                    TransportType transportType = GetTransportType(vehicleEntity);
 
                     // Collect first, then mutate afterward, so do not edit the passenger buffer
                     // while still scanning it for late passengers.
                     // Managed HashSet is intentional here: this is short-lived main-thread scratch state,
                     // not Burst/job code, so NativeHashSet would add allocator/dispose noise with no payoff.
                     var pendingCancellation = new HashSet<Entity>();
+                    int readyCount = 0;
+                    int notReadyCount = 0;
+                    int groupNotReadyCount = 0;
+                    int unsafeNotReadyCount = 0;
+                    int candidateCountForVehicle = 0;
 
                     for (var i = 0; i < passengers.Length; i++)
                     {
@@ -294,6 +327,15 @@ namespace FastBoarding
 
                         if ((currentVehicle.m_Flags & CreatureVehicleFlags.Ready) != 0)
                         {
+                            readyCount++;
+                            continue;
+                        }
+
+                        notReadyCount++;
+
+                        if (IsGroupPassenger(passenger))
+                        {
+                            groupNotReadyCount++;
                             continue;
                         }
 
@@ -301,8 +343,27 @@ namespace FastBoarding
                         {
                             pendingCancellation.Add(passenger);
                             candidates++;
+                            candidateCountForVehicle++;
+                        }
+                        else
+                        {
+                            unsafeNotReadyCount++;
                         }
                     }
+
+                    TryLogBoardingHoldProbe(
+                        frame,
+                        vehicleEntity,
+                        transportType,
+                        publicTransport,
+                        passengers.Length,
+                        readyCount,
+                        notReadyCount,
+                        groupNotReadyCount,
+                        unsafeNotReadyCount,
+                        candidateCountForVehicle,
+                        candidateCountForVehicle == 0 ? "no-late-solo-candidates" : "late-solo-candidates",
+                        ref boardingHoldProbeLogs);
 
                     int canceledForVehicle = 0;
                     var canceledPassengers = new HashSet<Entity>();
@@ -404,6 +465,89 @@ namespace FastBoarding
                     vehicles.Dispose();
                 }
             }
+        }
+
+
+        private void TryLogBoardingHoldProbe(
+            uint frame,
+            Entity vehicleEntity,
+            TransportType transportType,
+            Game.Vehicles.PublicTransport publicTransport,
+            int passengerCount,
+            int readyCount,
+            int notReadyCount,
+            int groupNotReadyCount,
+            int unsafeNotReadyCount,
+            int candidateCount,
+            string note,
+            ref int logsThisUpdate)
+        {
+            if (!ShouldLogDiagnostics())
+            {
+                return;
+            }
+
+            if (logsThisUpdate >= MaxBoardingHoldProbeLogsPerUpdate)
+            {
+                return;
+            }
+
+            if (m_LastBoardingHoldProbeFrame != 0 &&
+                frame >= m_LastBoardingHoldProbeFrame &&
+                frame - m_LastBoardingHoldProbeFrame < BoardingHoldProbeFrameInterval)
+            {
+                return;
+            }
+
+            uint framesPastDeparture = frame >= publicTransport.m_DepartureFrame
+                ? frame - publicTransport.m_DepartureFrame
+                : 0u;
+
+            // Only log cases that can explain "vehicle is still boarding after departure":
+            // empty/low-use vehicles, no safe late solo candidates, or the new vanilla long-hold threshold.
+            bool lowUse = passengerCount <= 2;
+            bool noLateSoloCandidates = candidateCount == 0;
+            bool pastVanillaLongHold = framesPastDeparture >= 1800u;
+
+            if (!lowUse && !noLateSoloCandidates && !pastVanillaLongHold)
+            {
+                return;
+            }
+
+            logsThisUpdate++;
+            m_LastBoardingHoldProbeFrame = frame;
+
+            Entity route = Entity.Null;
+            if (EntityManager.HasComponent<CurrentRoute>(vehicleEntity))
+            {
+                route = EntityManager.GetComponentData<CurrentRoute>(vehicleEntity).m_Route;
+            }
+
+            string routeText = route == Entity.Null ? "none" : route.ToString();
+            string vehicleText = EntityText(vehicleEntity);
+            double gameMinutesPastDeparture = FramesToGameMinutes(framesPastDeparture);
+
+            LogUtils.Info(
+                Mod.s_Log,
+                () =>
+                    $"BoardingHoldProbe: mode={transportType}, vehicle={vehicleText}, route={routeText}, " +
+                    $"frame={frame}, departureFrame={publicTransport.m_DepartureFrame}, " +
+                    $"pastDepartureFrames={framesPastDeparture}, pastDepartureGameMin={gameMinutesPastDeparture:F1}, " +
+                    $"passengers={passengerCount}, ready={readyCount}, notReady={notReadyCount}, " +
+                    $"lateSoloCandidates={candidateCount}, groupNotReady={groupNotReadyCount}, unsafeNotReady={unsafeNotReadyCount}, " +
+                    $"maxBoardingDistance={publicTransport.m_MaxBoardingDistance}, minWaitingDistance={publicTransport.m_MinWaitingDistance}, " +
+                    $"state={publicTransport.m_State}, note={note}");
+        }
+
+        private static double FramesToGameMinutes(uint frames)
+        {
+            return frames * 1440.0 / 262144.0;
+        }
+
+        private bool IsGroupPassenger(Entity passenger)
+        {
+            return EntityManager.HasComponent<GroupMember>(passenger) ||
+                   EntityManager.HasBuffer<GroupCreature>(passenger);
         }
 
         private bool IsPlayerUsingTool()
@@ -662,8 +806,7 @@ namespace FastBoarding
 
         private bool CanSafelyCancelPassenger(Entity vehicleEntity, Entity passenger)
         {
-            if (EntityManager.HasComponent<GroupMember>(passenger) ||
-                EntityManager.HasBuffer<GroupCreature>(passenger))
+            if (IsGroupPassenger(passenger))
             {
                 // Group boarding has extra leader/member rules. Keep the first beta pass solo-only.
                 return false;
@@ -891,6 +1034,7 @@ namespace FastBoarding
         private void ResetDiagnosticsForCityLoad()
         {
             m_LastDiagnosticFrame = 0;
+            m_LastBoardingHoldProbeFrame = 0;
             m_TotalCanceled = 0;
             m_SkippedForTool = 0;
             m_LoggedActive = false;
