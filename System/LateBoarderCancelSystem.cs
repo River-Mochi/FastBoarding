@@ -35,7 +35,7 @@ namespace FastBoarding
         // Higher caps process large crowds faster but can create larger one-frame edits.
         private const int MaxCancellationsPerUpdate = 128;
 
-        // Verbose summary throttles. 4096 frames is about 22.5 in-game minutes.
+        // Verbose summary throttles. 4096 frames is ~22.5 in-game minutes.
         private const uint DiagnosticFrameInterval = 4096;
 
 
@@ -45,6 +45,7 @@ namespace FastBoarding
         private const int MaxFollowUpSamples = 256;
         private const int MaxFollowUpLogsPerUpdate = 6;
 
+        // Verbose boarding-hold probe throttles. 4096 frames is ~22.5 in-game minutes.
         private const uint BoardingHoldProbeFrameInterval = 4096;
         private const int MaxBoardingHoldProbeLogsPerUpdate = 6;
 
