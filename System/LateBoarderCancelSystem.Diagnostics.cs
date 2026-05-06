@@ -44,7 +44,7 @@ namespace FastBoarding
             int readyCount,
             int notReadyCount,
             int groupNotReadyCount,
-            int unsafeNotReadyCount,
+            UnsafeNotReadyStats unsafeNotReadyStats,
             int candidateCount,
             string note,
             ref int logsThisUpdate)
@@ -101,7 +101,7 @@ namespace FastBoarding
                     $"frame={frame}, departureFrame={publicTransport.m_DepartureFrame}, " +
                     $"pastDepartureFrames={framesPastDeparture}, pastDepartureGameMin={gameMinutesPastDeparture:F1}, " +
                     $"passengers={passengerCount}, ready={readyCount}, notReady={notReadyCount}, " +
-                    $"lateSoloCandidates={candidateCount}, groupNotReady={groupNotReadyCount}, unsafeNotReady={unsafeNotReadyCount}, " +
+                    $"lateSoloCandidates={candidateCount}, groupNotReady={groupNotReadyCount}, unsafeNotReady={unsafeNotReadyStats.Total}, unsafeMissingData={unsafeNotReadyStats.MissingData}, unsafeNoExactVehicleInPath={unsafeNotReadyStats.NoExactVehicleInPath}, unsafeOther={unsafeNotReadyStats.Other}, " +
                     $"maxBoardingDistance={publicTransport.m_MaxBoardingDistance}, minWaitingDistance={publicTransport.m_MinWaitingDistance}, " +
                     $"state={publicTransport.m_State}, note={note}");
         }

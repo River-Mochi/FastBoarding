@@ -4,7 +4,7 @@
 namespace FastBoarding
 {
     using Game; // GameSystemBase
-    using System;
+    using System; // DateTime
     using Unity.Entities;
     using TransportType = Game.Prefabs.TransportType;
 
@@ -27,6 +27,17 @@ namespace FastBoarding
             public int Candidates { get; }
 
             public int Canceled { get; }
+        }
+
+        private struct UnsafeNotReadyStats
+        {
+            public int MissingData;
+
+            public int NoExactVehicleInPath;
+
+            public int Other;
+
+            public int Total => MissingData + NoExactVehicleInPath + Other;
         }
 
         private readonly struct CanceledPassengerSample

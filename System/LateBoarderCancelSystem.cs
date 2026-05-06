@@ -195,7 +195,7 @@ namespace FastBoarding
                             readyCount: 0,
                             notReadyCount: 0,
                             groupNotReadyCount: 0,
-                            unsafeNotReadyCount: 0,
+                            unsafeNotReadyStats: default,
                             candidateCount: 0,
                             note: "empty-past-departure",
                             ref boardingHoldProbeLogs);
@@ -211,7 +211,7 @@ namespace FastBoarding
                     int readyCount = 0;
                     int notReadyCount = 0;
                     int groupNotReadyCount = 0;
-                    int unsafeNotReadyCount = 0;
+                    UnsafeNotReadyStats unsafeNotReadyStats = default;
                     int candidateCountForVehicle = 0;
 
                     for (var i = 0; i < passengers.Length; i++)
@@ -248,15 +248,11 @@ namespace FastBoarding
                             continue;
                         }
 
-                        if (CanSafelyCancelPassenger(vehicleEntity, passenger))
+                        if (CanSafelyCancelPassenger(vehicleEntity, passenger, ref unsafeNotReadyStats))
                         {
                             pendingCancellation.Add(passenger);
                             candidates++;
                             candidateCountForVehicle++;
-                        }
-                        else
-                        {
-                            unsafeNotReadyCount++;
                         }
                     }
 
@@ -269,7 +265,7 @@ namespace FastBoarding
                         readyCount,
                         notReadyCount,
                         groupNotReadyCount,
-                        unsafeNotReadyCount,
+                        unsafeNotReadyStats,
                         candidateCountForVehicle,
                         candidateCountForVehicle == 0 ? "no-late-solo-candidates" : "late-solo-candidates",
                         ref boardingHoldProbeLogs);

@@ -35,9 +35,9 @@ namespace FastBoarding
 
         // 1x is the real vanilla/no-mod baseline. DefaultSpeedFactor is the first-run preset.
         public const int VanillaSpeedFactor = 1;
-        public const int DefaultSpeedFactor = 4;
+        public const int DefaultSpeedFactor = 3;
         public const int MinSpeedFactor = VanillaSpeedFactor;
-        public const int MaxSpeedFactor = 10;
+        public const int MaxSpeedFactor = 5;
         public const int SpeedStepFactor = 1;
 
         public Setting(IMod mod)
