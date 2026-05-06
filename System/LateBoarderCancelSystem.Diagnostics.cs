@@ -3,12 +3,13 @@
 
 namespace FastBoarding
 {
-    using Game; // GameSystemBase
-    using Game.Common; // Deleted, Destroyed
-    using Game.Routes; // CurrentRoute
-    using Game.Vehicles; // PublicTransport, Passenger, CurrentVehicle
-    using System; // DateTime
-    using Unity.Entities; // Entity
+    using Game;             // GameSystemBase
+    using Game.Common;      // Deleted, Destroyed
+    using Game.Creatures;   // CurrentVehicle
+    using Game.Routes;      // CurrentRoute
+    using Game.Vehicles;    // PublicTransport, Passenger
+    using System;           // DateTime
+    using Unity.Entities;   // Entity
     using TransportType = Game.Prefabs.TransportType; // bus/train/etc.
 
     public partial class LateBoarderCancelSystem : GameSystemBase
