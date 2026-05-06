@@ -5,8 +5,8 @@ namespace FastBoarding
 {
     using Game; // GameSystemBase
     using System; // DateTime
-    using Unity.Entities;
-    using TransportType = Game.Prefabs.TransportType;
+    using Unity.Entities; // Entity
+    using TransportType = Game.Prefabs.TransportType; // bus/train/etc.
 
     public partial class LateBoarderCancelSystem : GameSystemBase
     {

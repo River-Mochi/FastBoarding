@@ -333,6 +333,12 @@ namespace FastBoarding
             LogUtils.Info(Mod.s_Log, () => $"Speed changed: {BoardingRuntimeSettings.DescribeForLog()}");
         }
 
+
+        public void RepairLoadedValues()
+        {
+            RepairAndClamp();
+        }
+
         private void RepairAndClamp()
         {
             BusBoardingSpeedFactor = ClampSpeedFactor(BusBoardingSpeedFactor);

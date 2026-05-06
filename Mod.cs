@@ -60,8 +60,12 @@ namespace FastBoarding
             try
             {
                 // CS2 persists ModSetting values in the mod .coc file.
-                // Loading before RegisterInOptionsUI follows the normal flow.
+                // Locales + load settings before register in OptionsUI so it shows localized+saved settings.
                 AssetDatabase.global.LoadSettings(ModId, setting, new Setting(this));
+
+                // Clamp old saved values before Options UI sees them.
+                // Example: helps legacy 6x-10x values become new 5x max after this update.
+                setting.RepairLoadedValues();
                 setting.RegisterInOptionsUI();
                 BoardingRuntimeSettings.Apply(setting);
             }

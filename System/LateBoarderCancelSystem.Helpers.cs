@@ -1,11 +1,12 @@
 // File: System/LateBoarderCancelSystem.Helpers.cs
-// Purpose: Helper methods for passenger checks, cancellation edits, and transport-type detection.
+// Purpose: Helper methods for tool safety, passenger checks, cancellation edits, and transport-type detection.
 
 namespace FastBoarding
 {
     using Game; // GameSystemBase
-    using Game.Creatures; // Human, CurrentVehicle, Passenger flags
+    using Game.Creatures; // Human, CurrentVehicle, group checks
     using Game.Pathfind; // PathOwner, PathElement
+    using Game.Tools; // ToolBaseSystem
     using Game.Vehicles; // Passenger
     using System; // Math
     using System.Collections.Generic; // HashSet
@@ -16,6 +17,23 @@ namespace FastBoarding
 
     public partial class LateBoarderCancelSystem : GameSystemBase
     {
+        private bool IsGroupPassenger(Entity passenger)
+        {
+            return EntityManager.HasComponent<GroupMember>(passenger) ||
+                   EntityManager.HasBuffer<GroupCreature>(passenger);
+        }
+
+        private bool IsPlayerUsingTool()
+        {
+            if (m_ToolSystem == null || m_DefaultToolSystem == null)
+            {
+                return false;
+            }
+
+            ToolBaseSystem? activeTool = m_ToolSystem.activeTool;
+            return activeTool != null && activeTool != m_DefaultToolSystem;
+        }
+
         private bool CanSafelyCancelPassenger(Entity vehicleEntity, Entity passenger)
         {
             UnsafeNotReadyStats ignoredStats = default;
@@ -60,7 +78,7 @@ namespace FastBoarding
             return false;
         }
 
-        private static void AccumulateCanceledCount        private static void AccumulateCanceledCount(
+        private static void AccumulateCanceledCount(
             TransportType transportType,
             int count,
             ref int busCanceled,
