@@ -38,6 +38,26 @@ namespace FastBoarding
 
             const string ToggleName = "Skip Late Passengers";
 
+            string SpeedDescription(string transitName, string shortName, string extraLine)
+            {
+                return
+                    "<1x = vanilla>\n" +
+                    extraLine +
+                    $"Higher values reduce {transitName} boarding and loading time.\n" +
+                    "3x is the recommended default.\n" +
+                    "5x is the maximum.\n" +
+                    "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
+                    $"Use [✓] <{ToggleName}> if you want late cims to miss the vehicle after departure time.\n" +
+                    "Skipped late citizens are not deleted; vanilla will naturally reroute them.\n" +
+                    "<==========================>\n" +
+                    "Loading value:\n" +
+                    "1x = 100% vanilla dwell\n" +
+                    "2x = ~1/2 planned dwell\n" +
+                    "3x = ~1/3 planned dwell (recommended)\n" +
+                    "5x = ~1/5 planned dwell (max)\n" +
+                    $"This is not the same as <{ToggleName}>; that checkbox decides whether late cims can miss the {shortName} after departure time.";
+            }
+
             // One helper keeps all seven status tooltips in sync for future translations.
             string StatusDescription(string transitName)
             {
@@ -47,7 +67,7 @@ namespace FastBoarding
                     "**Avg** = average wait time for those passengers.\n" +
                     "**Worst** stop = highest average wait at one stop.\n" +
                     "Worst stops are good places to inspect for traffic accidents, blocked/bugged stops, or need more vehicles assigned.\n" +
-                    $"**Skipped** = late solo passengers skipped today by <{ToggleName}>.\n" +
+                    $"**Late skipped today** = solo late passengers skipped today by <{ToggleName}>.\n" +
                     "Use <Stats to Log> for detailed report: stop names, entity IDs, and more.";
             }
 
@@ -71,48 +91,31 @@ namespace FastBoarding
                 // Boarding speed sliders
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.BusBoardingSpeedFactor)), "Bus boarding speed" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.BusBoardingSpeedFactor)),
-                    "<1x = vanilla>\n" +
-                    "Higher values reduce bus stop boarding and loading time.\n" +
-                    "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
-                    $"Use [✓] <{ToggleName}> so buses are not forced to wait for late cims.\n" +
-                    "2x means ~double boarding speed.\n" +
-                    "Tech notes: higher loading value means shorter planned stop duration, and boarding time is more like passenger-side wait/boarding estimate.\n" +
-                    $"This is not the same as <{ToggleName}>; that checkbox decides whether late cims can miss the vehicle after departure time.\n" +
-                    "<==========================>\n" +
-                    "Loading value for all transit:\n" +
-                    "1x  = 100% vanilla dwell \n" +
-                    "2x  = ~ 1/2 planned dwell\n" +
-                    "4x  = ~ 1/4 planned dwell\n" +
-                    "10x = ~ 1/10 planned dwell"
-
+                    SpeedDescription(
+                        "bus stop",
+                        "bus",
+                        string.Empty)
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "Rail boarding speed" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.RailBoardingSpeedFactor)),
-                    "<1x = vanilla>\n" +
-                    "Applies to train, tram, and subway stops.\n" +
-                    "Higher values reduce boarding/loading time at rail stops.\n" +
-                    "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
-                    $"Use [✓] <{ToggleName}> if you want late cims to miss the vehicle after departure time.\n" +
-                    "Vanilla will naturally reroute the cim.\n" +
-                    "2x means ~double boarding speed."
+                    SpeedDescription(
+                        "train, tram, and subway stop",
+                        "vehicle",
+                        "Applies to train, tram, and subway stops.\n")
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "Ship + ferry speed" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.WaterBoardingSpeedFactor)),
-                    "<1x = vanilla>\n" +
-                    "Applies to ship and ferry stops.\n" +
-                    "Higher values reduce boarding/loading time at ship and ferry stops.\n" +
-                    "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
-                    $"Use [✓] <{ToggleName}> if you want late cims to miss the vehicle after departure time.\n" +
-                    "2x means ~double boarding speed."
+                    SpeedDescription(
+                        "ship and ferry stop",
+                        "vehicle",
+                        "Applies to ship and ferry stops.\n")
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "Airplane speed" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AirBoardingSpeedFactor)),
-                    "<1x = vanilla>\n" +
-                    "Applies to passenger airplane terminals.\n" +
-                    "Higher values reduce boarding/loading time at airplane terminals.\n" +
-                    "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
-                    $"Use [✓] <{ToggleName}> if you want late cims to miss the vehicle after departure time.\n" +
-                    "2x means ~double boarding speed."
+                    SpeedDescription(
+                        "airplane terminal",
+                        "airplane",
+                        "Applies to passenger airplane terminals.\n")
                 },
 
                 // Late passenger behavior
@@ -176,18 +179,16 @@ namespace FastBoarding
                     "**Do not enable for normal gameplay.**\n" +
                     "Leaving this on can decrease performance and create huge log files.\n" +
                     "You can delete old log files later.\n" +
-                    "Note: <Stats to Log> is only a current right-now snapshot.\n" +
+                    "Note: <Stats to Log> is a point-in-time report plus today's late-skip counters.\n" +
                     "Run verbose logging for 15-30 min if you want a timeline of what happened over time.\n" +
                     "Just don't forget to turn it **OFF** again before normal gameplay."
-
                 },
-
 
                 // Runtime status strings
                 { TransitWaitStatus.KeyStatusNotLoaded, "Status not loaded." },
                 { TransitWaitStatus.KeyNoCityLoaded, "No city loaded." },
                 { TransitWaitStatus.KeyNoStopsFound, "No stops found." },
-                { TransitWaitStatus.KeyStatusLine, "{0} waiting | avg {1} | worst {2} | {3} Late skipped" },
+                { TransitWaitStatus.KeyStatusLine, "{0} waiting | avg {1} | worst {2} | {3} late skipped today" },
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} tourist/mo | {1} citizens/mo | updated {2}" },
 
                 // Stats-to-log report strings
@@ -197,7 +198,7 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportNote, "Line hint comes from the highest-wait waypoint at that stop." },
                 { TransitWaitStatus.KeyReportTesterHintsHeader, "Tester hints" },
                 { TransitWaitStatus.KeyReportHintWorstStops, "Worst stops: inspect these first in-game or with Scene Explorer mod. Look for accidents, traffic, bad transit stop location, or a bugged stop." },
-                { TransitWaitStatus.KeyReportHintSkippedCims, "Skipped solo cims: late passengers we skip to allow transit to leave. later state should usually become 'has path' or 'assigned'. If it stays 'no path yet', inspect that cim entity after more time." },
+                { TransitWaitStatus.KeyReportHintSkippedCims, "Skipped solo cims: late passengers we skip to allow transit to leave. Later state should usually become 'has path' or 'assigned'. If it stays 'no path yet', inspect that cim entity after more time." },
                 { TransitWaitStatus.KeyReportHintLateGroups, "Late groups: these are families/groups left to vanilla. High counts are clues for future safe group-travel support." },
                 { TransitWaitStatus.KeyReportFamilyHeader, "{0}" },
                 { TransitWaitStatus.KeyReportServedStops, "Served stops: {0}" },
@@ -216,12 +217,10 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportTopWorstStopsHeader, "Top {0} worst stops by average wait:" },
                 { TransitWaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | avg {2} | waiting {3} | stop entity {4} | waypoint entity {5} | line entity {6} | line hint {7}" },
                 { TransitWaitStatus.KeyReportLateGroups, "Late group passengers left alone: {0} passengers in {1} groups on {2} vehicles" },
-                { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "Skipped solo Late cim examples at this CURRENT time" },
+                { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "Skipped solo late cim examples" },
                 { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | passenger {2} | missed vehicle {3} | time {4} | now {5}" },
                 { TransitWaitStatus.KeyReportNone, "none" },
                 { TransitWaitStatus.KeyReportUnknown, "(unknown)" },
-
-
             };
         }
 
@@ -230,3 +229,4 @@ namespace FastBoarding
         }
     }
 }
+0
