@@ -3,18 +3,17 @@
 
 namespace FastBoarding
 {
-    using Game.Creatures;
-    using Game.Pathfind;
-    using Game.SceneFlow;
-    using Game.Simulation;
-    using Game.Tools;
-    using Game.Vehicles;
-    using System;
-    using System.Collections.Generic;
-    using Unity.Entities;
-    using PrefabRef = Game.Prefabs.PrefabRef;
-    using PublicTransportVehicleData = Game.Prefabs.PublicTransportVehicleData;
-    using TransportType = Game.Prefabs.TransportType;
+    using Game; // GameSystemBase
+    using Game.Creatures; // Human, CurrentVehicle, group checks
+    using Game.Pathfind; // PathOwner, PathElement
+    using Game.Tools; // ToolBaseSystem
+    using Game.Vehicles; // Passenger
+    using System; // Math
+    using System.Collections.Generic; // HashSet
+    using Unity.Entities; // Entity, EntityCommandBuffer
+    using PrefabRef = Game.Prefabs.PrefabRef; // prefab lookup
+    using PublicTransportVehicleData = Game.Prefabs.PublicTransportVehicleData; // transport type source
+    using TransportType = Game.Prefabs.TransportType; // bus/train/etc.
 
     public partial class LateBoarderCancelSystem : GameSystemBase
     {
@@ -53,9 +52,11 @@ namespace FastBoarding
 
             var pathOwner = EntityManager.GetComponentData<PathOwner>(passenger);
             var pathElements = EntityManager.GetBuffer<PathElement>(passenger);
+
             // Only inspect the remaining path from the current cursor forward.
             // Older elements before m_ElementIndex are already behind the cim.
             int startIndex = Math.Max(0, pathOwner.m_ElementIndex);
+
             // Only cancel when the cim still has this exact vehicle in the remaining path.
             for (var i = startIndex; i < pathElements.Length; i++)
             {
@@ -178,10 +179,12 @@ namespace FastBoarding
 
             var pathOwner = EntityManager.GetComponentData<PathOwner>(passenger);
             var pathElements = EntityManager.GetBuffer<PathElement>(passenger);
+
             // Match vanilla's "search from the current path cursor onward" behavior.
             int startIndex = Math.Max(0, pathOwner.m_ElementIndex);
+
             // -1 is a sentinel meaning "vehicle not found yet".
-            // We never use it as an array index: the < 0 check below aborts first.
+            // It is never used as an array index; the < 0 check below aborts first.
             int vehiclePathIndex = -1;
             for (var i = startIndex; i < pathElements.Length; i++)
             {
@@ -194,8 +197,7 @@ namespace FastBoarding
 
             if (vehiclePathIndex < 0)
             {
-                // Safety stop: if the vehicle disappeared from the remaining path, do nothing
-                // and leave the passenger fully to vanilla.
+                // Safety stop: if the vehicle disappeared from the remaining path, do nothing.
                 return false;
             }
 
@@ -213,16 +215,14 @@ namespace FastBoarding
             ecb.SetComponent(passenger, human);
 
             // Replace the path buffer during ECB playback so vanilla can continue from the next leg.
-            // We keep only the elements AFTER the missed vehicle. That is why the copy starts at +1.
-            // If the missed vehicle was already the final leg, the new path is intentionally empty.
+            // Copy starts after the missed vehicle, so the missed leg is removed.
             DynamicBuffer<PathElement> newPath = ecb.SetBuffer<PathElement>(passenger);
             for (var i = vehiclePathIndex + 1; i < pathElements.Length; i++)
             {
                 newPath.Add(pathElements[i]);
             }
 
-            // Restart from the beginning of the trimmed buffer. This matches the vanilla pattern:
-            // once the consumed prefix is gone, the next remaining leg is now index 0.
+            // Restart from the beginning of the trimmed buffer.
             pathOwner.m_ElementIndex = 0;
             ecb.SetComponent(passenger, pathOwner);
             return true;
@@ -234,8 +234,7 @@ namespace FastBoarding
             DynamicBuffer<Passenger> passengers,
             HashSet<Entity> canceledPassengers)
         {
-            // Rebuild the passenger buffer once so we do not remove entries while iterating it.
-            // SetBuffer replaces the whole buffer at playback, so there is no extra Clear() call here.
+            // Rebuild the passenger buffer once so entries are not removed while iterating it.
             DynamicBuffer<Passenger> newPassengers = ecb.SetBuffer<Passenger>(vehicleEntity);
             for (var i = 0; i < passengers.Length; i++)
             {

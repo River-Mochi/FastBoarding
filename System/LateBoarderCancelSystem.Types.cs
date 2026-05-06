@@ -3,6 +3,7 @@
 
 namespace FastBoarding
 {
+    using Game; // GameSystemBase
     using System;
     using Unity.Entities;
     using TransportType = Game.Prefabs.TransportType;

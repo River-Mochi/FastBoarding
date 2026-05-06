@@ -3,12 +3,12 @@
 
 namespace FastBoarding
 {
-    using Game;
-    using Game.Routes;
-    using Game.Vehicles;
-    using System;
-    using Unity.Entities;
-    using TransportType = Game.Prefabs.TransportType;
+    using Game; // GameSystemBase
+    using Game.Routes; // CurrentRoute
+    using Game.Vehicles; // PublicTransport
+    using System; // DateTime
+    using Unity.Entities; // Entity
+    using TransportType = Game.Prefabs.TransportType; // bus/train/etc.
 
     public partial class LateBoarderCancelSystem : GameSystemBase
     {
@@ -29,6 +29,7 @@ namespace FastBoarding
         private static bool s_FollowUpLegendLogged;
         private int m_SkippedForTool;
         private bool m_LoggedActive;
+
         // Fixed-size storage for delayed follow-up checks. Reuse slots instead of allocating every update.
         private readonly FollowUpSample[] m_FollowUpSamples = new FollowUpSample[MaxFollowUpSamples];
         private int m_FollowUpCount;
@@ -110,23 +111,6 @@ namespace FastBoarding
             return frames * 1440.0 / 262144.0;
         }
 
-        private bool IsGroupPassenger(Entity passenger)
-        {
-            return EntityManager.HasComponent<GroupMember>(passenger) ||
-                   EntityManager.HasBuffer<GroupCreature>(passenger);
-        }
-
-        private bool IsPlayerUsingTool()
-        {
-            if (m_ToolSystem == null || m_DefaultToolSystem == null)
-            {
-                return false;
-            }
-
-            ToolBaseSystem? activeTool = m_ToolSystem.activeTool;
-            return activeTool != null && activeTool != m_DefaultToolSystem;
-        }
-
         private void LogActiveOnce()
         {
             if (!ShouldLogDiagnostics())
@@ -204,8 +188,7 @@ namespace FastBoarding
 
         private int FindFollowUpSampleSlot()
         {
-            // Prefer finished/empty slots so high-volume skip passes do not overwrite samples
-            // before they reach FollowUpDelayFrames and prove what vanilla did next.
+            // Prefer finished/empty slots so high-volume skip passes do not overwrite samples before proof checks run.
             for (int attempt = 0; attempt < m_FollowUpSamples.Length; attempt++)
             {
                 int index = (m_NextFollowUpSample + attempt) % m_FollowUpSamples.Length;
@@ -227,7 +210,7 @@ namespace FastBoarding
                 return;
             }
 
-            // Follow-up logs answer the "what did vanilla do next?" question after we detach a cim.
+            // Follow-up logs answer the "what did vanilla do next?" question after a cim is detached.
             TransitWaitStatusSystem followUpStatusSystem = World.GetOrCreateSystemManaged<TransitWaitStatusSystem>();
             int loggedThisUpdate = 0;
             for (int i = 0; i < m_FollowUpCount; i++)
