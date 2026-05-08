@@ -26,7 +26,16 @@ namespace FastBoarding
         private const int MaxBoardingHoldProbeLogsPerUpdate = 6;
 
         private uint m_LastDiagnosticFrame;
-        private uint m_LastBoardingHoldProbeFrame;
+
+        private uint m_LastBusBoardingHoldProbeFrame;
+        private uint m_LastTrainBoardingHoldProbeFrame;
+        private uint m_LastTramBoardingHoldProbeFrame;
+        private uint m_LastSubwayBoardingHoldProbeFrame;
+        private uint m_LastShipBoardingHoldProbeFrame;
+        private uint m_LastFerryBoardingHoldProbeFrame;
+        private uint m_LastAirBoardingHoldProbeFrame;
+
+
         private long m_TotalCanceled;
         private static bool s_FollowUpLegendLogged;
         private int m_SkippedForTool;
@@ -61,12 +70,13 @@ namespace FastBoarding
                 return;
             }
 
-            if (m_LastBoardingHoldProbeFrame != 0 &&
-                frame >= m_LastBoardingHoldProbeFrame &&
-                frame - m_LastBoardingHoldProbeFrame < BoardingHoldProbeFrameInterval)
+
+            // Mode-specific throttle prevents busy bus/tram probes from hiding train evidence.
+            if (IsBoardingHoldProbeThrottled(transportType, frame))
             {
                 return;
             }
+
 
             uint framesPastDeparture = frame >= publicTransport.m_DepartureFrame
                 ? frame - publicTransport.m_DepartureFrame
@@ -84,7 +94,7 @@ namespace FastBoarding
             }
 
             logsThisUpdate++;
-            m_LastBoardingHoldProbeFrame = frame;
+            SetLastBoardingHoldProbeFrame(transportType, frame);
 
             Entity route = Entity.Null;
             if (EntityManager.HasComponent<CurrentRoute>(vehicleEntity))
@@ -107,6 +117,70 @@ namespace FastBoarding
                     $"maxBoardingDistance={publicTransport.m_MaxBoardingDistance}, minWaitingDistance={publicTransport.m_MinWaitingDistance}, " +
                     $"state={publicTransport.m_State}, note={note}");
         }
+
+
+        private bool IsBoardingHoldProbeThrottled(TransportType transportType, uint frame)
+        {
+            uint lastFrame = GetLastBoardingHoldProbeFrame(transportType);
+            return lastFrame != 0 &&
+                frame >= lastFrame &&
+                frame - lastFrame < BoardingHoldProbeFrameInterval;
+        }
+
+        private uint GetLastBoardingHoldProbeFrame(TransportType transportType)
+        {
+            switch (transportType)
+            {
+                case TransportType.Bus:
+                    return m_LastBusBoardingHoldProbeFrame;
+                case TransportType.Train:
+                    return m_LastTrainBoardingHoldProbeFrame;
+                case TransportType.Tram:
+                    return m_LastTramBoardingHoldProbeFrame;
+                case TransportType.Subway:
+                    return m_LastSubwayBoardingHoldProbeFrame;
+                case TransportType.Ship:
+                    return m_LastShipBoardingHoldProbeFrame;
+                case TransportType.Ferry:
+                    return m_LastFerryBoardingHoldProbeFrame;
+                case TransportType.Airplane:
+                    return m_LastAirBoardingHoldProbeFrame;
+                default:
+                    return m_LastBusBoardingHoldProbeFrame;
+            }
+        }
+
+        private void SetLastBoardingHoldProbeFrame(TransportType transportType, uint frame)
+        {
+            switch (transportType)
+            {
+                case TransportType.Bus:
+                    m_LastBusBoardingHoldProbeFrame = frame;
+                    break;
+                case TransportType.Train:
+                    m_LastTrainBoardingHoldProbeFrame = frame;
+                    break;
+                case TransportType.Tram:
+                    m_LastTramBoardingHoldProbeFrame = frame;
+                    break;
+                case TransportType.Subway:
+                    m_LastSubwayBoardingHoldProbeFrame = frame;
+                    break;
+                case TransportType.Ship:
+                    m_LastShipBoardingHoldProbeFrame = frame;
+                    break;
+                case TransportType.Ferry:
+                    m_LastFerryBoardingHoldProbeFrame = frame;
+                    break;
+                case TransportType.Airplane:
+                    m_LastAirBoardingHoldProbeFrame = frame;
+                    break;
+                default:
+                    m_LastBusBoardingHoldProbeFrame = frame;
+                    break;
+            }
+        }
+
 
         private static double FramesToGameMinutes(uint frames)
         {
@@ -461,12 +535,19 @@ namespace FastBoarding
         private void ResetDiagnosticsForCityLoad()
         {
             m_LastDiagnosticFrame = 0;
-            m_LastBoardingHoldProbeFrame = 0;
             m_TotalCanceled = 0;
             m_SkippedForTool = 0;
             m_LoggedActive = false;
             m_FollowUpCount = 0;
             m_NextFollowUpSample = 0;
+
+            m_LastBusBoardingHoldProbeFrame = 0;
+            m_LastTrainBoardingHoldProbeFrame = 0;
+            m_LastTramBoardingHoldProbeFrame = 0;
+            m_LastSubwayBoardingHoldProbeFrame = 0;
+            m_LastShipBoardingHoldProbeFrame = 0;
+            m_LastFerryBoardingHoldProbeFrame = 0;
+            m_LastAirBoardingHoldProbeFrame = 0;
         }
     }
 }
