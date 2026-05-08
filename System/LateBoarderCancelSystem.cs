@@ -196,6 +196,7 @@ namespace FastBoarding
                         int emptyLeavePassengerCount = 0;
                         int emptyLeaveReadyCount = 0;
                         int emptyLeaveNotReadyCount = 0;
+                        string emptyLeaveReason = "not-evaluated";
 
                         if (leaveIfNoBoarding)
                         {
@@ -205,7 +206,8 @@ namespace FastBoarding
                                 publicTransport,
                                 out emptyLeavePassengerCount,
                                 out emptyLeaveReadyCount,
-                                out emptyLeaveNotReadyCount);
+                                out emptyLeaveNotReadyCount,
+                                out emptyLeaveReason);
 
                             if (leaveAssistQueued)
                             {
@@ -224,7 +226,11 @@ namespace FastBoarding
                             groupNotReadyCount: 0,
                             unsafeNotReadyStats: default,
                             candidateCount: 0,
-                            note: leaveAssistQueued ? "leave-if-no-boarding-empty-or-layout-ready" : "empty-past-departure",
+                            note: leaveIfNoBoarding
+                                ? leaveAssistQueued
+                                    ? $"leave-if-no-boarding:{emptyLeaveReason}"
+                                    : $"leave-probe:{emptyLeaveReason}"
+                                : "empty-past-departure",
                             ref boardingHoldProbeLogs);
 
                         continue;
@@ -290,6 +296,7 @@ namespace FastBoarding
                     int leaveCheckedPassengers = 0;
                     int leaveReadyCount = 0;
                     int leaveNotReadyCount = 0;
+                    string leaveReason = "not-evaluated";
 
                     if (leaveIfNoBoarding)
                     {
@@ -299,7 +306,8 @@ namespace FastBoarding
                             publicTransport,
                             out leaveCheckedPassengers,
                             out leaveReadyCount,
-                            out leaveNotReadyCount);
+                            out leaveNotReadyCount,
+                            out leaveReason);
 
                         if (leaveAssistForVehicle)
                         {
@@ -318,8 +326,10 @@ namespace FastBoarding
                         groupNotReadyCount,
                         unsafeNotReadyStats,
                         candidateCountForVehicle,
-                        leaveAssistForVehicle
-                            ? "leave-if-no-boarding"
+                        leaveIfNoBoarding
+                            ? leaveAssistForVehicle
+                                ? $"leave-if-no-boarding:{leaveReason}"
+                                : $"leave-probe:{leaveReason}"
                             : candidateCountForVehicle == 0
                                 ? "no-late-solo-candidates"
                                 : "late-solo-candidates",

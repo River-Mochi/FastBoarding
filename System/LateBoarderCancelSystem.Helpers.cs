@@ -178,35 +178,44 @@ namespace FastBoarding
             Game.Vehicles.PublicTransport publicTransport,
             out int passengerCount,
             out int readyCount,
-            out int notReadyCount)
+            out int notReadyCount,
+            out string reason)
         {
             passengerCount = 0;
             readyCount = 0;
             notReadyCount = 0;
+            reason = "not-evaluated";
 
             if (!BoardingRuntimeSettings.LeaveIfNoBoarding)
             {
+                reason = "toggle-off";
                 return false;
             }
 
             if ((publicTransport.m_State & PublicTransportFlags.Boarding) == 0)
             {
+                reason = "not-boarding";
                 return false;
             }
 
             if ((publicTransport.m_State & (PublicTransportFlags.Evacuating | PublicTransportFlags.PrisonerTransport)) != 0)
             {
+                reason = "special-transport";
                 return false;
             }
 
             if (!HasNoVanillaBoardingBlocker(vehicleEntity, out passengerCount, out readyCount, out notReadyCount))
             {
+                reason = "not-ready-passenger";
                 return false;
             }
 
             if (publicTransport.m_MaxBoardingDistance == float.MaxValue)
             {
-                // Already unlocked for vanilla StopBoarding; avoid counting the same vehicle again.
+                // Vanilla already has the boarding-distance blocker open; log this as evidence, not an assist.
+                reason = passengerCount == 0
+                    ? "already-open-empty"
+                    : "already-open-all-ready";
                 return false;
             }
 
@@ -214,6 +223,9 @@ namespace FastBoarding
             publicTransport.m_MinWaitingDistance = 0f;
             publicTransport.m_MaxBoardingDistance = float.MaxValue;
             ecb.SetComponent(vehicleEntity, publicTransport);
+            reason = passengerCount == 0
+                ? "queued-empty"
+                : "queued-all-ready";
             return true;
         }
 
