@@ -1,5 +1,5 @@
 // File: System/LateBoarderCancelSystem.Helpers.cs
-// Purpose: Helper methods for tool safety, passenger checks, boarding assists, cancellation edits, and transport-type detection.
+// Purpose: Helper methods for tool safety, passenger checks, cancellation edits, and transport-type detection.
 
 namespace FastBoarding
 {
@@ -7,10 +7,10 @@ namespace FastBoarding
     using Game.Creatures; // Human, CurrentVehicle, group checks
     using Game.Pathfind; // PathOwner, PathElement
     using Game.Tools; // ToolBaseSystem
-    using Game.Vehicles; // Passenger, LayoutElement
+    using Game.Vehicles; // CargoTransport, LayoutElement, Passenger
     using System; // Math
     using System.Collections.Generic; // HashSet
-    using Unity.Entities; // Entity, EntityCommandBuffer
+    using Unity.Entities; // DynamicBuffer, Entity, EntityCommandBuffer
     using PrefabRef = Game.Prefabs.PrefabRef; // prefab lookup
     using PublicTransportVehicleData = Game.Prefabs.PublicTransportVehicleData; // transport type source
     using TransportType = Game.Prefabs.TransportType; // bus/train/etc.
@@ -19,6 +19,7 @@ namespace FastBoarding
     {
         private bool IsGroupPassenger(Entity passenger)
         {
+            // Groups/families have leader/member rules, so the safe beta behavior stays solo-only.
             return EntityManager.HasComponent<GroupMember>(passenger) ||
                    EntityManager.HasBuffer<GroupCreature>(passenger);
         }
@@ -34,29 +35,6 @@ namespace FastBoarding
             return activeTool != null && activeTool != m_DefaultToolSystem;
         }
 
-        private bool IsPastDepartureFrames(
-            Entity vehicleEntity,
-            Game.Vehicles.PublicTransport publicTransport,
-            uint frame)
-        {
-            if (publicTransport.m_DepartureFrame == 0 ||
-                frame <= publicTransport.m_DepartureFrame)
-            {
-                return false;
-            }
-
-            if (!EntityManager.HasComponent<Game.Vehicles.CargoTransport>(vehicleEntity))
-            {
-                return true;
-            }
-
-            Game.Vehicles.CargoTransport cargoTransport =
-                EntityManager.GetComponentData<Game.Vehicles.CargoTransport>(vehicleEntity);
-
-            // Vanilla uses the later cargo/public departure frame for mixed cargo+public vehicles.
-            return cargoTransport.m_DepartureFrame == 0 || frame > cargoTransport.m_DepartureFrame;
-        }
-
         private bool CanSafelyCancelPassenger(Entity vehicleEntity, Entity passenger)
         {
             UnsafeNotReadyStats ignoredStats = default;
@@ -67,7 +45,6 @@ namespace FastBoarding
         {
             if (IsGroupPassenger(passenger))
             {
-                // Group boarding has extra leader/member rules. Keep this beta pass solo-only.
                 unsafeStats.Other++;
                 return false;
             }
@@ -88,7 +65,7 @@ namespace FastBoarding
             // Older elements before m_ElementIndex are already behind the cim.
             int startIndex = Math.Max(0, pathOwner.m_ElementIndex);
 
-            // Only cancel when the cim still has this exact vehicle in the remaining path.
+            // Only cancel when the remaining path still contains this exact vehicle.
             for (var i = startIndex; i < pathElements.Length; i++)
             {
                 if (pathElements[i].m_Target == vehicleEntity)
@@ -99,6 +76,100 @@ namespace FastBoarding
 
             unsafeStats.NoExactVehicleInPath++;
             return false;
+        }
+
+        private bool IsPastDepartureFrames(
+            Entity vehicleEntity,
+            Game.Vehicles.PublicTransport publicTransport,
+            uint frame)
+        {
+            uint latestDepartureFrame = publicTransport.m_DepartureFrame;
+
+            if (EntityManager.HasComponent<CargoTransport>(vehicleEntity))
+            {
+                CargoTransport cargoTransport = EntityManager.GetComponentData<CargoTransport>(vehicleEntity);
+                if (cargoTransport.m_DepartureFrame > latestDepartureFrame)
+                {
+                    latestDepartureFrame = cargoTransport.m_DepartureFrame;
+                }
+            }
+
+            return latestDepartureFrame != 0 && frame > latestDepartureFrame;
+        }
+
+        private bool HasNoVanillaBoardingBlocker(
+            Entity vehicleEntity,
+            out int passengerCount,
+            out int readyCount,
+            out int notReadyCount)
+        {
+            passengerCount = 0;
+            readyCount = 0;
+            notReadyCount = 0;
+
+            // Train/tram layouts can store passengers on child cars, so mirror vanilla train checks.
+            if (EntityManager.HasBuffer<LayoutElement>(vehicleEntity))
+            {
+                DynamicBuffer<LayoutElement> layout = EntityManager.GetBuffer<LayoutElement>(vehicleEntity);
+                if (layout.Length != 0)
+                {
+                    for (int i = 0; i < layout.Length; i++)
+                    {
+                        CountPassengerReadiness(
+                            layout[i].m_Vehicle,
+                            ref passengerCount,
+                            ref readyCount,
+                            ref notReadyCount);
+                    }
+
+                    return notReadyCount == 0;
+                }
+            }
+
+            CountPassengerReadiness(
+                vehicleEntity,
+                ref passengerCount,
+                ref readyCount,
+                ref notReadyCount);
+
+            return notReadyCount == 0;
+        }
+
+        private void CountPassengerReadiness(
+            Entity vehicleEntity,
+            ref int passengerCount,
+            ref int readyCount,
+            ref int notReadyCount)
+        {
+            if (!EntityManager.Exists(vehicleEntity) ||
+                !EntityManager.HasBuffer<Passenger>(vehicleEntity))
+            {
+                return;
+            }
+
+            DynamicBuffer<Passenger> passengers = EntityManager.GetBuffer<Passenger>(vehicleEntity);
+            for (int i = 0; i < passengers.Length; i++)
+            {
+                Entity passenger = passengers[i].m_Passenger;
+                passengerCount++;
+
+                if (!EntityManager.Exists(passenger) ||
+                    !EntityManager.HasComponent<CurrentVehicle>(passenger))
+                {
+                    continue;
+                }
+
+                CurrentVehicle currentVehicle = EntityManager.GetComponentData<CurrentVehicle>(passenger);
+                if ((currentVehicle.m_Flags & CreatureVehicleFlags.Ready) != 0)
+                {
+                    readyCount++;
+                }
+                else
+                {
+                    // Vanilla blocks StopBoarding when a passenger in the buffer has CurrentVehicle but is not Ready.
+                    notReadyCount++;
+                }
+            }
         }
 
         private bool QueueLeaveIfNoBoarding(
@@ -133,96 +204,17 @@ namespace FastBoarding
                 return false;
             }
 
-            if (publicTransport.m_MinWaitingDistance == 0f &&
-                publicTransport.m_MaxBoardingDistance == float.MaxValue)
+            if (publicTransport.m_MaxBoardingDistance == float.MaxValue)
             {
-                // Already nudged this frame or by an earlier assist pass.
+                // Already unlocked for vanilla StopBoarding; avoid counting the same vehicle again.
                 return false;
             }
 
             // Nudge vanilla StopBoarding logic instead of clearing Boarding directly.
-            // Vanilla still decides when to end boarding and move to the next waypoint.
             publicTransport.m_MinWaitingDistance = 0f;
             publicTransport.m_MaxBoardingDistance = float.MaxValue;
             ecb.SetComponent(vehicleEntity, publicTransport);
             return true;
-        }
-
-        private bool HasNoVanillaBoardingBlocker(
-            Entity vehicleEntity,
-            out int passengerCount,
-            out int readyCount,
-            out int notReadyCount)
-        {
-            passengerCount = 0;
-            readyCount = 0;
-            notReadyCount = 0;
-
-            if (EntityManager.HasBuffer<LayoutElement>(vehicleEntity))
-            {
-                DynamicBuffer<LayoutElement> layout = EntityManager.GetBuffer<LayoutElement>(vehicleEntity);
-                if (layout.Length != 0)
-                {
-                    // Train-style vehicles can keep passenger buffers on individual layout cars.
-                    // This also safely covers trams or any other multi-part transport using LayoutElement.
-                    for (int i = 0; i < layout.Length; i++)
-                    {
-                        CountPassengerReadiness(
-                            layout[i].m_Vehicle,
-                            ref passengerCount,
-                            ref readyCount,
-                            ref notReadyCount);
-                    }
-
-                    return notReadyCount == 0;
-                }
-            }
-
-            // Single-body vehicles use the root vehicle passenger buffer.
-            CountPassengerReadiness(
-                vehicleEntity,
-                ref passengerCount,
-                ref readyCount,
-                ref notReadyCount);
-
-            return notReadyCount == 0;
-        }
-
-        private void CountPassengerReadiness(
-            Entity vehicleEntity,
-            ref int passengerCount,
-            ref int readyCount,
-            ref int notReadyCount)
-        {
-            if (!EntityManager.Exists(vehicleEntity) ||
-                !EntityManager.HasBuffer<Passenger>(vehicleEntity))
-            {
-                return;
-            }
-
-            DynamicBuffer<Passenger> passengers = EntityManager.GetBuffer<Passenger>(vehicleEntity);
-            for (int i = 0; i < passengers.Length; i++)
-            {
-                Entity passenger = passengers[i].m_Passenger;
-                passengerCount++;
-
-                if (!EntityManager.Exists(passenger) ||
-                    !EntityManager.HasComponent<CurrentVehicle>(passenger))
-                {
-                    // Vanilla ready checks only block on passengers that still have CurrentVehicle.
-                    continue;
-                }
-
-                CurrentVehicle currentVehicle = EntityManager.GetComponentData<CurrentVehicle>(passenger);
-                if ((currentVehicle.m_Flags & CreatureVehicleFlags.Ready) != 0)
-                {
-                    readyCount++;
-                }
-                else
-                {
-                    notReadyCount++;
-                }
-            }
         }
 
         private static void AccumulateCanceledCount(

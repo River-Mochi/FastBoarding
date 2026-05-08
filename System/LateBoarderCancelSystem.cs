@@ -1,5 +1,5 @@
 // File: System/LateBoarderCancelSystem.cs
-// Purpose: Main update loop for late solo passenger skipping and safe no-boarding leave assists.
+// Purpose: Main update loop and boarding-assist pass for late solo passengers and ready vehicles.
 
 namespace FastBoarding
 {
@@ -20,9 +20,9 @@ namespace FastBoarding
     public partial class LateBoarderCancelSystem : GameSystemBase
     {
         // High-level flow:
-        // 1. Scan boarding vehicles after vanilla departure frames are met.
-        // 2. Optionally nudge vehicles to leave when no attached passenger is still boarding.
-        // 3. Optionally detach solo late passengers whose remaining path still contains that exact vehicle.
+        // 1. Scan boarding vehicles after their vanilla departure frame.
+        // 2. Optionally detach safe solo late passengers whose remaining path still contains that exact vehicle.
+        // 3. Optionally nudge vanilla to end boarding when no attached passenger is still not-ready.
         // 4. Optionally record delayed "what happened next?" samples for verbose diagnostics.
         // 2048/day means every 128 simulation frames (~42 game seconds); cancellation work is also capped below.
         public const int UpdatesPerDay = 2048;
@@ -49,8 +49,7 @@ namespace FastBoarding
             m_ToolSystem = World.GetOrCreateSystemManaged<ToolSystem>();
             m_DefaultToolSystem = World.GetOrCreateSystemManaged<DefaultToolSystem>();
 
-            // Passenger buffer is intentionally not required here.
-            // "Leave If No Boarding" must also inspect empty vehicles and vehicles without a root passenger buffer.
+            // Passenger is intentionally not required. Empty/no-buffer vehicles are valid leave-assist candidates.
             m_VehicleQuery = SystemAPI.QueryBuilder()
                 .WithAll<Game.Vehicles.PublicTransport>()
                 .WithNone<Deleted, Destroyed, Temp, Overridden>()
@@ -68,8 +67,7 @@ namespace FastBoarding
                 return;
             }
 
-            // Options UI setters do not fire just because a saved city loads.
-            // Restore the live system state from the runtime snapshot after each real game load.
+            // Saved checkboxes do not fire Options UI setters during load, so restore live system state here.
             ResetDiagnosticsForCityLoad();
             Enabled = BoardingRuntimeSettings.BoardingAssistEnabled;
         }
@@ -80,7 +78,7 @@ namespace FastBoarding
             {
                 if (!BoardingRuntimeSettings.BoardingAssistEnabled)
                 {
-                    // The system sleeps unless at least one boarding assist is enabled.
+                    // Options UI setter wakes this system only when a boarding assist is enabled.
                     Enabled = false;
                     return;
                 }
@@ -89,21 +87,19 @@ namespace FastBoarding
 
                 if (IsPlayerUsingTool())
                 {
-                    // Avoid touching passenger buffers while edit tools may be deleting/rebuilding entities.
+                    // Avoid passenger-buffer edits while tools may delete or rebuild entities.
                     m_SkippedForTool++;
-                    LogPassSummary(
-                        m_SimulationSystem?.frameIndex ?? 0,
-                        new PassStats(0, 0, 0, 0, 0),
-                        "paused-tool");
-                    LogFollowUps(m_SimulationSystem?.frameIndex ?? 0);
+                    uint frame = m_SimulationSystem?.frameIndex ?? 0;
+                    LogPassSummary(frame, new PassStats(0, 0, 0, 0, 0), "paused-tool");
+                    LogFollowUps(frame);
                     return;
                 }
 
-                // Main pass edits current boarding state; follow-up pass only samples old skipped cims.
+                // One pass handles both behavior toggles, then older samples are checked separately.
                 PassStats stats = RunCancellationPass();
-                uint frame = m_SimulationSystem?.frameIndex ?? 0;
-                LogPassSummary(frame, stats, "pass");
-                LogFollowUps(frame);
+                uint currentFrame = m_SimulationSystem?.frameIndex ?? 0;
+                LogPassSummary(currentFrame, stats, "pass");
+                LogFollowUps(currentFrame);
             }
             catch (Exception ex)
             {
@@ -151,8 +147,7 @@ namespace FastBoarding
             try
             {
                 // This pass reads vehicle/passenger data directly on the main thread.
-                // Safety: CompleteDependency is only a sync point: it does not change the query,
-                // it just waits for earlier ECS jobs touching the same data to finish first.
+                // Safety: CompleteDependency waits for earlier ECS jobs touching the same data to finish first.
                 m_VehicleQuery.CompleteDependency();
                 vehicles = m_VehicleQuery.ToEntityArray(Allocator.Temp);
                 ecb = new EntityCommandBuffer(Allocator.Temp);
@@ -185,33 +180,11 @@ namespace FastBoarding
                     if (m_SimulationSystem == null ||
                         !IsPastDepartureFrames(vehicleEntity, publicTransport, frame))
                     {
-                        // Boarding assists only run after vanilla public/cargo departure frames are met.
+                        // Boarding assists only run after vanilla departure frames are met.
                         continue;
                     }
 
                     TransportType transportType = GetTransportType(vehicleEntity);
-
-                    bool leaveAssistQueued = false;
-                    int leavePassengerCount = 0;
-                    int leaveReadyCount = 0;
-                    int leaveNotReadyCount = 0;
-
-                    if (leaveIfNoBoarding)
-                    {
-                        leaveAssistQueued = QueueLeaveIfNoBoarding(
-                            ref ecb,
-                            vehicleEntity,
-                            publicTransport,
-                            out leavePassengerCount,
-                            out leaveReadyCount,
-                            out leaveNotReadyCount);
-
-                        if (leaveAssistQueued)
-                        {
-                            leaveAssists++;
-                        }
-                    }
-
                     bool hasPassengerBuffer = EntityManager.HasBuffer<Passenger>(vehicleEntity);
                     DynamicBuffer<Passenger> passengers = hasPassengerBuffer
                         ? EntityManager.GetBuffer<Passenger>(vehicleEntity)
@@ -219,29 +192,46 @@ namespace FastBoarding
 
                     if (!hasPassengerBuffer || passengers.Length == 0)
                     {
-                        // Empty root buffers are useful evidence for trains/trams with layout cars.
-                        // Leave-assist counts may still include passengers from layout vehicles.
+                        bool leaveAssistQueued = false;
+                        int emptyLeavePassengerCount = 0;
+                        int emptyLeaveReadyCount = 0;
+                        int emptyLeaveNotReadyCount = 0;
+
+                        if (leaveIfNoBoarding)
+                        {
+                            leaveAssistQueued = QueueLeaveIfNoBoarding(
+                                ref ecb,
+                                vehicleEntity,
+                                publicTransport,
+                                out emptyLeavePassengerCount,
+                                out emptyLeaveReadyCount,
+                                out emptyLeaveNotReadyCount);
+
+                            if (leaveAssistQueued)
+                            {
+                                leaveAssists++;
+                            }
+                        }
+
                         TryLogBoardingHoldProbe(
                             frame,
                             vehicleEntity,
                             transportType,
                             publicTransport,
-                            passengerCount: leavePassengerCount,
-                            readyCount: leaveReadyCount,
-                            notReadyCount: leaveNotReadyCount,
+                            passengerCount: leaveIfNoBoarding ? emptyLeavePassengerCount : 0,
+                            readyCount: leaveIfNoBoarding ? emptyLeaveReadyCount : 0,
+                            notReadyCount: leaveIfNoBoarding ? emptyLeaveNotReadyCount : 0,
                             groupNotReadyCount: 0,
                             unsafeNotReadyStats: default,
                             candidateCount: 0,
-                            note: leaveAssistQueued ? "leave-if-no-boarding" : "empty-past-departure",
+                            note: leaveAssistQueued ? "leave-if-no-boarding-empty-or-layout-ready" : "empty-past-departure",
                             ref boardingHoldProbeLogs);
 
                         continue;
                     }
 
-                    // Collect first, then mutate afterward, so the passenger buffer is not edited
-                    // while still scanning it for late passengers.
-                    // Managed HashSet is intentional here: short-lived main-thread scratch state,
-                    // not Burst/job code, so NativeHashSet would add allocator/dispose noise with no payoff.
+                    // Collect first, then mutate afterward, so the passenger buffer is not edited while scanned.
+                    // Managed HashSet is short-lived main-thread scratch state; NativeHashSet adds allocator noise here.
                     var pendingCancellation = new HashSet<Entity>();
                     int readyCount = 0;
                     int notReadyCount = 0;
@@ -296,18 +286,39 @@ namespace FastBoarding
                         }
                     }
 
+                    bool leaveAssistForVehicle = false;
+                    int leaveCheckedPassengers = 0;
+                    int leaveReadyCount = 0;
+                    int leaveNotReadyCount = 0;
+
+                    if (leaveIfNoBoarding)
+                    {
+                        leaveAssistForVehicle = QueueLeaveIfNoBoarding(
+                            ref ecb,
+                            vehicleEntity,
+                            publicTransport,
+                            out leaveCheckedPassengers,
+                            out leaveReadyCount,
+                            out leaveNotReadyCount);
+
+                        if (leaveAssistForVehicle)
+                        {
+                            leaveAssists++;
+                        }
+                    }
+
                     TryLogBoardingHoldProbe(
                         frame,
                         vehicleEntity,
                         transportType,
                         publicTransport,
-                        passengers.Length,
-                        readyCount,
-                        notReadyCount,
+                        leaveIfNoBoarding ? leaveCheckedPassengers : passengers.Length,
+                        leaveIfNoBoarding ? leaveReadyCount : readyCount,
+                        leaveIfNoBoarding ? leaveNotReadyCount : notReadyCount,
                         groupNotReadyCount,
                         unsafeNotReadyStats,
                         candidateCountForVehicle,
-                        leaveAssistQueued
+                        leaveAssistForVehicle
                             ? "leave-if-no-boarding"
                             : candidateCountForVehicle == 0
                                 ? "no-late-solo-candidates"
@@ -370,7 +381,7 @@ namespace FastBoarding
                     }
                 }
 
-                // Mutate after scanning so buffers/components are not edited while enumerating them.
+                // Mutate after scanning so buffers/components are not edited while enumerated.
                 ecb.Playback(EntityManager);
 
                 // Update UI counters only after all queued ECS edits have succeeded.

@@ -82,6 +82,10 @@ namespace FastBoarding
         [SettingsUISetter(typeof(Setting), nameof(SetCancelLateBoardersLive))]
         public bool CancelLateBoarders { get; set; }
 
+        [SettingsUISection(ActionsTab, BehaviorGroup)]
+        [SettingsUISetter(typeof(Setting), nameof(SetLeaveIfNoBoardingLive))]
+        public bool LeaveIfNoBoarding { get; set; }
+
         [SettingsUISection(ActionsTab, StatusGroup)]
         public string StatusOverview
         {
@@ -239,6 +243,7 @@ namespace FastBoarding
             WaterBoardingSpeedFactor = DefaultSpeedFactor;
             AirBoardingSpeedFactor = DefaultSpeedFactor;
             CancelLateBoarders = true;
+            LeaveIfNoBoarding = false;
             EnableVerboseLogging = false;
         }
 
@@ -260,8 +265,10 @@ namespace FastBoarding
 
             if ((changes & BoardingRuntimeChangeFlags.LateBoarders) != 0)
             {
-                LogUtils.Info(Mod.s_Log, () => $"Options Settings: skipLateSoloCim={CancelLateBoarders}");
-                TrySetLateBoarderSystemEnabled(CancelLateBoarders);
+                LogUtils.Info(
+                    Mod.s_Log,
+                    () => $"Options Settings: skipLateSoloCim={CancelLateBoarders}, leaveIfNoBoarding={LeaveIfNoBoarding}");
+                TrySetLateBoarderSystemEnabled(BoardingRuntimeSettings.BoardingAssistEnabled);
             }
 
             if ((changes & BoardingRuntimeChangeFlags.VerboseLogging) != 0)
@@ -311,11 +318,23 @@ namespace FastBoarding
         {
             if (BoardingRuntimeSettings.SetCancelLateBoarders(value))
             {
-                // SettingsUISetter gives us immediate live behavior without adding an Apply button.
+                // SettingsUISetter applies immediate live behavior without adding an Apply button.
                 LogUtils.Info(
                     Mod.s_Log,
-                    () => $"Options Settings: skipLateSoloCim={value}");
-                TrySetLateBoarderSystemEnabled(value);
+                    () => $"Options Settings: skipLateSoloCim={value}, leaveIfNoBoarding={BoardingRuntimeSettings.LeaveIfNoBoarding}");
+                TrySetLateBoarderSystemEnabled(BoardingRuntimeSettings.BoardingAssistEnabled);
+            }
+        }
+
+        private void SetLeaveIfNoBoardingLive(bool value)
+        {
+            if (BoardingRuntimeSettings.SetLeaveIfNoBoarding(value))
+            {
+                // This behavior uses the same boarding scan as late-passenger skipping.
+                LogUtils.Info(
+                    Mod.s_Log,
+                    () => $"Options Settings: skipLateSoloCim={BoardingRuntimeSettings.CancelLateBoarders}, leaveIfNoBoarding={value}");
+                TrySetLateBoarderSystemEnabled(BoardingRuntimeSettings.BoardingAssistEnabled);
             }
         }
 
@@ -332,7 +351,6 @@ namespace FastBoarding
             // Keep slider logs short because players may drag several sliders in one session.
             LogUtils.Info(Mod.s_Log, () => $"Speed changed: {BoardingRuntimeSettings.DescribeForLog()}");
         }
-
 
         public void RepairLoadedValues()
         {
@@ -394,7 +412,7 @@ namespace FastBoarding
 
             try
             {
-                // The live system stays disabled unless the experimental toggle is on.
+                // The live system stays disabled unless at least one boarding behavior is on.
                 LateBoarderCancelSystem system =
                     world.GetExistingSystemManaged<LateBoarderCancelSystem>() ??
                     world.GetOrCreateSystemManaged<LateBoarderCancelSystem>();

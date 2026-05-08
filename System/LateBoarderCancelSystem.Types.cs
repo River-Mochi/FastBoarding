@@ -12,12 +12,13 @@ namespace FastBoarding
     {
         private readonly struct PassStats
         {
-            public PassStats(int vehicles, int passengers, int candidates, int canceled)
+            public PassStats(int vehicles, int passengers, int candidates, int canceled, int leaveAssists)
             {
                 Vehicles = vehicles;
                 Passengers = passengers;
                 Candidates = candidates;
                 Canceled = canceled;
+                LeaveAssists = leaveAssists;
             }
 
             public int Vehicles { get; }
@@ -27,6 +28,8 @@ namespace FastBoarding
             public int Candidates { get; }
 
             public int Canceled { get; }
+
+            public int LeaveAssists { get; }
         }
 
         private struct UnsafeNotReadyStats

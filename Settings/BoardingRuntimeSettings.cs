@@ -36,6 +36,10 @@ namespace FastBoarding
 
         public static bool CancelLateBoarders { get; private set; } = false;
 
+        public static bool LeaveIfNoBoarding { get; private set; } = false;
+
+        public static bool BoardingAssistEnabled => CancelLateBoarders || LeaveIfNoBoarding;
+
         public static bool EnableVerboseLogging { get; private set; } = false;
 
         public static BoardingRuntimeChangeFlags Apply(Setting settings)
@@ -81,10 +85,23 @@ namespace FastBoarding
                 changes |= BoardingRuntimeChangeFlags.StopTuning;
             }
 
+            bool lateBoarderChanged = false;
+
             if (CancelLateBoarders != settings.CancelLateBoarders)
             {
                 CancelLateBoarders = settings.CancelLateBoarders;
-                // The live boarding system only needs to wake when this behavior toggle changes.
+                lateBoarderChanged = true;
+            }
+
+            if (LeaveIfNoBoarding != settings.LeaveIfNoBoarding)
+            {
+                LeaveIfNoBoarding = settings.LeaveIfNoBoarding;
+                lateBoarderChanged = true;
+            }
+
+            if (lateBoarderChanged)
+            {
+                // The live boarding system only needs to wake when behavior toggles change.
                 LateBoarderRevision++;
                 changes |= BoardingRuntimeChangeFlags.LateBoarders;
             }
@@ -163,6 +180,18 @@ namespace FastBoarding
             return true;
         }
 
+        public static bool SetLeaveIfNoBoarding(bool value)
+        {
+            if (LeaveIfNoBoarding == value)
+            {
+                return false;
+            }
+
+            LeaveIfNoBoarding = value;
+            LateBoarderRevision++;
+            return true;
+        }
+
         public static bool SetEnableVerboseLogging(bool value)
         {
             if (EnableVerboseLogging == value)
@@ -180,7 +209,7 @@ namespace FastBoarding
             return
                 $"bus={BusBoardingSpeedFactor}x, rail={RailBoardingSpeedFactor}x, " +
                 $"ship+ferry={WaterBoardingSpeedFactor}x, air={AirBoardingSpeedFactor}x, " +
-                $"skipLateSoloCim={CancelLateBoarders}";
+                $"skipLateSoloCim={CancelLateBoarders}, leaveIfNoBoarding={LeaveIfNoBoarding}";
         }
 
         public static string DescribeVerboseForLog(bool enabled)

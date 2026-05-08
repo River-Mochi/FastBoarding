@@ -5,7 +5,7 @@ namespace FastBoarding
 {
     using Game;             // GameSystemBase
     using Game.Common;      // Deleted, Destroyed
-    using Game.Creatures;   // CurrentVehicle, CurrentVehicleFlags
+    using Game.Creatures;   // CurrentVehicle, CreatureVehicleFlags
     using Game.Routes;      // CurrentRoute
     using Game.Vehicles;    // PublicTransport, Passenger
     using System;           // DateTime
@@ -35,8 +35,8 @@ namespace FastBoarding
         private uint m_LastFerryBoardingHoldProbeFrame;
         private uint m_LastAirBoardingHoldProbeFrame;
 
-
         private long m_TotalCanceled;
+        private long m_TotalLeaveAssists;
         private static bool s_FollowUpLegendLogged;
         private int m_SkippedForTool;
         private bool m_LoggedActive;
@@ -70,20 +70,17 @@ namespace FastBoarding
                 return;
             }
 
-
-            // Mode-specific throttle prevents busy bus/tram probes from hiding train evidence.
+            // Keep one throttle per transit mode so busy bus/tram logs do not suppress train probes.
             if (IsBoardingHoldProbeThrottled(transportType, frame))
             {
                 return;
             }
 
-
             uint framesPastDeparture = frame >= publicTransport.m_DepartureFrame
                 ? frame - publicTransport.m_DepartureFrame
                 : 0u;
 
-            // Only log cases that can explain "vehicle is still boarding after departure":
-            // empty/low-use vehicles, no safe late solo candidates, or the new vanilla long-hold threshold.
+            // Only log cases that can explain "vehicle is still boarding after departure".
             bool lowUse = passengerCount <= 2;
             bool noLateSoloCandidates = candidateCount == 0;
             bool pastVanillaLongHold = framesPastDeparture >= 1800u;
@@ -117,7 +114,6 @@ namespace FastBoarding
                     $"maxBoardingDistance={publicTransport.m_MaxBoardingDistance}, minWaitingDistance={publicTransport.m_MinWaitingDistance}, " +
                     $"state={publicTransport.m_State}, note={note}");
         }
-
 
         private bool IsBoardingHoldProbeThrottled(TransportType transportType, uint frame)
         {
@@ -181,7 +177,6 @@ namespace FastBoarding
             }
         }
 
-
         private static double FramesToGameMinutes(uint frames)
         {
             return frames * 1440.0 / 262144.0;
@@ -202,12 +197,13 @@ namespace FastBoarding
             m_LoggedActive = true;
             LogUtils.Info(
                 Mod.s_Log,
-                () => $"Skip pass active: every {GetUpdateInterval(SystemUpdatePhase.GameSimulation)} frames, cap={MaxCancellationsPerUpdate} late solo cims/update");
+                () => $"Boarding assist active: every {GetUpdateInterval(SystemUpdatePhase.GameSimulation)} frames, cap={MaxCancellationsPerUpdate} late solo cims/update, skipLateSoloCim={BoardingRuntimeSettings.CancelLateBoarders}, leaveIfNoBoarding={BoardingRuntimeSettings.LeaveIfNoBoarding}");
         }
 
         private void LogPassSummary(uint frame, PassStats stats, string reason)
         {
             m_TotalCanceled += stats.Canceled;
+            m_TotalLeaveAssists += stats.LeaveAssists;
 
             if (!ShouldLogDiagnostics())
             {
@@ -219,7 +215,7 @@ namespace FastBoarding
                 frame < m_LastDiagnosticFrame ||
                 frame - m_LastDiagnosticFrame >= DiagnosticFrameInterval;
 
-            if (!force && !intervalElapsed && stats.Canceled == 0)
+            if (!force && !intervalElapsed && stats.Canceled == 0 && stats.LeaveAssists == 0)
             {
                 return;
             }
@@ -235,13 +231,13 @@ namespace FastBoarding
             {
                 LogUtils.Info(
                     Mod.s_Log,
-                    () => $"Skip pass paused: activeTool={activeTool}, pauses={m_SkippedForTool}, totalSkipped={m_TotalCanceled}");
+                    () => $"Boarding assist paused: activeTool={activeTool}, pauses={m_SkippedForTool}, totalSkipped={m_TotalCanceled}, totalLeaveAssists={m_TotalLeaveAssists}");
                 return;
             }
 
             LogUtils.Info(
                 Mod.s_Log,
-                () => $"Skip pass: vehicles={stats.Vehicles}, passengersScanned={stats.Passengers}, lateSolo={stats.Candidates}, skipped={stats.Canceled}, totalSkipped={m_TotalCanceled}");
+                () => $"Boarding assist: vehicles={stats.Vehicles}, passengersScanned={stats.Passengers}, lateSolo={stats.Candidates}, skipped={stats.Canceled}, leaveAssists={stats.LeaveAssists}, totalSkipped={m_TotalCanceled}, totalLeaveAssists={m_TotalLeaveAssists}");
         }
 
         private void TrackFollowUpSample(CanceledPassengerSample sample)
@@ -536,6 +532,7 @@ namespace FastBoarding
         {
             m_LastDiagnosticFrame = 0;
             m_TotalCanceled = 0;
+            m_TotalLeaveAssists = 0;
             m_SkippedForTool = 0;
             m_LoggedActive = false;
             m_FollowUpCount = 0;

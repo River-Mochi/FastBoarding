@@ -127,6 +127,16 @@ namespace FastBoarding
                     "Groups are a small part of the crowd; most benefits are from skipping solo cims who are running late.\n" +
                     "Skipped late citizens are not deleted; they are naturally reassigned by the game."
                 },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.LeaveIfNoBoarding)), "Leave If No Boarding" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.LeaveIfNoBoarding)),
+                    "**Experimental**\n" +
+                    "After <departure time>, helps a transit vehicle leave if <no one is still boarding>.\n" +
+                    "Fast Boarding only nudges vanilla to end boarding when:\n" +
+                    "- the vehicle is already in Boarding state,\n" +
+                    "- the passenger buffer is empty, or\n" +
+                    "- all attached passengers are Ready.\n" +
+                    "Does not skip groups, does not delete citizens, and does not force vehicles to leave before vanilla departure time."
+                },
 
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "Total usage" },
@@ -192,7 +202,6 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyStatusLine, "{0} waiting | avg {1} | worst {2} | {3}" },
                 { TransitWaitStatus.KeyStatusLateSkipped, "{0} late skipped" },
                 { TransitWaitStatus.KeyStatusSkipOff, "skip OFF" },
-
 
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} tourist/mo | {1} citizens/mo | updated {2}" },
 
