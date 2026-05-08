@@ -5,7 +5,7 @@ namespace FastBoarding
 {
     using Game;             // GameSystemBase
     using Game.Common;      // Deleted, Destroyed
-    using Game.Creatures;   // CurrentVehicle
+    using Game.Creatures;   // CurrentVehicle, CurrentVehicleFlags
     using Game.Routes;      // CurrentRoute
     using Game.Vehicles;    // PublicTransport, Passenger
     using System;           // DateTime

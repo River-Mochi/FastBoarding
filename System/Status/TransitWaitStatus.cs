@@ -20,8 +20,12 @@ namespace FastBoarding
         public const string KeyStatusNotLoaded = "FB_STATUS_NOT_LOADED";
         public const string KeyNoCityLoaded = "FB_STATUS_NO_CITY_LOADED";
         public const string KeyNoStopsFound = "FB_STATUS_NO_STOPS";
+
         public const string KeyStatusLine = "FB_STATUS_LINE";
+        public const string KeyStatusLateSkipped = "FB_STATUS_LATE_SKIPPED";
+        public const string KeyStatusSkipOff = "FB_STATUS_SKIP_OFF";
         public const string KeyStatusOverviewLine = "FB_STATUS_OVERVIEW_LINE";
+
         public const string KeyReportNoCityLoaded = "FB_REPORT_NO_CITY_LOADED";
         public const string KeyReportTitle = "FB_REPORT_TITLE";
         public const string KeyReportSettings = "FB_REPORT_SETTINGS";
@@ -51,6 +55,7 @@ namespace FastBoarding
         public const string KeyReportLastSkippedSampleLine = "FB_REPORT_LAST_SKIPPED_SAMPLE_LINE";
         public const string KeyReportNone = "FB_REPORT_NONE";
         public const string KeyReportUnknown = "FB_REPORT_UNKNOWN";
+
 
         private const int ReportHeaderWidth = 60;
         private const int ReportFieldWidth = 24;
@@ -548,13 +553,20 @@ namespace FastBoarding
                 return LocaleUtils.Localize(KeyNoStopsFound, "No stops found.");
             }
 
+            string lateSkipText = BoardingRuntimeSettings.CancelLateBoarders
+                ? LocaleUtils.SafeFormat(
+                    KeyStatusLateSkipped,
+                    "{0} late skipped",
+                    LocaleUtils.FormatN0(lateBoardersCanceledToday))
+                : LocaleUtils.Localize(KeyStatusSkipOff, "skip OFF");
+
             return LocaleUtils.SafeFormat(
                 KeyStatusLine,
-                "{0} waiting | avg {1} | worst {2} | {3} skipped",
+                "{0} waiting | avg {1} | worst {2} | {3}",
                 LocaleUtils.FormatN0(family.WaitingPassengers),
                 FormatDuration(family.AverageWaitSeconds),
                 FormatDuration(family.WorstStopWaitSeconds),
-                LocaleUtils.FormatN0(lateBoardersCanceledToday));
+                lateSkipText);
         }
 
         private static void ApplySnapshot(TransitWaitStatusSystem.Snapshot snapshot)
