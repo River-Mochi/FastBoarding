@@ -49,10 +49,10 @@ namespace FastBoarding
             AddLocaleSource("fr-FR", new LocaleFR(setting));
             AddLocaleSource("es-ES", new LocaleES(setting));
             AddLocaleSource("de-DE", new LocaleDE(setting));
-            // AddLocaleSource("it-IT", new LocaleIT(setting));
+            AddLocaleSource("it-IT", new LocaleIT(setting));
             AddLocaleSource("ja-JP", new LocaleJA(setting));
             AddLocaleSource("ko-KR", new LocaleKO(setting));
-            // AddLocaleSource("pl-PL", new LocalePL(setting));
+            AddLocaleSource("pl-PL", new LocalePL(setting));
             AddLocaleSource("pt-BR", new LocalePT_BR(setting));
             AddLocaleSource("zh-HANS", new LocaleZH_CN(setting));    // Simplified Chinese
             AddLocaleSource("zh-HANT", new LocaleZH_HANT(setting));  // Traditional Chinese

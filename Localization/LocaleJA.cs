@@ -220,7 +220,7 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportWorstLineWaypointAverage, "最悪路線 waypoint 平均: {0}、待機 {1}" },
                 { TransitWaitStatus.KeyReportTopWorstStopsHeader, "平均待ち時間による最悪停留所 Top {0}:" },
                 { TransitWaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | 平均 {2} | 待機 {3} | 停留所 {4} | waypoint {5} | 路線 {6} | ヒント {7}" },
-                { TransitWaitStatus.KeyReportLateGroups, "そのままにした遅れたグループ乗客: {1} グループ、{2} 車両、{0} 人" },
+                { TransitWaitStatus.KeyReportLateGroups, "スキップしなかった遅れグループ: {0} 人の乗客 / {1} グループ / {2} 台の車両" },   
                 { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "スキップされた遅れた単独 cim の例" },
                 { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | 乗客 {2} | 逃した車両 {3} | 時刻 {4} | 現在 {5}" },
                 { TransitWaitStatus.KeyReportNone, "なし" },

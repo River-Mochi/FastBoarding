@@ -67,7 +67,7 @@ namespace FastBoarding
                     "**Avg** = average wait time for those passengers.\n" +
                     "**Worst** stop = highest average wait at one stop.\n" +
                     "Worst stops are good places to inspect for traffic accidents, blocked/bugged stops, or need more vehicles assigned.\n" +
-                    $"**Late skipped** = solo late passengers skipped all today by <{ToggleName}>.\n" +
+                    $"**Late skipped** = solo late passengers skipped for all today by <{ToggleName}>.\n" +
                     "Use <Stats to Log> for detailed report: stop names, entity IDs, and more.";
             }
 

@@ -49,10 +49,10 @@ Tune boarding speeds for:
 ### Credits
 - River-Mochi_____mod author
 - Inspiration and thanks to bcallender's All Aboard mod and Wayze's old InstantBoarding.
-- yenyang_________for testing and code feedback
-- Neco1996________for testing
-- MayorCheeks_____for testing
-- elGaucho87______thumbnail enchancements/straightener
+- yenyang_________testing and code feedback
+- Neco1996________testing
+- MayorCheeks_____testing
+- elGaucho87______thumbnail straightener
 
 If you got this far, congrats, say hi, there is a senryu poem I wrote just for you in images. click Like button, it's hard, I know, and so tiny.
 
@@ -71,14 +71,17 @@ tags: boarding time, bus stop, slow transit, debunching
 	<!--Link to the forum post where the mod can be discussed-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/fast-boarding.1918695/"/>
 	<!--Version of the mod-->
-	<ModVersion Value="1.0.3"/>
+	<ModVersion Value="1.0.4"/>
 	<!--Recommended version of the base game to use the mod-->
 	<GameVersion Value="1.5.*"/>
 	<!--Dependency for the mod, can be set multiple times-->
 	<Dependency Id=""/>
 	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 	<ChangeLog>
-- fix 4x default settings for new installs to apply on new installs
+- add Italian and Polish
+- update all locale files to align with English
+- internal add more info for stats report + verbose logging
+
 </ChangeLog>
 	<!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->
 	<ExternalLink Type="github" Url="https://github.com/River-Mochi/FastBoarding"/>
