@@ -10,7 +10,7 @@
 	<LongDescription>
 ## Faster public transit boarding
 
-YES - this mod is still useful with patch 1.5.7-1.5.8. The game patch added a fallback so stuck transit can move ~10 minutes after schedule departure time.
+YES - this mod is still useful with patch 1.5.7-1.5.8. The game patch added a fallback so stuck transit can move ~10 minutes after scheduled departure time.
 That fallback does not stop late passengers from holding transit after departure time. A vehicle can still wait too long at a stop before vanilla finally forces it to move.
 
 Fast Boarding helps before that point with boarding/loading speeds and the ability to reduce many late passengers that prevent transit from leaving stops.
@@ -20,7 +20,7 @@ Fast Boarding helps before that point with boarding/loading speeds and the abili
 
 - This build focuses on two behaviors:
 - **Adjustable stop tuning** for all transit, not just buses and trains. You choose the speed.
-- **Skip Late Passengers** (optional [x]) lets late solo cims miss a vehicle instead of holding it up past depature time (happens in vanilla now, see mod Options Status).
+- **Skip Late Passengers** (optional [x]) lets late solo cims miss a vehicle instead of holding it up past departure time (happens in vanilla now, see mod Options Status).
 - See **Notes** section for incompatible mods.
 
 Tune boarding speeds for:
@@ -40,7 +40,7 @@ Tune boarding speeds for:
 - Each time you enter the menu, it does a 1-time scan of current city info (never while running the city).
 
 ### Notes
-- Important compatibility: conflicts possible with mods that change boarding behavior, like All-Aboard, so Only choose One.
+- Important compatibility: conflicts possible with mods that change boarding behavior, like All-Aboard, so Only Choose One.
 Some players report no issues with Smart Transportation + Fast boarding together.
 - This mod is intended to be a lighter, safer alternative than replacing the game's Transport system files approach.
 - This mod works nicely with `Public Works Plus` to solve many transit issues.
