@@ -1,6 +1,6 @@
-# Fast Boarding (FB) Internals
+# Fast Boarding (FB) Internals.md
 
-Problem: `m_DepartureFrame` is used as a gate,
+Game Problems: `m_DepartureFrame` is used as a gate,
 but `StopBoarding` still returns `false` if any passenger in the vehicle buffer has `CurrentVehicle` without the `Ready` flag.
 Returning false means “do not stop boarding yet, someone is still on the way.”
 So vanilla has a planned departure frame, but it is not a hard “leave now even if someone is late” cutoff which is where this mod helps.
@@ -76,9 +76,11 @@ The Status section in Options UI is a snapshot. `Skipped` is the number of solo 
 FB uses a simple player-facing sliders:
 
 ```text
+Loading value:
 1x = vanilla
-2x = roughly twice as fast
-10x = aggressive test value
+2x = ~twice as fast (~1/2 planned dwell)
+3x = default (~1/3 planned dwell)
+5x = aggressive test value (~1/5 planned dwell )
 ```
 
 Implementation:

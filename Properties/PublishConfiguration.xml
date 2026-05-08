@@ -2,63 +2,69 @@
 	<!--Id must be set in order to update existed mod. it is not required for publishing mod for the first time-->
 	<ModId Value="141997"/>
 	<!--Name of the mod to display to players-->
-	<DisplayName Value="Fast Boarding [Beta]"/>
+	<DisplayName Value="Fast Boarding"/>
 	<!--Short description of the mod-->
-	<ShortDescription Value="Improves traffic flow with Transit faster Boarding + Loading and Late passengers stop slowing transit down."/>
+	<ShortDescription Value="Improves traffic with faster Transit Boarding + Loading; optional Late solo passengers stop holding up transit."/>
 	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
 	<!--LongDescription Value="This is a long description" /-->
 	<LongDescription>
-## Fast Boarding (Beta)
+        ## Faster public transit boarding
 
-Faster public transit boarding
-- Improve traffic, increase transit usage, reduce bunching of transit vehicles, reduce car demand indirectly.
-- The larger your city, the more this mod will help.
-- This build focuses on two behaviors:
+        YES - this mod still useful with patch (1.5.7-1.5.8). The game patch added a fallback so stuck transit can move after ~10 minutes.
 
-- **Adjustable stop tuning** for all transit, not just buses and trains. You choose the speed.
-- **Skip Late Passengers** (optional) so tardy citizens can just miss a vehicle instead of holding it up.
+        Fast Boarding helps before that point by with improved boarding/loading speeds and ability to reduce late passengers that prevent transit from leaving stops.
 
-Tune boarding speeds for:
+        - Improve traffic, increase transit usage, reduce bunching of transit vehicles, reduce car demand indirectly.
+        - The larger your city, the more this mod will help.
 
-- Bus, Rail (train, tram, subway), Water (ship, ferry), Air
-- Higher values shorten dwell by increasing loading speed at the stop and adjusting the boarding-time estimate used by the game.
-- ✅ When **Skip Late Passengers** is enabled, late passengers who are *still not ready* after *departure time* can miss that vehicle instead of holding it up.
-- Simple Goal: don't wait on passengers who are still late or far away. The game then naturally reassigns them.
+        - This build focuses on two behaviors:
+        - **Adjustable stop tuning** for all transit, not just buses and trains. You choose the speed.
+        - **Skip Late Passengers** (optional [x]) so tardy citizens can just miss a vehicle instead of holding it up (happens in vanilla now, frequently).
+        - See **Notes** section for incompatible mods.
 
-### Bonus Status report included
-- After the city runs a bit, check the Options menu to see current status.
-- *Skipped* number shows how many late passengers have been skipped so the transit can leave on time.
-- This is a right-now snapshot; if the skip number stays at "0" for a long time, make sure the checkbox ✅ is enabled.
-- Use the [Stats to Log] button for more detailed stats.
-- Example usage: Worst stop shows 10+ minutes, check it for traffic, bad placement, not enough vehicles, or replace the stop.
-- This is a one-shot button that does not run in the city per-frame, so no performance impact.
-- When investigating, I like to click the Stats button every 30 min, then compare the report later to see exactly where the worst stops are and more.
+        Tune boarding speeds for:
 
-### Notes
-- **Important compatibility**: conflicts possible with mods that change boarding behavior, like All-Aboard, Smart Transportation, so **only choose one**; if installing this mod, advise remove other mods to avoid unknown issues.
-- This mod is intended to be a lighter, safer alternative than replacing the game's Transport system files approach.
-- This mod works nicely with `Public Works Plus` to solve many transit issues.
-- Group boarding is handled conservatively to avoid splitting groups (they are few compared to the many single travelers).
-- Save-game safe. Safe to remove anytime.
-- No Harmony patches; lightweight design for low overhead and negligible performance impact.
+        - Bus, Rail (train, tram, subway), Water (ship, ferry), Air
+        - Higher values shorten dwell by increasing loading speed at the stop and adjusting the boarding-time estimate used by the game.
+        - ✅ When **Skip Late Passengers** is enabled, late passengers who are *still not ready* after *departure time* can miss that vehicle instead of holding it up.
+        - Simple Goal: don't wait on passengers who are still late or far away. The game then naturally reassigns them.
 
-### Support and feedback
-- If mods make the game better, give it a Like. It's an easy way to show support for free mods :)
-- Feedback on: Github, Discord, etc., link icons on this page.
+        ### Bonus Status report included
+        - After the city runs a bit, check the Options menu to see current status.
+        - *Skipped* number shows how many late solo passengers have been skipped today to not hold up transit.
+        - Use [Stats to Log] button for more detailed data than what is in Options menu.
+        - Example usage: Worst stop shows 10+ minutes, check it for traffic, bad placement, not enough vehicles, or replace the stop.
+        - This is a one-shot button that does not run in the city per-frame, so no performance impact.
+        - When checking things, I like to click the Stats button every ~20-30 min, then compare the report later to see where the worst stops are and more (Scene Explorer mod can help with this too).
+        - Each time you enter the menu, it does a 1-time scan of current city info (never while running city).
 
-### Credits
-- River-Mochi_____mod author
-- Inspiration and thanks to bcallender's All Aboard mod and Wayze's old InstantBoarding.
-- yenyang_________testing and code feedback
-- Neco1996________testing
-- MayorCheeks_____testing
-- elGaucho87______thumbnail straightener
 
-If you got this far, congrats, say hi, there is a senryu poem I wrote just for you in images. click Like button, it's hard, I know, and so tiny.
+        ### Notes
+        - Important compatibility: conflicts possible with mods that change boarding behavior, like All-Aboard, so Only choose One.
+        Some players report no issues with Smart Transportation + Fast boarding together.
+        - This mod is intended to be a lighter, safer alternative than replacing the game's Transport system files approach.
+        - This mod works nicely with `Public Works Plus` to solve many transit issues.
+        - Group boarding is left to normal vanilla handling to avoid splitting groups (they are few compared to the many single travelers).
+        - Save-game safe. Safe to remove anytime.
+        - No Harmony patches; lightweight design for low overhead and negligible performance impact.
 
-tags: boarding time, bus stop, slow transit, debunching
+        ### Support and feedback
+        - If mods make the game better, give it a Like. It's an easy way to show support for free mods :)
+        - Feedback on: Github, Discord, etc., link icons on this page.
 
-</LongDescription>
+        ### Credits
+        - River-Mochi_____mod author
+        - Inspiration and thanks to bcallender's All Aboard mod and Wayze's old InstantBoarding.
+        - yenyang_________testing and code feedback
+        - Neco1996________testing
+        - MayorCheeks_____testing
+        - elGaucho87______thumbnail straightening
+
+        If you got this far, congrats, say hi, there is a senryu poem I wrote just for you in images. click Like button, it's hard, I know, and so tiny.
+
+        tags: boarding time, bus stop, slow transit, debunching, unbunching
+
+    </LongDescription>
 	<!--Thumbnail-->
 	<Thumbnail Value="Properties/Thumbnail-Boarding.jpg"/>
 	<!--Screenshot, can be set multiple times-->
