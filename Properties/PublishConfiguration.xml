@@ -87,7 +87,7 @@
 - add Italian and Polish
 - update all locale files to align with English
 - Set 3x as default, and 5x as maximum boarding-speed scaler.
-- internal add more info for stats report + verbose logging
+- internal: more info for stats report + verbose logging
 
 </ChangeLog>
 	<!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->
