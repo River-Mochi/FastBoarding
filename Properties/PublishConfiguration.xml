@@ -10,16 +10,17 @@
 	<LongDescription>
         ## Faster public transit boarding
 
-        YES - this mod still useful with patch (1.5.7-1.5.8). The game patch added a fallback so stuck transit can move after ~10 minutes.
+        YES - this mod is still useful with patch 1.5.7-1.5.8. The game patch added a fallback so stuck transit can move ~10 minutes after schedule departure time.
+        That fallback does not stop late passengers from holding transit after departure time. A vehicle can still wait too long at a stop before vanilla finally forces it to move.
 
-        Fast Boarding helps before that point by with improved boarding/loading speeds and ability to reduce late passengers that prevent transit from leaving stops.
+        Fast Boarding helps before that point with boarding/loading speeds and the ability to reduce many late passengers that prevent transit from leaving stops.
 
         - Improve traffic, increase transit usage, reduce bunching of transit vehicles, reduce car demand indirectly.
         - The larger your city, the more this mod will help.
 
         - This build focuses on two behaviors:
         - **Adjustable stop tuning** for all transit, not just buses and trains. You choose the speed.
-        - **Skip Late Passengers** (optional [x]) so tardy citizens can just miss a vehicle instead of holding it up (happens in vanilla now, frequently).
+        - **Skip Late Passengers** (optional [x]) lets late solo cims miss a vehicle instead of holding it up past depature time (happens in vanilla now, see mod Options Status).
         - See **Notes** section for incompatible mods.
 
         Tune boarding speeds for:
@@ -31,13 +32,12 @@
 
         ### Bonus Status report included
         - After the city runs a bit, check the Options menu to see current status.
-        - *Skipped* number shows how many late solo passengers have been skipped today to not hold up transit.
+        - *Skipped* number shows how many late solo passengers have been skipped today so they do not hold up transit.
         - Use [Stats to Log] button for more detailed data than what is in Options menu.
         - Example usage: Worst stop shows 10+ minutes, check it for traffic, bad placement, not enough vehicles, or replace the stop.
         - This is a one-shot button that does not run in the city per-frame, so no performance impact.
         - When checking things, I like to click the Stats button every ~20-30 min, then compare the report later to see where the worst stops are and more (Scene Explorer mod can help with this too).
-        - Each time you enter the menu, it does a 1-time scan of current city info (never while running city).
-
+        - Each time you enter the menu, it does a 1-time scan of current city info (never while running the city).
 
         ### Notes
         - Important compatibility: conflicts possible with mods that change boarding behavior, like All-Aboard, so Only choose One.
@@ -86,6 +86,7 @@
 	<ChangeLog>
 - add Italian and Polish
 - update all locale files to align with English
+- Set 3x as default, and 5x as maximum boarding-speed scaler.
 - internal add more info for stats report + verbose logging
 
 </ChangeLog>
