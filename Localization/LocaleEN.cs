@@ -129,13 +129,14 @@ namespace FastBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.LeaveIfNoBoarding)), "Leave If No Boarding" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.LeaveIfNoBoarding)),
-                    "**Experimental**\n" +
-                    "After <departure time>, helps a transit vehicle leave if <no one is still boarding>.\n" +
+                    "**Beta / testing**\n" +
+                    "Vanilla already has its own boarding fallback. This nudges narrow post-departure cases sooner.\n" +
+                    "After <departure time>, helps a transit vehicle leave if <no one is still boarding or loading>.\n" +
                     "Fast Boarding only nudges vanilla to end boarding when:\n" +
                     "- the vehicle is already in Boarding state,\n" +
                     "- the passenger buffer is empty, or\n" +
                     "- all attached passengers are Ready.\n" +
-                    "Does not skip groups, does not delete citizens, and does not force vehicles to leave before vanilla departure time."
+                    "Does not skip groups, delete citizens, interrupt refueling/loading, or force vehicles to leave before vanilla departure time."
                 },
 
                 // Status overview

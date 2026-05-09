@@ -204,6 +204,21 @@ namespace FastBoarding
                 return false;
             }
 
+            if ((publicTransport.m_State & PublicTransportFlags.Refueling) != 0 ||
+                (EntityManager.HasComponent<CargoTransport>(vehicleEntity) &&
+                    (EntityManager.GetComponentData<CargoTransport>(vehicleEntity).m_State & CargoTransportFlags.Refueling) != 0))
+            {
+                reason = "refueling";
+                return false;
+            }
+
+            if (EntityManager.HasBuffer<LoadingResources>(vehicleEntity) &&
+                EntityManager.GetBuffer<LoadingResources>(vehicleEntity).Length > 0)
+            {
+                reason = "loading-resources";
+                return false;
+            }
+
             if (!HasNoVanillaBoardingBlocker(vehicleEntity, out passengerCount, out readyCount, out notReadyCount))
             {
                 reason = "not-ready-passenger";
