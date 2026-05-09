@@ -36,11 +36,9 @@ namespace FastBoarding
 
         public static bool CancelLateBoarders { get; private set; } = false;
 
-        public static bool LeaveIfNoBoarding { get; private set; } = false;
-
         public static bool CimsRunSoonerToCatchBuses { get; private set; } = false;
 
-        public static bool BoardingAssistEnabled => CancelLateBoarders || LeaveIfNoBoarding || CimsRunSoonerToCatchBuses;
+        public static bool BoardingAssistEnabled => CancelLateBoarders || CimsRunSoonerToCatchBuses;
 
         public static bool EnableVerboseLogging { get; private set; } = false;
 
@@ -92,12 +90,6 @@ namespace FastBoarding
             if (CancelLateBoarders != settings.CancelLateBoarders)
             {
                 CancelLateBoarders = settings.CancelLateBoarders;
-                lateBoarderChanged = true;
-            }
-
-            if (LeaveIfNoBoarding != settings.LeaveIfNoBoarding)
-            {
-                LeaveIfNoBoarding = settings.LeaveIfNoBoarding;
                 lateBoarderChanged = true;
             }
 
@@ -188,18 +180,6 @@ namespace FastBoarding
             return true;
         }
 
-        public static bool SetLeaveIfNoBoarding(bool value)
-        {
-            if (LeaveIfNoBoarding == value)
-            {
-                return false;
-            }
-
-            LeaveIfNoBoarding = value;
-            LateBoarderRevision++;
-            return true;
-        }
-
         public static bool SetCimsRunSoonerToCatchBuses(bool value)
         {
             if (CimsRunSoonerToCatchBuses == value)
@@ -229,8 +209,7 @@ namespace FastBoarding
             return
                 $"bus={BusBoardingSpeedFactor}x, rail={RailBoardingSpeedFactor}x, " +
                 $"ship+ferry={WaterBoardingSpeedFactor}x, air={AirBoardingSpeedFactor}x, " +
-                $"skipLateSoloCim={CancelLateBoarders}, leaveIfNoBoarding={LeaveIfNoBoarding}, " +
-                $"busRunSooner={CimsRunSoonerToCatchBuses}";
+                $"skipLateSoloCim={CancelLateBoarders}, busRunSooner={CimsRunSoonerToCatchBuses}";
         }
 
         public static string DescribeVerboseForLog(bool enabled)

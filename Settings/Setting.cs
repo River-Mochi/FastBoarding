@@ -86,10 +86,6 @@ namespace FastBoarding
         [SettingsUISetter(typeof(Setting), nameof(SetCimsRunSoonerToCatchBusesLive))]
         public bool CimsRunSoonerToCatchBuses { get; set; }
 
-        [SettingsUISection(ActionsTab, BehaviorGroup)]
-        [SettingsUISetter(typeof(Setting), nameof(SetLeaveIfNoBoardingLive))]
-        public bool LeaveIfNoBoarding { get; set; }
-
         [SettingsUISection(ActionsTab, StatusGroup)]
         public string StatusOverview
         {
@@ -248,7 +244,6 @@ namespace FastBoarding
             AirBoardingSpeedFactor = DefaultSpeedFactor;
             CancelLateBoarders = true;
             CimsRunSoonerToCatchBuses = true;
-            LeaveIfNoBoarding = false;
             EnableVerboseLogging = false;
         }
 
@@ -326,19 +321,7 @@ namespace FastBoarding
                 // SettingsUISetter applies immediate live behavior without adding an Apply button.
                 LogUtils.Info(
                     Mod.s_Log,
-                    () => DescribeBehaviorForLog(value, BoardingRuntimeSettings.LeaveIfNoBoarding, BoardingRuntimeSettings.CimsRunSoonerToCatchBuses));
-                TrySetLateBoarderSystemEnabled(BoardingRuntimeSettings.BoardingAssistEnabled);
-            }
-        }
-
-        private void SetLeaveIfNoBoardingLive(bool value)
-        {
-            if (BoardingRuntimeSettings.SetLeaveIfNoBoarding(value))
-            {
-                // This behavior uses the same boarding scan as late-passenger skipping.
-                LogUtils.Info(
-                    Mod.s_Log,
-                    () => DescribeBehaviorForLog(BoardingRuntimeSettings.CancelLateBoarders, value, BoardingRuntimeSettings.CimsRunSoonerToCatchBuses));
+                    () => DescribeBehaviorForLog(value, BoardingRuntimeSettings.CimsRunSoonerToCatchBuses));
                 TrySetLateBoarderSystemEnabled(BoardingRuntimeSettings.BoardingAssistEnabled);
             }
         }
@@ -350,7 +333,7 @@ namespace FastBoarding
                 // This only sets vanilla's Run flag a little before bus departure.
                 LogUtils.Info(
                     Mod.s_Log,
-                    () => DescribeBehaviorForLog(BoardingRuntimeSettings.CancelLateBoarders, BoardingRuntimeSettings.LeaveIfNoBoarding, value));
+                    () => DescribeBehaviorForLog(BoardingRuntimeSettings.CancelLateBoarders, value));
                 TrySetLateBoarderSystemEnabled(BoardingRuntimeSettings.BoardingAssistEnabled);
             }
         }
@@ -371,15 +354,14 @@ namespace FastBoarding
 
         private string DescribeBehaviorForLog()
         {
-            return DescribeBehaviorForLog(CancelLateBoarders, LeaveIfNoBoarding, CimsRunSoonerToCatchBuses);
+            return DescribeBehaviorForLog(CancelLateBoarders, CimsRunSoonerToCatchBuses);
         }
 
         private static string DescribeBehaviorForLog(
             bool skipLateSoloCim,
-            bool leaveIfNoBoarding,
             bool busRunSooner)
         {
-            return $"Options Settings: skipLateSoloCim={skipLateSoloCim}, leaveIfNoBoarding={leaveIfNoBoarding}, busRunSooner={busRunSooner}";
+            return $"Options Settings: skipLateSoloCim={skipLateSoloCim}, busRunSooner={busRunSooner}";
         }
 
         public void RepairLoadedValues()

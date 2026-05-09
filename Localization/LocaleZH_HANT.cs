@@ -127,13 +127,6 @@ namespace FastBoarding
                     "團體只占人群的一小部分；主要收益來自跳過遲到奔跑的單獨 cim。\n" +
                     "被跳過的遲到市民不會被刪除；遊戲會自然重新分配他們。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.LeaveIfNoBoarding)), "Leave If No Boarding" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.LeaveIfNoBoarding)),
-                    "**Beta / testing**\n" +
-                    "Vanilla already has its own boarding fallback. This nudges narrow post-departure cases sooner.\n" +
-                    "After <departure time>, helps a transit vehicle leave if <no one is still boarding or loading>.\n" +
-                    "Does not skip groups, delete citizens, interrupt refueling/loading, or force vehicles to leave before vanilla departure time."
-                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "Cims Run Sooner to Catch Buses" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
                     "**Beta / testing**\n" +

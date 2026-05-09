@@ -1,5 +1,5 @@
 // File: System/LateBoarderCancelSystem.cs
-// Purpose: Main update loop and boarding-assist pass for late solo passengers and ready vehicles.
+// Purpose: Main update loop and boarding-assist pass for late solo passengers.
 
 namespace FastBoarding
 {
@@ -22,7 +22,7 @@ namespace FastBoarding
         // High-level flow:
         // 1. Scan boarding vehicles after their vanilla departure frame.
         // 2. Optionally detach safe solo late passengers whose remaining path still contains that exact vehicle.
-        // 3. Optionally nudge vanilla to end boarding when no attached passenger is still not-ready.
+        // 3. Optionally set vanilla's Run flag before bus departure so assigned cims hurry sooner.
         // 4. Optionally record delayed "what happened next?" samples for verbose diagnostics.
         // 2048/day means every 128 simulation frames (~42 game seconds); cancellation work is also capped below.
         public const int UpdatesPerDay = 2048;
@@ -49,7 +49,7 @@ namespace FastBoarding
             m_ToolSystem = World.GetOrCreateSystemManaged<ToolSystem>();
             m_DefaultToolSystem = World.GetOrCreateSystemManaged<DefaultToolSystem>();
 
-            // Passenger is intentionally not required. Empty/no-buffer vehicles are valid leave-assist candidates.
+            // Passenger is intentionally not required so diagnostic probes can still explain empty holds.
             m_VehicleQuery = SystemAPI.QueryBuilder()
                 .WithAll<Game.Vehicles.PublicTransport>()
                 .WithNone<Deleted, Destroyed, Temp, Overridden>()
@@ -90,7 +90,7 @@ namespace FastBoarding
                     // Avoid passenger-buffer edits while tools may delete or rebuild entities.
                     m_SkippedForTool++;
                     uint frame = m_SimulationSystem?.frameIndex ?? 0;
-                    LogPassSummary(frame, new PassStats(0, 0, 0, 0, 0, 0), "paused-tool");
+                    LogPassSummary(frame, new PassStats(0, 0, 0, 0, 0), "paused-tool");
                     LogFollowUps(frame);
                     return;
                 }
@@ -105,7 +105,6 @@ namespace FastBoarding
             {
                 Enabled = false;
                 BoardingRuntimeSettings.SetCancelLateBoarders(false);
-                BoardingRuntimeSettings.SetLeaveIfNoBoarding(false);
                 BoardingRuntimeSettings.SetCimsRunSoonerToCatchBuses(false);
 
                 Mod.WarnOnce(
@@ -120,7 +119,6 @@ namespace FastBoarding
             EntityCommandBuffer ecb = default;
             bool hasCommandBuffer = false;
             int cancellationsThisUpdate = 0;
-            int leaveAssists = 0;
             int runSoonerAssists = 0;
             int vehiclesScanned = 0;
             int passengersScanned = 0;
@@ -144,7 +142,6 @@ namespace FastBoarding
             int boardingHoldProbeLogs = 0;
             uint frame = m_SimulationSystem?.frameIndex ?? 0;
             bool cancelLateBoarders = BoardingRuntimeSettings.CancelLateBoarders;
-            bool leaveIfNoBoarding = BoardingRuntimeSettings.LeaveIfNoBoarding;
             bool cimsRunSoonerToCatchBuses = BoardingRuntimeSettings.CimsRunSoonerToCatchBuses;
 
             try
@@ -208,45 +205,18 @@ namespace FastBoarding
 
                     if (!hasPassengerBuffer || passengers.Length == 0)
                     {
-                        bool leaveAssistQueued = false;
-                        int emptyLeavePassengerCount = 0;
-                        int emptyLeaveReadyCount = 0;
-                        int emptyLeaveNotReadyCount = 0;
-                        string emptyLeaveReason = "not-evaluated";
-
-                        if (leaveIfNoBoarding)
-                        {
-                            leaveAssistQueued = QueueLeaveIfNoBoarding(
-                                ref ecb,
-                                vehicleEntity,
-                                publicTransport,
-                                out emptyLeavePassengerCount,
-                                out emptyLeaveReadyCount,
-                                out emptyLeaveNotReadyCount,
-                                out emptyLeaveReason);
-
-                            if (leaveAssistQueued)
-                            {
-                                leaveAssists++;
-                            }
-                        }
-
                         TryLogBoardingHoldProbe(
                             frame,
                             vehicleEntity,
                             transportType,
                             publicTransport,
-                            passengerCount: leaveIfNoBoarding ? emptyLeavePassengerCount : 0,
-                            readyCount: leaveIfNoBoarding ? emptyLeaveReadyCount : 0,
-                            notReadyCount: leaveIfNoBoarding ? emptyLeaveNotReadyCount : 0,
+                            passengerCount: 0,
+                            readyCount: 0,
+                            notReadyCount: 0,
                             groupNotReadyCount: 0,
                             unsafeNotReadyStats: default,
                             candidateCount: 0,
-                            note: leaveIfNoBoarding
-                                ? leaveAssistQueued
-                                    ? $"leave-if-no-boarding:{emptyLeaveReason}"
-                                    : $"leave-probe:{emptyLeaveReason}"
-                                : "empty-past-departure",
+                            note: "empty-past-departure",
                             ref boardingHoldProbeLogs);
 
                         continue;
@@ -308,47 +278,20 @@ namespace FastBoarding
                         }
                     }
 
-                    bool leaveAssistForVehicle = false;
-                    int leaveCheckedPassengers = 0;
-                    int leaveReadyCount = 0;
-                    int leaveNotReadyCount = 0;
-                    string leaveReason = "not-evaluated";
-
-                    if (leaveIfNoBoarding)
-                    {
-                        leaveAssistForVehicle = QueueLeaveIfNoBoarding(
-                            ref ecb,
-                            vehicleEntity,
-                            publicTransport,
-                            out leaveCheckedPassengers,
-                            out leaveReadyCount,
-                            out leaveNotReadyCount,
-                            out leaveReason);
-
-                        if (leaveAssistForVehicle)
-                        {
-                            leaveAssists++;
-                        }
-                    }
-
                     TryLogBoardingHoldProbe(
                         frame,
                         vehicleEntity,
                         transportType,
                         publicTransport,
-                        leaveIfNoBoarding ? leaveCheckedPassengers : passengers.Length,
-                        leaveIfNoBoarding ? leaveReadyCount : readyCount,
-                        leaveIfNoBoarding ? leaveNotReadyCount : notReadyCount,
+                        passengers.Length,
+                        readyCount,
+                        notReadyCount,
                         groupNotReadyCount,
                         unsafeNotReadyStats,
                         candidateCountForVehicle,
-                        leaveIfNoBoarding
-                            ? leaveAssistForVehicle
-                                ? $"leave-if-no-boarding:{leaveReason}"
-                                : $"leave-probe:{leaveReason}"
-                            : candidateCountForVehicle == 0
-                                ? "no-late-solo-candidates"
-                                : "late-solo-candidates",
+                        candidateCountForVehicle == 0
+                            ? "no-late-solo-candidates"
+                            : "late-solo-candidates",
                         ref boardingHoldProbeLogs);
 
                     int canceledForVehicle = 0;
@@ -438,7 +381,7 @@ namespace FastBoarding
                     }
                 }
 
-                return new PassStats(vehiclesScanned, passengersScanned, candidates, cancellationsThisUpdate, leaveAssists, runSoonerAssists);
+                return new PassStats(vehiclesScanned, passengersScanned, candidates, cancellationsThisUpdate, runSoonerAssists);
             }
             finally
             {

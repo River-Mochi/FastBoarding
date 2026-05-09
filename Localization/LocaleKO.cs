@@ -127,13 +127,6 @@ namespace FastBoarding
                     "그룹은 군중의 작은 부분입니다. 대부분의 효과는 늦게 뛰어오는 혼자 cim을 건너뛰는 데서 옵니다.\n" +
                     "건너뛴 늦은 시민은 삭제되지 않으며, 게임이 자연스럽게 다시 배정합니다."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.LeaveIfNoBoarding)), "Leave If No Boarding" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.LeaveIfNoBoarding)),
-                    "**Beta / testing**\n" +
-                    "Vanilla already has its own boarding fallback. This nudges narrow post-departure cases sooner.\n" +
-                    "After <departure time>, helps a transit vehicle leave if <no one is still boarding or loading>.\n" +
-                    "Does not skip groups, delete citizens, interrupt refueling/loading, or force vehicles to leave before vanilla departure time."
-                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "Cims Run Sooner to Catch Buses" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
                     "**Beta / testing**\n" +

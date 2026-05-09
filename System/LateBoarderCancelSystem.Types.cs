@@ -12,13 +12,12 @@ namespace FastBoarding
     {
         private readonly struct PassStats
         {
-            public PassStats(int vehicles, int passengers, int candidates, int canceled, int leaveAssists, int runSoonerAssists)
+            public PassStats(int vehicles, int passengers, int candidates, int canceled, int runSoonerAssists)
             {
                 Vehicles = vehicles;
                 Passengers = passengers;
                 Candidates = candidates;
                 Canceled = canceled;
-                LeaveAssists = leaveAssists;
                 RunSoonerAssists = runSoonerAssists;
             }
 
@@ -29,8 +28,6 @@ namespace FastBoarding
             public int Candidates { get; }
 
             public int Canceled { get; }
-
-            public int LeaveAssists { get; }
 
             public int RunSoonerAssists { get; }
         }
