@@ -38,7 +38,9 @@ namespace FastBoarding
 
         public static bool LeaveIfNoBoarding { get; private set; } = false;
 
-        public static bool BoardingAssistEnabled => CancelLateBoarders || LeaveIfNoBoarding;
+        public static bool CimsRunSoonerToCatchBuses { get; private set; } = false;
+
+        public static bool BoardingAssistEnabled => CancelLateBoarders || LeaveIfNoBoarding || CimsRunSoonerToCatchBuses;
 
         public static bool EnableVerboseLogging { get; private set; } = false;
 
@@ -96,6 +98,12 @@ namespace FastBoarding
             if (LeaveIfNoBoarding != settings.LeaveIfNoBoarding)
             {
                 LeaveIfNoBoarding = settings.LeaveIfNoBoarding;
+                lateBoarderChanged = true;
+            }
+
+            if (CimsRunSoonerToCatchBuses != settings.CimsRunSoonerToCatchBuses)
+            {
+                CimsRunSoonerToCatchBuses = settings.CimsRunSoonerToCatchBuses;
                 lateBoarderChanged = true;
             }
 
@@ -192,6 +200,18 @@ namespace FastBoarding
             return true;
         }
 
+        public static bool SetCimsRunSoonerToCatchBuses(bool value)
+        {
+            if (CimsRunSoonerToCatchBuses == value)
+            {
+                return false;
+            }
+
+            CimsRunSoonerToCatchBuses = value;
+            LateBoarderRevision++;
+            return true;
+        }
+
         public static bool SetEnableVerboseLogging(bool value)
         {
             if (EnableVerboseLogging == value)
@@ -209,7 +229,8 @@ namespace FastBoarding
             return
                 $"bus={BusBoardingSpeedFactor}x, rail={RailBoardingSpeedFactor}x, " +
                 $"ship+ferry={WaterBoardingSpeedFactor}x, air={AirBoardingSpeedFactor}x, " +
-                $"skipLateSoloCim={CancelLateBoarders}, leaveIfNoBoarding={LeaveIfNoBoarding}";
+                $"skipLateSoloCim={CancelLateBoarders}, leaveIfNoBoarding={LeaveIfNoBoarding}, " +
+                $"busRunSooner={CimsRunSoonerToCatchBuses}";
         }
 
         public static string DescribeVerboseForLog(bool enabled)

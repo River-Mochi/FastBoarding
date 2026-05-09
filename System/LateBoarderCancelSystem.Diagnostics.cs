@@ -37,6 +37,7 @@ namespace FastBoarding
 
         private long m_TotalCanceled;
         private long m_TotalLeaveAssists;
+        private long m_TotalRunSoonerAssists;
         private static bool s_FollowUpLegendLogged;
         private int m_SkippedForTool;
         private bool m_LoggedActive;
@@ -197,13 +198,14 @@ namespace FastBoarding
             m_LoggedActive = true;
             LogUtils.Info(
                 Mod.s_Log,
-                () => $"Boarding assist active: every {GetUpdateInterval(SystemUpdatePhase.GameSimulation)} frames, cap={MaxCancellationsPerUpdate} late solo cims/update, skipLateSoloCim={BoardingRuntimeSettings.CancelLateBoarders}, leaveIfNoBoarding={BoardingRuntimeSettings.LeaveIfNoBoarding}");
+                () => $"Boarding assist active: every {GetUpdateInterval(SystemUpdatePhase.GameSimulation)} frames, cap={MaxCancellationsPerUpdate} late solo cims/update, skipLateSoloCim={BoardingRuntimeSettings.CancelLateBoarders}, leaveIfNoBoarding={BoardingRuntimeSettings.LeaveIfNoBoarding}, busRunSooner={BoardingRuntimeSettings.CimsRunSoonerToCatchBuses}");
         }
 
         private void LogPassSummary(uint frame, PassStats stats, string reason)
         {
             m_TotalCanceled += stats.Canceled;
             m_TotalLeaveAssists += stats.LeaveAssists;
+            m_TotalRunSoonerAssists += stats.RunSoonerAssists;
 
             if (!ShouldLogDiagnostics())
             {
@@ -215,7 +217,7 @@ namespace FastBoarding
                 frame < m_LastDiagnosticFrame ||
                 frame - m_LastDiagnosticFrame >= DiagnosticFrameInterval;
 
-            if (!force && !intervalElapsed && stats.Canceled == 0 && stats.LeaveAssists == 0)
+            if (!force && !intervalElapsed && stats.Canceled == 0 && stats.LeaveAssists == 0 && stats.RunSoonerAssists == 0)
             {
                 return;
             }
@@ -231,13 +233,13 @@ namespace FastBoarding
             {
                 LogUtils.Info(
                     Mod.s_Log,
-                    () => $"Boarding assist paused: activeTool={activeTool}, pauses={m_SkippedForTool}, totalSkipped={m_TotalCanceled}, totalLeaveAssists={m_TotalLeaveAssists}");
+                    () => $"Boarding assist paused: activeTool={activeTool}, pauses={m_SkippedForTool}, totalSkipped={m_TotalCanceled}, totalLeaveAssists={m_TotalLeaveAssists}, totalBusRunSooner={m_TotalRunSoonerAssists}");
                 return;
             }
 
             LogUtils.Info(
                 Mod.s_Log,
-                () => $"Boarding assist: vehicles={stats.Vehicles}, passengersScanned={stats.Passengers}, lateSolo={stats.Candidates}, skipped={stats.Canceled}, leaveAssists={stats.LeaveAssists}, totalSkipped={m_TotalCanceled}, totalLeaveAssists={m_TotalLeaveAssists}");
+                () => $"Boarding assist: vehicles={stats.Vehicles}, passengersScanned={stats.Passengers}, lateSolo={stats.Candidates}, skipped={stats.Canceled}, leaveAssists={stats.LeaveAssists}, busRunSooner={stats.RunSoonerAssists}, totalSkipped={m_TotalCanceled}, totalLeaveAssists={m_TotalLeaveAssists}, totalBusRunSooner={m_TotalRunSoonerAssists}");
         }
 
         private void TrackFollowUpSample(CanceledPassengerSample sample)
@@ -533,6 +535,7 @@ namespace FastBoarding
             m_LastDiagnosticFrame = 0;
             m_TotalCanceled = 0;
             m_TotalLeaveAssists = 0;
+            m_TotalRunSoonerAssists = 0;
             m_SkippedForTool = 0;
             m_LoggedActive = false;
             m_FollowUpCount = 0;

@@ -90,7 +90,7 @@ namespace FastBoarding
                 updateSystem.World.GetOrCreateSystemManaged<TransportStopTuningSystem>().Enabled = true;
                 // Start the late-cim skip system in the same ON/OFF state saved in the mod settings file.
                 updateSystem.World.GetOrCreateSystemManaged<LateBoarderCancelSystem>().Enabled =
-                    BoardingRuntimeSettings.CancelLateBoarders;
+                    BoardingRuntimeSettings.BoardingAssistEnabled;
             }
             catch (Exception ex)
             {

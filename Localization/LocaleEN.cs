@@ -127,6 +127,14 @@ namespace FastBoarding
                     "Groups are a small part of the crowd; most benefits are from skipping solo cims who are running late.\n" +
                     "Skipped late citizens are not deleted; they are naturally reassigned by the game."
                 },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "Cims Run Sooner to Catch Buses" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
+                    "**Beta / testing**\n" +
+                    "Citizens who are running late for the bus start running sooner to try to make it before departure time.\n" +
+                    "This helps keep buses on schedule.\n" +
+                    "Only affects cims already assigned to a bus that is currently boarding.\n" +
+                    "Does not force boarding, skip groups, delete citizens, or affect trains, trams, ships, ferries, or airplanes."
+                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.LeaveIfNoBoarding)), "Leave If No Boarding" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.LeaveIfNoBoarding)),
                     "**Beta / testing**\n" +

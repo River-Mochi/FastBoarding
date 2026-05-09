@@ -90,7 +90,7 @@ namespace FastBoarding
                     // Avoid passenger-buffer edits while tools may delete or rebuild entities.
                     m_SkippedForTool++;
                     uint frame = m_SimulationSystem?.frameIndex ?? 0;
-                    LogPassSummary(frame, new PassStats(0, 0, 0, 0, 0), "paused-tool");
+                    LogPassSummary(frame, new PassStats(0, 0, 0, 0, 0, 0), "paused-tool");
                     LogFollowUps(frame);
                     return;
                 }
@@ -106,6 +106,7 @@ namespace FastBoarding
                 Enabled = false;
                 BoardingRuntimeSettings.SetCancelLateBoarders(false);
                 BoardingRuntimeSettings.SetLeaveIfNoBoarding(false);
+                BoardingRuntimeSettings.SetCimsRunSoonerToCatchBuses(false);
 
                 Mod.WarnOnce(
                     "FB_LATE_BOARDER_CANCEL_EXCEPTION",
@@ -120,6 +121,7 @@ namespace FastBoarding
             bool hasCommandBuffer = false;
             int cancellationsThisUpdate = 0;
             int leaveAssists = 0;
+            int runSoonerAssists = 0;
             int vehiclesScanned = 0;
             int passengersScanned = 0;
             int candidates = 0;
@@ -143,6 +145,7 @@ namespace FastBoarding
             uint frame = m_SimulationSystem?.frameIndex ?? 0;
             bool cancelLateBoarders = BoardingRuntimeSettings.CancelLateBoarders;
             bool leaveIfNoBoarding = BoardingRuntimeSettings.LeaveIfNoBoarding;
+            bool cimsRunSoonerToCatchBuses = BoardingRuntimeSettings.CimsRunSoonerToCatchBuses;
 
             try
             {
@@ -177,14 +180,27 @@ namespace FastBoarding
                         continue;
                     }
 
+                    TransportType transportType = GetTransportType(vehicleEntity);
+                    uint latestDepartureFrame = GetLatestDepartureFrame(vehicleEntity, publicTransport);
+
+                    if (cimsRunSoonerToCatchBuses)
+                    {
+                        runSoonerAssists += QueueBusPassengersRunSooner(
+                            ref ecb,
+                            vehicleEntity,
+                            transportType,
+                            publicTransport,
+                            frame,
+                            latestDepartureFrame);
+                    }
+
                     if (m_SimulationSystem == null ||
-                        !IsPastDepartureFrames(vehicleEntity, publicTransport, frame))
+                        !IsPastDepartureFrames(latestDepartureFrame, frame))
                     {
                         // Boarding assists only run after vanilla departure frames are met.
                         continue;
                     }
 
-                    TransportType transportType = GetTransportType(vehicleEntity);
                     bool hasPassengerBuffer = EntityManager.HasBuffer<Passenger>(vehicleEntity);
                     DynamicBuffer<Passenger> passengers = hasPassengerBuffer
                         ? EntityManager.GetBuffer<Passenger>(vehicleEntity)
@@ -422,7 +438,7 @@ namespace FastBoarding
                     }
                 }
 
-                return new PassStats(vehiclesScanned, passengersScanned, candidates, cancellationsThisUpdate, leaveAssists);
+                return new PassStats(vehiclesScanned, passengersScanned, candidates, cancellationsThisUpdate, leaveAssists, runSoonerAssists);
             }
             finally
             {

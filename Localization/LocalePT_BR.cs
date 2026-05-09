@@ -127,7 +127,21 @@ namespace FastBoarding
                     "Grupos são uma pequena parte da multidão; a maior parte do benefício vem de pular cims solo atrasados.\n" +
                     "Cidadãos atrasados pulados não são excluídos; eles são naturalmente reatribuídos pelo jogo."
                 },
-
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.LeaveIfNoBoarding)), "Leave If No Boarding" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.LeaveIfNoBoarding)),
+                    "**Beta / testing**\n" +
+                    "Vanilla already has its own boarding fallback. This nudges narrow post-departure cases sooner.\n" +
+                    "After <departure time>, helps a transit vehicle leave if <no one is still boarding or loading>.\n" +
+                    "Does not skip groups, delete citizens, interrupt refueling/loading, or force vehicles to leave before vanilla departure time."
+                },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "Cims Run Sooner to Catch Buses" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
+                    "**Beta / testing**\n" +
+                    "Citizens who are running late for the bus start running sooner to try to make it before departure time.\n" +
+                    "This helps keep buses on schedule.\n" +
+                    "Only affects cims already assigned to a bus that is currently boarding.\n" +
+                    "Does not force boarding, skip groups, delete citizens, or affect trains, trams, ships, ferries, or airplanes."
+                },
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "Uso total" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)),

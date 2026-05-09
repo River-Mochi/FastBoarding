@@ -4,6 +4,7 @@
 namespace FastBoarding
 {
     using Game; // GameSystemBase
+    using Game.Common; // Deleted, Destroyed, Overridden
     using Game.Creatures; // Human, CurrentVehicle, group checks
     using Game.Pathfind; // PathOwner, PathElement
     using Game.Tools; // ToolBaseSystem
@@ -17,6 +18,10 @@ namespace FastBoarding
 
     public partial class LateBoarderCancelSystem : GameSystemBase
     {
+        // Vanilla sets HumanFlags.Run at departure time. This beta assist starts that
+        // same behavior a little earlier for bus passengers who are already assigned.
+        private const uint BusRunSoonerLeadFrames = 512u;
+
         private bool IsGroupPassenger(Entity passenger)
         {
             // Groups/families have leader/member rules, so the safe beta behavior stays solo-only.
@@ -83,6 +88,18 @@ namespace FastBoarding
             Game.Vehicles.PublicTransport publicTransport,
             uint frame)
         {
+            return IsPastDepartureFrames(GetLatestDepartureFrame(vehicleEntity, publicTransport), frame);
+        }
+
+        private static bool IsPastDepartureFrames(uint latestDepartureFrame, uint frame)
+        {
+            return latestDepartureFrame != 0 && frame > latestDepartureFrame;
+        }
+
+        private uint GetLatestDepartureFrame(
+            Entity vehicleEntity,
+            Game.Vehicles.PublicTransport publicTransport)
+        {
             uint latestDepartureFrame = publicTransport.m_DepartureFrame;
 
             if (EntityManager.HasComponent<CargoTransport>(vehicleEntity))
@@ -94,7 +111,7 @@ namespace FastBoarding
                 }
             }
 
-            return latestDepartureFrame != 0 && frame > latestDepartureFrame;
+            return latestDepartureFrame;
         }
 
         private bool HasNoVanillaBoardingBlocker(
@@ -242,6 +259,96 @@ namespace FastBoarding
                 ? "queued-empty"
                 : "queued-all-ready";
             return true;
+        }
+
+        private int QueueBusPassengersRunSooner(
+            ref EntityCommandBuffer ecb,
+            Entity vehicleEntity,
+            TransportType transportType,
+            Game.Vehicles.PublicTransport publicTransport,
+            uint frame,
+            uint latestDepartureFrame)
+        {
+            if (!BoardingRuntimeSettings.CimsRunSoonerToCatchBuses ||
+                transportType != TransportType.Bus ||
+                latestDepartureFrame == 0 ||
+                frame >= latestDepartureFrame ||
+                latestDepartureFrame - frame > BusRunSoonerLeadFrames)
+            {
+                return 0;
+            }
+
+            if ((publicTransport.m_State & PublicTransportFlags.Boarding) == 0 ||
+                (publicTransport.m_State & (PublicTransportFlags.Evacuating | PublicTransportFlags.PrisonerTransport | PublicTransportFlags.Refueling)) != 0)
+            {
+                return 0;
+            }
+
+            if (EntityManager.HasBuffer<LoadingResources>(vehicleEntity) &&
+                EntityManager.GetBuffer<LoadingResources>(vehicleEntity).Length > 0)
+            {
+                return 0;
+            }
+
+            // Layout support is harmless for buses and keeps the helper safe if a future vehicle uses child cars.
+            if (EntityManager.HasBuffer<LayoutElement>(vehicleEntity))
+            {
+                int queued = 0;
+                DynamicBuffer<LayoutElement> layout = EntityManager.GetBuffer<LayoutElement>(vehicleEntity);
+                for (int i = 0; i < layout.Length; i++)
+                {
+                    queued += QueueRunForPassengersOnVehicle(ref ecb, layout[i].m_Vehicle);
+                }
+
+                return queued;
+            }
+
+            return QueueRunForPassengersOnVehicle(ref ecb, vehicleEntity);
+        }
+
+        private int QueueRunForPassengersOnVehicle(ref EntityCommandBuffer ecb, Entity vehicleEntity)
+        {
+            if (!EntityManager.Exists(vehicleEntity) ||
+                !EntityManager.HasBuffer<Passenger>(vehicleEntity))
+            {
+                return 0;
+            }
+
+            int queued = 0;
+            DynamicBuffer<Passenger> passengers = EntityManager.GetBuffer<Passenger>(vehicleEntity);
+            for (int i = 0; i < passengers.Length; i++)
+            {
+                Entity passenger = passengers[i].m_Passenger;
+                if (!EntityManager.Exists(passenger) ||
+                    EntityManager.HasComponent<Deleted>(passenger) ||
+                    EntityManager.HasComponent<Destroyed>(passenger) ||
+                    EntityManager.HasComponent<Temp>(passenger) ||
+                    EntityManager.HasComponent<Overridden>(passenger) ||
+                    !EntityManager.HasComponent<CurrentVehicle>(passenger) ||
+                    !EntityManager.HasComponent<Human>(passenger))
+                {
+                    continue;
+                }
+
+                CurrentVehicle currentVehicle = EntityManager.GetComponentData<CurrentVehicle>(passenger);
+                if (currentVehicle.m_Vehicle != vehicleEntity ||
+                    (currentVehicle.m_Flags & CreatureVehicleFlags.Ready) != 0)
+                {
+                    continue;
+                }
+
+                Human human = EntityManager.GetComponentData<Human>(passenger);
+                if ((human.m_Flags & HumanFlags.Run) != 0)
+                {
+                    continue;
+                }
+
+                human.m_Flags |= HumanFlags.Run;
+                ecb.SetComponent(passenger, human);
+                queued++;
+            }
+
+            return queued;
         }
 
         private static void AccumulateCanceledCount(
