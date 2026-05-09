@@ -130,10 +130,11 @@ namespace FastBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "Cims Run Sooner to Catch Buses" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
                     "**Beta / testing**\n" +
-                    "Citizens who are running late for the bus start running sooner to try to make it before departure time.\n" +
-                    "This helps keep buses on schedule.\n" +
+                    "Citizens who are late for the bus start **running sooner** to try to make it **before** departure time.\n" +
+                    "Helps keep buses on schedule.\n" +
                     "Only affects cims already assigned to a bus that is currently boarding.\n" +
-                    "Does not force boarding, skip groups, delete citizens, or affect trains, trams, ships, ferries, or airplanes."
+                    "Vanilla only has cims start running at departure time which is too late.\n" +
+                    "Does not force boarding or affect other transit types."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.LeaveIfNoBoarding)), "Leave If No Boarding" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.LeaveIfNoBoarding)),
