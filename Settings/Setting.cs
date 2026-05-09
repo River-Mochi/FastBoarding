@@ -247,7 +247,7 @@ namespace FastBoarding
             WaterBoardingSpeedFactor = DefaultSpeedFactor;
             AirBoardingSpeedFactor = DefaultSpeedFactor;
             CancelLateBoarders = true;
-            CimsRunSoonerToCatchBuses = false;
+            CimsRunSoonerToCatchBuses = true;
             LeaveIfNoBoarding = false;
             EnableVerboseLogging = false;
         }
