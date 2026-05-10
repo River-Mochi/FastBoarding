@@ -49,10 +49,10 @@ namespace FastBoarding
             AddLocaleSource("fr-FR", new LocaleFR(setting));
             AddLocaleSource("es-ES", new LocaleES(setting));
             AddLocaleSource("de-DE", new LocaleDE(setting));
-            // AddLocaleSource("it-IT", new LocaleIT(setting));
+            AddLocaleSource("it-IT", new LocaleIT(setting));
             AddLocaleSource("ja-JP", new LocaleJA(setting));
             AddLocaleSource("ko-KR", new LocaleKO(setting));
-            // AddLocaleSource("pl-PL", new LocalePL(setting));
+            AddLocaleSource("pl-PL", new LocalePL(setting));
             AddLocaleSource("pt-BR", new LocalePT_BR(setting));
             AddLocaleSource("zh-HANS", new LocaleZH_CN(setting));    // Simplified Chinese
             AddLocaleSource("zh-HANT", new LocaleZH_HANT(setting));  // Traditional Chinese
@@ -60,8 +60,12 @@ namespace FastBoarding
             try
             {
                 // CS2 persists ModSetting values in the mod .coc file.
-                // Loading before RegisterInOptionsUI follows the normal flow.
+                // Locales + load settings before register in OptionsUI so it shows localized+saved settings.
                 AssetDatabase.global.LoadSettings(ModId, setting, new Setting(this));
+
+                // Clamp old saved values before Options UI sees them.
+                // Example: helps legacy 6x-10x values become new 5x max after this update.
+                setting.RepairLoadedValues();
                 setting.RegisterInOptionsUI();
                 BoardingRuntimeSettings.Apply(setting);
             }
@@ -86,7 +90,7 @@ namespace FastBoarding
                 updateSystem.World.GetOrCreateSystemManaged<TransportStopTuningSystem>().Enabled = true;
                 // Start the late-cim skip system in the same ON/OFF state saved in the mod settings file.
                 updateSystem.World.GetOrCreateSystemManaged<LateBoarderCancelSystem>().Enabled =
-                    BoardingRuntimeSettings.CancelLateBoarders;
+                    BoardingRuntimeSettings.BoardingAssistEnabled;
             }
             catch (Exception ex)
             {

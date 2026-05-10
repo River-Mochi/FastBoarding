@@ -1,4 +1,5 @@
 // File: Utils/LogUtils.cs
+// version : 0.5.2
 // Purpose: popup-safe logging helpers for CS2 mods.
 // Based on River-Mochi shared CS2 utilities.
 
@@ -61,6 +62,11 @@ namespace FastBoarding
             TryLog(log, Level.Warn, messageFactory, exception);
         }
 
+        public static void Debug(ILog log, Func<string> messageFactory)
+        {
+            TryLog(log, Level.Debug, messageFactory);
+        }
+
         public static void TryLog(ILog log, Level level, Func<string> messageFactory, Exception? exception = null)
         {
             if (log == null || messageFactory == null)
@@ -86,7 +92,7 @@ namespace FastBoarding
 
             try
             {
-                // Routine BT logs bypass Colossal's Unity logger path; that path can show
+                // Routine FB logs bypass Colossal's Unity logger path; that path can show
                 // a UI popup if its internal file stream fails while writing.
                 AppendDirect(log, level, message, exception);
             }
@@ -121,7 +127,11 @@ namespace FastBoarding
             {
                 // Direct append keeps routine mod diagnostics out of Colossal's fragile UI-log path.
                 // ShareReadWrite lets the file stay viewable while the game keeps running.
-                Directory.CreateDirectory(Path.GetDirectoryName(logPath));
+                string? dir = Path.GetDirectoryName(logPath);
+                if (!string.IsNullOrEmpty(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
 
                 using FileStream stream = new FileStream(
                     logPath,

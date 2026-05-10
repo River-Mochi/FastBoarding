@@ -209,6 +209,16 @@ namespace FastBoarding
             Other,
         }
 
+        public enum FollowUpTargetKind
+        {
+            None,
+            Stop,
+            Waypoint,
+            Lane,
+            Vehicle,
+            Target,
+        }
+
         public readonly struct FollowUpSnapshot
         {
             public FollowUpSnapshot(
@@ -219,6 +229,8 @@ namespace FastBoarding
                 int pathElementCount,
                 int pathIndex,
                 Entity nextTargetEntity,
+                FollowUpTargetKind nextTargetKind,
+                string nextTargetName,
                 Entity nextWaypointEntity,
                 Entity nextStopEntity,
                 string nextStopName,
@@ -233,6 +245,8 @@ namespace FastBoarding
                 PathElementCount = pathElementCount;
                 PathIndex = pathIndex;
                 NextTargetEntity = nextTargetEntity;
+                NextTargetKind = nextTargetKind;
+                NextTargetName = nextTargetName ?? string.Empty;
                 NextWaypointEntity = nextWaypointEntity;
                 NextStopEntity = nextStopEntity;
                 NextStopName = nextStopName ?? string.Empty;
@@ -255,6 +269,10 @@ namespace FastBoarding
 
             public Entity NextTargetEntity { get; }
 
+            public FollowUpTargetKind NextTargetKind { get; }
+
+            public string NextTargetName { get; }
+
             public Entity NextWaypointEntity { get; }
 
             public Entity NextStopEntity { get; }
@@ -275,18 +293,26 @@ namespace FastBoarding
         private readonly struct FollowUpTargetInfo
         {
             public FollowUpTargetInfo(
+                FollowUpTargetKind nextTargetKind,
+                string nextTargetName,
                 Entity nextWaypointEntity,
                 Entity nextStopEntity,
                 string nextStopName,
                 Entity nextLineEntity,
                 string nextLineName)
             {
+                NextTargetKind = nextTargetKind;
+                NextTargetName = nextTargetName ?? string.Empty;
                 NextWaypointEntity = nextWaypointEntity;
                 NextStopEntity = nextStopEntity;
                 NextStopName = nextStopName ?? string.Empty;
                 NextLineEntity = nextLineEntity;
                 NextLineName = nextLineName ?? string.Empty;
             }
+
+            public FollowUpTargetKind NextTargetKind { get; }
+
+            public string NextTargetName { get; }
 
             public Entity NextWaypointEntity { get; }
 
@@ -460,6 +486,8 @@ namespace FastBoarding
                     -1,
                     -1,
                     Entity.Null,
+                    FollowUpTargetKind.None,
+                    string.Empty,
                     Entity.Null,
                     Entity.Null,
                     string.Empty,
@@ -479,6 +507,8 @@ namespace FastBoarding
                     -1,
                     -1,
                     Entity.Null,
+                    FollowUpTargetKind.None,
+                    string.Empty,
                     Entity.Null,
                     Entity.Null,
                     string.Empty,
@@ -549,6 +579,8 @@ namespace FastBoarding
                 pathElementCount,
                 pathIndex,
                 nextTargetEntity,
+                targetInfo.NextTargetKind,
+                targetInfo.NextTargetName,
                 targetInfo.NextWaypointEntity,
                 targetInfo.NextStopEntity,
                 targetInfo.NextStopName,
@@ -1026,7 +1058,14 @@ namespace FastBoarding
         {
             if (nextTargetEntity == Entity.Null || !EntityManager.Exists(nextTargetEntity))
             {
-                return default;
+                return new FollowUpTargetInfo(
+                    FollowUpTargetKind.None,
+                    string.Empty,
+                    Entity.Null,
+                    Entity.Null,
+                    string.Empty,
+                    Entity.Null,
+                    string.Empty);
             }
 
             Entity waypointEntity = Entity.Null;
@@ -1065,26 +1104,61 @@ namespace FastBoarding
                 current = EntityManager.GetComponentData<Owner>(current).m_Owner;
             }
 
+            string targetName = m_NameSystem.GetRenderedLabelName(nextTargetEntity);
+            if (string.IsNullOrWhiteSpace(targetName))
+            {
+                targetName = m_NameSystem.GetDebugName(nextTargetEntity);
+            }
+
+            targetName = string.IsNullOrWhiteSpace(targetName)
+                ? string.Empty
+                : NormalizeWhitespace(targetName);
+
             string stopName = stopEntity != Entity.Null
                 ? ResolveStopName(stopEntity, transportType)
                 : string.Empty;
 
             if (string.IsNullOrWhiteSpace(stopName))
             {
-                string targetName = m_NameSystem.GetRenderedLabelName(nextTargetEntity);
-                if (string.IsNullOrWhiteSpace(targetName))
-                {
-                    targetName = m_NameSystem.GetDebugName(nextTargetEntity);
-                }
-
-                stopName = SimplifyStopName(targetName, transportType);
+                stopName = string.Empty;
             }
 
             string lineName = lineEntity != Entity.Null
                 ? ResolveLineName(lineEntity)
                 : string.Empty;
 
+            FollowUpTargetKind targetKind;
+            string targetLabel;
+            if (stopEntity != Entity.Null)
+            {
+                targetKind = FollowUpTargetKind.Stop;
+                targetLabel = stopName;
+            }
+            else if (EntityManager.HasComponent<Game.Vehicles.PublicTransport>(nextTargetEntity))
+            {
+                targetKind = FollowUpTargetKind.Vehicle;
+                targetLabel = targetName;
+            }
+            else if (waypointEntity != Entity.Null || EntityManager.HasComponent<Connected>(nextTargetEntity))
+            {
+                targetKind = FollowUpTargetKind.Waypoint;
+                targetLabel = targetName;
+            }
+            else if (!string.IsNullOrWhiteSpace(targetName) &&
+                targetName.IndexOf("Lane", System.StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                targetKind = FollowUpTargetKind.Lane;
+                targetLabel = targetName;
+            }
+            else
+            {
+                targetKind = FollowUpTargetKind.Target;
+                targetLabel = targetName;
+            }
+
             return new FollowUpTargetInfo(
+                targetKind,
+                targetLabel,
                 waypointEntity,
                 stopEntity,
                 stopName,

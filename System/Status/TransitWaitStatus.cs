@@ -20,8 +20,14 @@ namespace FastBoarding
         public const string KeyStatusNotLoaded = "FB_STATUS_NOT_LOADED";
         public const string KeyNoCityLoaded = "FB_STATUS_NO_CITY_LOADED";
         public const string KeyNoStopsFound = "FB_STATUS_NO_STOPS";
+
         public const string KeyStatusLine = "FB_STATUS_LINE";
+        public const string KeyStatusLateSkipped = "FB_STATUS_LATE_SKIPPED";
+        public const string KeyStatusSkipOff = "FB_STATUS_SKIP_OFF";
         public const string KeyStatusOverviewLine = "FB_STATUS_OVERVIEW_LINE";
+        public const string KeyStatusRunSoonerLine = "FB_STATUS_RUN_SOONER_LINE";
+        public const string KeyStatusRunSoonerOff = "FB_STATUS_RUN_SOONER_OFF";
+
         public const string KeyReportNoCityLoaded = "FB_REPORT_NO_CITY_LOADED";
         public const string KeyReportTitle = "FB_REPORT_TITLE";
         public const string KeyReportSettings = "FB_REPORT_SETTINGS";
@@ -52,6 +58,7 @@ namespace FastBoarding
         public const string KeyReportNone = "FB_REPORT_NONE";
         public const string KeyReportUnknown = "FB_REPORT_UNKNOWN";
 
+
         private const int ReportHeaderWidth = 60;
         private const int ReportFieldWidth = 24;
         private const int SkippedSampleCapacityPerMode = 3;
@@ -59,6 +66,7 @@ namespace FastBoarding
         public static int RefreshIntervalSeconds { get; set; } = 15;
 
         public static string OverviewSummary { get; private set; } = string.Empty;
+        public static string CimsRunSoonerSummary { get; private set; } = string.Empty;
         public static string BusSummary { get; private set; } = string.Empty;
         public static string TrainSummary { get; private set; } = string.Empty;
         public static string TramSummary { get; private set; } = string.Empty;
@@ -80,6 +88,13 @@ namespace FastBoarding
         private static long s_ShipLateBoardersToday;
         private static long s_FerryLateBoardersToday;
         private static long s_AirLateBoardersToday;
+        private static long s_BusRunSoonerToday;
+        private static long s_TrainRunSoonerToday;
+        private static long s_TramRunSoonerToday;
+        private static long s_SubwayRunSoonerToday;
+        private static long s_ShipRunSoonerToday;
+        private static long s_FerryRunSoonerToday;
+        private static long s_AirRunSoonerToday;
         private static DateTime s_LastSnapshotLocalTime;
         // Outcome counters/rings back the detailed log report without bloating the Options UI rows.
         private static FollowUpOutcomeCounts s_BusFollowUpOutcomes;
@@ -145,6 +160,9 @@ namespace FastBoarding
                 OutcomeLabel = snapshot.OutcomeLabel;
                 CurrentVehicle = snapshot.CurrentVehicle;
                 CurrentVehicleFlags = snapshot.CurrentVehicleFlags;
+                NextTargetEntity = snapshot.NextTargetEntity;
+                NextTargetKind = snapshot.NextTargetKind;
+                NextTargetName = snapshot.NextTargetName;
                 NextStopEntity = snapshot.NextStopEntity;
                 NextStopName = snapshot.NextStopName;
                 NextWaypointEntity = snapshot.NextWaypointEntity;
@@ -169,6 +187,12 @@ namespace FastBoarding
             public Entity CurrentVehicle { get; }
 
             public CreatureVehicleFlags CurrentVehicleFlags { get; }
+
+            public Entity NextTargetEntity { get; }
+
+            public TransitWaitStatusSystem.FollowUpTargetKind NextTargetKind { get; }
+
+            public string NextTargetName { get; }
 
             public Entity NextStopEntity { get; }
 
@@ -289,6 +313,7 @@ namespace FastBoarding
 
             BusSummary = Localize(KeyStatusNotLoaded, "Status not loaded.");
             OverviewSummary = BusSummary;
+            CimsRunSoonerSummary = string.Empty;
             TrainSummary = string.Empty;
             TramSummary = string.Empty;
             SubwaySummary = string.Empty;
@@ -348,6 +373,7 @@ namespace FastBoarding
             {
                 BusSummary = Localize(KeyNoCityLoaded, "No city loaded.");
                 OverviewSummary = BusSummary;
+                CimsRunSoonerSummary = string.Empty;
                 TrainSummary = string.Empty;
                 TramSummary = string.Empty;
                 SubwaySummary = string.Empty;
@@ -391,6 +417,7 @@ namespace FastBoarding
             catch (Exception ex)
             {
                 BusSummary = Localize(KeyStatusNotLoaded, "Status not loaded.");
+                CimsRunSoonerSummary = string.Empty;
                 TrainSummary = string.Empty;
                 TramSummary = string.Empty;
                 SubwaySummary = string.Empty;
@@ -462,7 +489,7 @@ namespace FastBoarding
                 "Skipped solo cims: later state should usually become 'has path' or 'assigned'. If it stays 'no path yet', inspect that cim entity after more time."));
             sb.AppendLine("- " + Localize(
                 KeyReportHintLateGroups,
-                "Late groups: these are families/groups left to vanilla. High counts are clues for future safe group-travel support."));
+                ": families left to vanilla. High counts are clues for future safe group-travel support."));
         }
 
         internal static void RecordLateBoardersCanceled(World world, TransportType transportType, int count)
@@ -496,6 +523,41 @@ namespace FastBoarding
                     break;
                 case TransportType.Airplane:
                     s_AirLateBoardersToday += count;
+                    break;
+            }
+        }
+
+        internal static void RecordRunSoonerAssists(World world, TransportType transportType, int count)
+        {
+            if (count <= 0)
+            {
+                return;
+            }
+
+            EnsureCounterDay(world);
+
+            switch (transportType)
+            {
+                case TransportType.Bus:
+                    s_BusRunSoonerToday += count;
+                    break;
+                case TransportType.Train:
+                    s_TrainRunSoonerToday += count;
+                    break;
+                case TransportType.Tram:
+                    s_TramRunSoonerToday += count;
+                    break;
+                case TransportType.Subway:
+                    s_SubwayRunSoonerToday += count;
+                    break;
+                case TransportType.Ship:
+                    s_ShipRunSoonerToday += count;
+                    break;
+                case TransportType.Ferry:
+                    s_FerryRunSoonerToday += count;
+                    break;
+                case TransportType.Airplane:
+                    s_AirRunSoonerToday += count;
                     break;
             }
         }
@@ -539,19 +601,27 @@ namespace FastBoarding
                 return LocaleUtils.Localize(KeyNoStopsFound, "No stops found.");
             }
 
+            string lateSkipText = BoardingRuntimeSettings.CancelLateBoarders
+                ? LocaleUtils.SafeFormat(
+                    KeyStatusLateSkipped,
+                    "{0} late today",
+                    LocaleUtils.FormatN0(lateBoardersCanceledToday))
+                : LocaleUtils.Localize(KeyStatusSkipOff, "skip OFF");
+
             return LocaleUtils.SafeFormat(
                 KeyStatusLine,
-                "{0} waiting | avg {1} | worst {2} | {3} skipped",
+                "{0} waiting | avg {1} | worst {2} | {3}",
                 LocaleUtils.FormatN0(family.WaitingPassengers),
                 FormatDuration(family.AverageWaitSeconds),
                 FormatDuration(family.WorstStopWaitSeconds),
-                LocaleUtils.FormatN0(lateBoardersCanceledToday));
+                lateSkipText);
         }
 
         private static void ApplySnapshot(TransitWaitStatusSystem.Snapshot snapshot)
         {
             s_LastSnapshotLocalTime = DateTime.Now;
             OverviewSummary = FormatOverview(snapshot);
+            CimsRunSoonerSummary = FormatRunSoonerSummary();
             BusSummary = FormatFamily(snapshot.Bus, s_BusLateBoardersToday);
             TrainSummary = FormatFamily(snapshot.Train, s_TrainLateBoardersToday);
             TramSummary = FormatFamily(snapshot.Tram, s_TramLateBoardersToday);
@@ -571,6 +641,47 @@ namespace FastBoarding
                 s_LastSnapshotLocalTime.ToString("HH:mm:ss"));
         }
 
+        private static string FormatRunSoonerSummary()
+        {
+            if (!BoardingRuntimeSettings.CimsRunSoonerToCatchBuses)
+            {
+                return Localize(KeyStatusRunSoonerOff, "run sooner OFF");
+            }
+
+            StringBuilder sb = new StringBuilder();
+            AppendRunSoonerPart(sb, s_BusRunSoonerToday, "bus");
+            AppendRunSoonerPart(sb, s_TramRunSoonerToday, "tram");
+            AppendRunSoonerPart(sb, s_TrainRunSoonerToday, "train");
+            AppendRunSoonerPart(sb, s_SubwayRunSoonerToday, "subway");
+            AppendRunSoonerPart(sb, s_FerryRunSoonerToday, "ferry");
+            AppendRunSoonerPart(sb, s_ShipRunSoonerToday, "ship");
+            AppendRunSoonerPart(sb, s_AirRunSoonerToday, "air");
+
+            if (sb.Length == 0)
+            {
+                sb.Append("0 bus");
+            }
+
+            return LocaleUtils.SafeFormat(KeyStatusRunSoonerLine, "{0}", sb.ToString());
+        }
+
+        private static void AppendRunSoonerPart(StringBuilder sb, long count, string label)
+        {
+            if (count <= 0)
+            {
+                return;
+            }
+
+            if (sb.Length > 0)
+            {
+                sb.Append(" | ");
+            }
+
+            sb.Append(LocaleUtils.FormatN0(count));
+            sb.Append(' ');
+            sb.Append(label);
+        }
+
         private static void AppendSummaryReport(StringBuilder sb, TransitWaitStatusSystem.Snapshot snapshot)
         {
             sb.AppendLine();
@@ -579,6 +690,7 @@ namespace FastBoarding
                 sb,
                 "Total public transit",
                 $"{LocaleUtils.FormatN0(snapshot.MonthlyTourists)} tourists/mo | {LocaleUtils.FormatN0(snapshot.MonthlyCitizens)} citizens/mo");
+            AppendField(sb, "Cims run sooner", FormatRunSoonerSummary());
             AppendSummaryLine(sb, "Bus", snapshot.Bus, s_BusLateBoardersToday);
             AppendSummaryLine(sb, "Tram", snapshot.Tram, s_TramLateBoardersToday);
             AppendSummaryLine(sb, "Train", snapshot.Train, s_TrainLateBoardersToday);
@@ -631,7 +743,7 @@ namespace FastBoarding
             AppendField(sb, "Late solo cims skipped", LocaleUtils.FormatN0(lateBoardersCanceledToday) + " today");
             AppendField(
                 sb,
-                "Late groups not skipped",
+                "Late groups (families) not skipped",
                 $"{LocaleUtils.FormatN0(family.LateGroupPassengers)} passengers | {LocaleUtils.FormatN0(family.LateGroupGroups)} groups | {LocaleUtils.FormatN0(family.LateGroupVehicles)} vehicles");
             AppendField(sb, "Follow-up outcomes (verbose)", FormatFollowUpOutcomes(followUpOutcomes));
 
@@ -677,6 +789,8 @@ namespace FastBoarding
         {
             sb.AppendLine();
             AppendSubHeader(sb, "Skipped solo Late cim follow-up examples");
+            sb.AppendLine("Legend: state=same vehicle/different vehicle means assigned; has path means repathing or walking; no path yet means unresolved.");
+            sb.AppendLine("        next=stop/lane/waypoint/vehicle/target shows the cim's next path target.");
 
             if (followUpSamples.Count > 0)
             {
@@ -687,9 +801,7 @@ namespace FastBoarding
                     sb.AppendLine(
                         $"{LocaleUtils.FormatN0(i + 1)}. {sample.TransportType} | outcome {sample.OutcomeLabel} | passenger {EntityText(sample.Passenger)} | missed vehicle {EntityText(sample.MissedVehicle)} | skipped {sample.SkippedLocalTime:HH:mm:ss} | follow-up {sample.FollowUpLocalTime:HH:mm:ss}");
                     sb.AppendLine(
-                        $"   now vehicle {sample.CurrentVehicleText} | next stop {TextOrUnknown(sample.NextStopName)} {EntityText(sample.NextStopEntity)}");
-                    sb.AppendLine(
-                        $"   next waypoint {EntityText(sample.NextWaypointEntity)} | next line {TextOrUnknown(sample.NextLineName)} {EntityText(sample.NextLineEntity)}");
+                        $"   state {DescribeFollowUpState(sample)}");
                 }
 
                 return;
@@ -701,7 +813,7 @@ namespace FastBoarding
                 return;
             }
 
-            sb.AppendLine("No verbose follow-up recorded yet. Leave verbose logging on a little longer after skips.");
+            sb.AppendLine(GetFollowUpWaitingMessage());
             for (int i = 0; i < skippedSamples.Count; i++)
             {
                 SkippedPassengerSample sample = skippedSamples.GetNewest(i);
@@ -845,7 +957,9 @@ namespace FastBoarding
                 counts.HasPathNotAssignedYet == 0 &&
                 counts.Other == 0)
             {
-                return "none recorded yet";
+                return IsVerboseFollowUpCollectionEnabled()
+                    ? "none recorded yet"
+                    : "verbose follow-up OFF";
             }
 
             StringBuilder sb = new StringBuilder();
@@ -869,6 +983,88 @@ namespace FastBoarding
         private static string TextOrUnknown(string value)
         {
             return string.IsNullOrWhiteSpace(value) ? Localize(KeyReportUnknown, "(unknown)") : value;
+        }
+
+        private static string GetFollowUpWaitingMessage()
+        {
+            return IsVerboseFollowUpCollectionEnabled()
+                ? "No verbose follow-up recorded yet. Leave verbose logging on a little longer after skips."
+                : "Verbose follow-up collection is OFF. Enable [Verbose log] to record what skipped cims do next.";
+        }
+
+        private static bool IsVerboseFollowUpCollectionEnabled()
+        {
+#if DEBUG
+            return true;
+#else
+            return BoardingRuntimeSettings.EnableVerboseLogging;
+#endif
+        }
+
+        private static string DescribeFollowUpState(LateBoarderFollowUpSample sample)
+        {
+            if (sample.CurrentVehicle != Entity.Null)
+            {
+                string assignment = sample.Outcome == TransitWaitStatusSystem.FollowUpOutcome.SameVehicle
+                    ? $"same vehicle {sample.CurrentVehicleText}"
+                    : $"different vehicle {sample.CurrentVehicleText}";
+                return AppendFollowUpTargetDetails(assignment, sample);
+            }
+
+            if (sample.Outcome == TransitWaitStatusSystem.FollowUpOutcome.HasPathNotAssignedYet)
+            {
+                return AppendFollowUpTargetDetails("has path", sample);
+            }
+
+            return "no path yet";
+        }
+
+        private static string AppendFollowUpTargetDetails(
+            string summary,
+            LateBoarderFollowUpSample sample)
+        {
+            string nextTarget = DescribeFollowUpTarget(sample);
+            if (!string.IsNullOrWhiteSpace(nextTarget))
+            {
+                summary += $" | next {nextTarget}";
+            }
+
+            if (sample.NextTargetKind == TransitWaitStatusSystem.FollowUpTargetKind.Stop &&
+                !string.IsNullOrWhiteSpace(sample.NextLineName))
+            {
+                summary += $" | line {sample.NextLineName}";
+            }
+
+            return summary;
+        }
+
+        private static string DescribeFollowUpTarget(LateBoarderFollowUpSample sample)
+        {
+            switch (sample.NextTargetKind)
+            {
+                case TransitWaitStatusSystem.FollowUpTargetKind.Stop:
+                    return DescribeNamedEntity("stop", sample.NextStopName, sample.NextStopEntity);
+                case TransitWaitStatusSystem.FollowUpTargetKind.Lane:
+                    return DescribeNamedEntity("lane", sample.NextTargetName, Entity.Null);
+                case TransitWaitStatusSystem.FollowUpTargetKind.Waypoint:
+                    return DescribeNamedEntity("waypoint", sample.NextTargetName, sample.NextTargetEntity);
+                case TransitWaitStatusSystem.FollowUpTargetKind.Vehicle:
+                    return DescribeNamedEntity("vehicle", sample.NextTargetName, sample.NextTargetEntity);
+                case TransitWaitStatusSystem.FollowUpTargetKind.Target:
+                    return DescribeNamedEntity("target", sample.NextTargetName, sample.NextTargetEntity);
+                default:
+                    return string.Empty;
+            }
+        }
+
+        private static string DescribeNamedEntity(string kind, string name, Entity entity)
+        {
+            string label = string.IsNullOrWhiteSpace(name)
+                ? kind
+                : $"{kind} {name}";
+            return entity == Entity.Null
+                ? label
+                : $"{label} {EntityText(entity)}";
         }
 
         private static string FormatReport(string entryId, string fallbackFormat, params object[] args)
@@ -936,6 +1132,13 @@ namespace FastBoarding
             s_ShipLateBoardersToday = 0;
             s_FerryLateBoardersToday = 0;
             s_AirLateBoardersToday = 0;
+            s_BusRunSoonerToday = 0;
+            s_TrainRunSoonerToday = 0;
+            s_TramRunSoonerToday = 0;
+            s_SubwayRunSoonerToday = 0;
+            s_ShipRunSoonerToday = 0;
+            s_FerryRunSoonerToday = 0;
+            s_AirRunSoonerToday = 0;
             s_BusFollowUpOutcomes = default;
             s_TrainFollowUpOutcomes = default;
             s_TramFollowUpOutcomes = default;

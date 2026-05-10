@@ -14,6 +14,8 @@ Fast Boarding is a transit mod for Cities Skylines 2. It is focused on helping p
   - remove them from the vehicle passenger buffer,
   - let vanilla continue from there
 
+It uses a lighter-touch approach: tune the transit stops vanilla already uses,
+then optionally help with late passengers near departure time.
 
 ### Current Features
 
@@ -28,12 +30,15 @@ Fast Boarding is a transit mod for Cities Skylines 2. It is focused on helping p
 
 ### How It Works
 
-The sliders change the base game's `Game.Prefabs.TransportStopData` on passenger transport stop prefabs. Fast Boarding only changes:
+Fast Boarding changes the base game's `Game.Prefabs.TransportStopData` on passenger transport stop prefabs.
+
+It only changes:
 
 - `m_LoadingFactor`
 - `m_BoardingTime`
 
-Fast Boarding does not change `PublicTransport.m_DepartureFrame`, line schedules, vehicle counts, route counts, or the vanilla transport AI systems.
+Fast Boarding does not change `PublicTransport.m_DepartureFrame`, line schedules,
+vehicle counts, route counts, or the vanilla transport AI systems.
 
 At `1x`, untouched stops are left alone. At `2x-10x`, the mod reduces boarding/loading time so normal queues clear faster through vanilla systems.
 
