@@ -1,7 +1,18 @@
 ## Fast Boarding
 
-Fast Boarding is a transit mod focused on helping
-public transport board faster without replacing the game's whole transport systems.
+Fast Boarding is a transit mod for Cities Skylines 2. It is focused on helping public transport board faster without replacing the game's whole transport AI systems.
+
+### Uses two lighter-touch ideas:
+
+#### Sliders
+  - make normal boarding/loading faster through vanilla transit stop data (safe prefab change)
+
+#### Skip Late Passengers [x] toggle
+  - after vanilla departure frame,
+  - if a solo cim is still not *Ready*,
+  - let that cim miss this vehicle,
+  - remove them from the vehicle passenger buffer,
+  - let vanilla continue from there
 
 It uses a lighter-touch approach: tune the transit stops vanilla already uses,
 then optionally help with late passengers near departure time.
@@ -14,42 +25,8 @@ then optionally help with late passengers near departure time.
   - Ship + ferry
   - Airplane
 - `Skip Late Passengers` toggle
-- `Run Sooner: Bus + Tram` toggle
-- Compact Options UI status rows for current waits, worst stops, and skipped cims
-- `Stats to Log` report with more details for testers
-- Optional verbose logging for diagnostic testing
-
-### Boarding Speed Sliders
-
-The sliders make normal boarding/loading faster through vanilla transit stop data.
-
-- `1x` is vanilla.
-- `3x` is the recommended default.
-- `5x` is the maximum.
-
-This helps normal queues clear faster, but late passengers can still delay departure
-because of vanilla behavior.
-
-### Skip Late Passengers
-
-After the vanilla departure time:
-
-- if a solo cim is still not `Ready`,
-- that cim can miss this vehicle,
-- the cim is removed from the vehicle passenger buffer,
-- the game can naturally reassign them.
-
-The cim is not deleted.
-
-Groups/families travelling together are intentionally left to vanilla so they are not split up.
-They can still delay a vehicle like vanilla.
-
-### Run Sooner: Bus + Tram
-
-Bus and tram passengers assigned to a vehicle can start running sooner before departure time.
-
-This is meant to help cims reach buses and trams before they become late enough to miss the vehicle.
-It does not force boarding, teleport citizens, or affect other transit types.
+- Status report for current waits, worst stops, and skipped cims (in Options menu to not affect city performance).
+- `Stats to Log` button with even more details for the curious
 
 ### How It Works
 
@@ -63,34 +40,35 @@ It only changes:
 Fast Boarding does not change `PublicTransport.m_DepartureFrame`, line schedules,
 vehicle counts, route counts, or the vanilla transport AI systems.
 
-At `1x`, untouched stops are left alone. At `2x-5x`, the mod reduces boarding/loading
-time so normal queues clear faster through vanilla systems.
+At `1x`, untouched stops are left alone. At `2x-10x`, the mod reduces boarding/loading time so normal queues clear faster through vanilla systems.
 
-### Compared With All Aboard
+The optional `Skip Late Passengers` toggle watches vehicles that are already past their vanilla departure frame. 
+If a solo cim assigned to that vehicle is still *not ready*, the mod detaches that cim from the current vehicle and removes the missed vehicle leg from their current path. 
+The cim is not deleted; they simply miss that vehicle and vanilla systems continue from there.
 
-All Aboard solved the waiting problem inside the vehicle AI itself by disabling/replacing
-vanilla transport AI systems with patched copies.
+Groups/families travelling together are not skipped yet. They can still delay a vehicle like in vanilla game, (this needs more research/testing before changing it safely).
+
+### Compared to other boarding mod approaches
+
+Older boarding mods often solved the waiting problem inside the vehicle AI systems itself by disabling/replacing the vanilla road and train transport AI systems with Harmony patched copies.
 
 Fast Boarding takes a smaller no-Harmony route:
 
-- tunes the stop data vanilla already reads,
-- optionally lets late solo cims miss a vehicle after vanilla departure time,
-- optionally makes bus/tram passengers run sooner before departure,
-- works with the vanilla transport AI instead of replacing it.
+- tunes the stop data vanilla already reads.
+- optionally lets late solo cims miss a vehicle after vanilla departure time.
+- works with the vanilla's own transport AI system files and does not replace it.
 
 ### Notes
 
-- Avoid Harmony and wholesale game AI system replacement.
-- Stay save-game safe and safe to remove.
-- Verbose logging is for testers and should stay OFF during normal gameplay
-  to avoid large log files and performance cost.
+- save-game safe and safe to remove.
+- `Skip Late Passengers` is still Beta, so test on a copy of a save first or disable it.
+- Verbose logging is for testers only and should stay OFF during normal gameplay.
 
 ### Credits
 
-- River-Mochi: mod author
-- Inspiration and thanks to bcallender's All Aboard mod
-- yenyang: testing and code feedback
-- Neco1996: testing
-- MayorCheeks: testing
-- gagaxm: testing
-- Empiiey: testing
+- River-Mochi____mod author
+- Inspiration and thanks to bcallender's All Aboard mod and Wayze's old InstantBoarding.
+- yenyang_______for testing and code feedback
+- Neco1996______for testing
+- MayorCheeks___for testing
+- elGaucho87____thumbnail straightener
