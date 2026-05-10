@@ -143,7 +143,7 @@ namespace FastBoarding
                     "Monthly public transit usage from the game's Transportation infoview.\n" +
                     "Updated time shows when this status snapshot was taken (usually after entering Options menu)."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "Cims run sooner" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "Cims run earlier" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
                     "If enabled ✅, counts all cims (today) that started **running sooner** to try and catch a bus/tram before departure time.\n" +
                     "Cim run 512 frames earlier than they would in vanilla (~2-8 seconds sooner in real time, ~2 minutes in game)."
@@ -208,7 +208,7 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyStatusSkipOff, "skip OFF" },
 
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} tourist/mo | {1} citizens/mo | updated {2}" },
-                { TransitWaitStatus.KeyStatusRunSoonerLine, "{0} today" },
+                { TransitWaitStatus.KeyStatusRunSoonerLine, "{0}" },
                 { TransitWaitStatus.KeyStatusRunSoonerOff, "run sooner OFF" },
 
                 // Stats-to-log report strings

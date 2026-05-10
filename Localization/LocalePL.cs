@@ -207,7 +207,7 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyStatusSkipOff, "pomijanie OFF" },
 
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} turystów/mies. | {1} mieszkańców/mies. | aktual. {2}" },
-                { TransitWaitStatus.KeyStatusRunSoonerLine, "{0} dziś" },
+                { TransitWaitStatus.KeyStatusRunSoonerLine, "{0}" },
                 { TransitWaitStatus.KeyStatusRunSoonerOff, "bieg wcześniej OFF" },
 
                 // Stats-to-log report strings

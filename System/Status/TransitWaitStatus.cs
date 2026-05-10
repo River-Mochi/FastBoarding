@@ -662,7 +662,7 @@ namespace FastBoarding
                 sb.Append("0 bus");
             }
 
-            return LocaleUtils.SafeFormat(KeyStatusRunSoonerLine, "{0} today", sb.ToString());
+            return LocaleUtils.SafeFormat(KeyStatusRunSoonerLine, "{0}", sb.ToString());
         }
 
         private static void AppendRunSoonerPart(StringBuilder sb, long count, string label)
