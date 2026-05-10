@@ -145,7 +145,7 @@ namespace FastBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "Cims run earlier" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
-                    "If enabled ✅, counts all cims (today) that started **running sooner** to try and catch a bus/tram before departure time.\n" +
+                    "If enabled [x], counts all cims (today) that started **running sooner** to try and catch a bus/tram before departure time.\n" +
                     "Cim run 512 frames earlier than they would in vanilla (~2-8 seconds sooner in real time, ~2 minutes in game)."
                 },
 
