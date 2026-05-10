@@ -142,6 +142,10 @@ namespace FastBoarding
                     "업데이트 시간은 이 상태 스냅샷을 찍은 시각을 표시합니다(보통 옵션 메뉴에 들어간 뒤)."
                 },
 
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "Cims run sooner" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
+                    "Counts cims this in-game day that Fast Boarding told to run sooner so they can try to catch a bus before departure."
+                },
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "버스" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusBus)), StatusDescription("버스") },
@@ -197,10 +201,12 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyNoStopsFound, "정류장을 찾지 못했습니다." },
 
                 { TransitWaitStatus.KeyStatusLine, "{0} 대기 | 평균 {1} | 최악 {2} | {3}" },
-                { TransitWaitStatus.KeyStatusLateSkipped, "{0} late skipped" },
+                { TransitWaitStatus.KeyStatusLateSkipped, "{0} late today" },
                 { TransitWaitStatus.KeyStatusSkipOff, "스킵 OFF" },
 
                 { TransitWaitStatus.KeyStatusOverviewLine, "관광객 {0}/월 | 시민 {1}/월 | 업데이트 {2}" },
+                { TransitWaitStatus.KeyStatusRunSoonerLine, "{0} today" },
+                { TransitWaitStatus.KeyStatusRunSoonerOff, "run sooner OFF" },
 
                 // Stats-to-log report strings
                 { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] 통계 보고서가 요청되었지만 불러온 도시가 없습니다." },

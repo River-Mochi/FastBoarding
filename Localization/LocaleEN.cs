@@ -143,6 +143,10 @@ namespace FastBoarding
                     "Monthly public transit usage from the game's Transportation infoview.\n" +
                     "Updated time shows when this status snapshot was taken (usually after entering Options menu)."
                 },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "Cims run sooner" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
+                    "Counts cims this in-game day that Fast Boarding told to run sooner so they can try to catch a bus before departure."
+                },
 
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "Bus" },
@@ -199,10 +203,12 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyNoStopsFound, "No stops found." },
 
                 { TransitWaitStatus.KeyStatusLine, "{0} waiting | avg {1} | worst {2} | {3}" },
-                { TransitWaitStatus.KeyStatusLateSkipped, "{0} late skipped" },
+                { TransitWaitStatus.KeyStatusLateSkipped, "{0} late today" },
                 { TransitWaitStatus.KeyStatusSkipOff, "skip OFF" },
 
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} tourist/mo | {1} citizens/mo | updated {2}" },
+                { TransitWaitStatus.KeyStatusRunSoonerLine, "{0} today" },
+                { TransitWaitStatus.KeyStatusRunSoonerOff, "run sooner OFF" },
 
                 // Stats-to-log report strings
                 { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] Stats report requested, but no city is loaded." },

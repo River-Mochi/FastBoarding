@@ -142,6 +142,10 @@ namespace FastBoarding
                     "更新時刻は、このステータス snapshot が取得された時刻です（通常はオプションメニューを開いた後）。"
                 },
 
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "Cims run sooner" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
+                    "Counts cims this in-game day that Fast Boarding told to run sooner so they can try to catch a bus before departure."
+                },
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "バス" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusBus)), StatusDescription("バス") },
@@ -197,10 +201,12 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyNoStopsFound, "停留所が見つかりません。" },
 
                 { TransitWaitStatus.KeyStatusLine, "{0} 待機 | 平均 {1} | 最悪 {2} | {3}" },
-                { TransitWaitStatus.KeyStatusLateSkipped, "{0} late skipped" },
+                { TransitWaitStatus.KeyStatusLateSkipped, "{0} late today" },
                 { TransitWaitStatus.KeyStatusSkipOff, "スキップ OFF" },
 
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} 観光客/月 | {1} 市民/月 | 更新 {2}" },
+                { TransitWaitStatus.KeyStatusRunSoonerLine, "{0} today" },
+                { TransitWaitStatus.KeyStatusRunSoonerOff, "run sooner OFF" },
 
                 // Stats-to-log report strings
                 { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] 統計レポートが要求されましたが、都市が読み込まれていません。" },

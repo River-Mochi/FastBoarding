@@ -142,6 +142,10 @@ namespace FastBoarding
                     "更新時間顯示此狀態快照的取得時間（通常是在進入選項選單後）。"
                 },
 
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "Cims run sooner" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
+                    "Counts cims this in-game day that Fast Boarding told to run sooner so they can try to catch a bus before departure."
+                },
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "公車" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusBus)), StatusDescription("公車") },
@@ -197,10 +201,12 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyNoStopsFound, "未找到站點。" },
 
                 { TransitWaitStatus.KeyStatusLine, "{0} 等待 | 平均 {1} | 最差 {2} | {3}" },
-                { TransitWaitStatus.KeyStatusLateSkipped, "{0} late skipped" },
+                { TransitWaitStatus.KeyStatusLateSkipped, "{0} late today" },
                 { TransitWaitStatus.KeyStatusSkipOff, "跳過 OFF" },
 
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} 遊客/月 | {1} 市民/月 | 更新 {2}" },
+                { TransitWaitStatus.KeyStatusRunSoonerLine, "{0} today" },
+                { TransitWaitStatus.KeyStatusRunSoonerOff, "run sooner OFF" },
 
                 // Stats-to-log report strings
                 { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] 已請求統計報告，但未載入城市。" },

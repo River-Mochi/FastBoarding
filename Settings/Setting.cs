@@ -97,6 +97,16 @@ namespace FastBoarding
         }
 
         [SettingsUISection(ActionsTab, StatusGroup)]
+        public string StatusCimsRunSooner
+        {
+            get
+            {
+                try { TransitWaitStatus.RefreshIfNeeded(); } catch { }
+                return TransitWaitStatus.CimsRunSoonerSummary ?? string.Empty;
+            }
+        }
+
+        [SettingsUISection(ActionsTab, StatusGroup)]
         public string StatusBus
         {
             get

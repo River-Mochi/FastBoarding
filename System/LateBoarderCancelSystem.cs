@@ -362,6 +362,7 @@ namespace FastBoarding
                     shipCanceled,
                     ferryCanceled,
                     airCanceled);
+                TransitWaitStatus.RecordRunSoonerAssists(World, TransportType.Bus, runSoonerAssists);
 
                 if (sampledCanceledPassengers != null)
                 {

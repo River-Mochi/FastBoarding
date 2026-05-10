@@ -142,6 +142,10 @@ namespace FastBoarding
                     "L’ora aggiornata mostra quando è stato preso questo snapshot (di solito dopo l’ingresso nel menu Opzioni)."
                 },
 
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "Cims run sooner" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
+                    "Counts cims this in-game day that Fast Boarding told to run sooner so they can try to catch a bus before departure."
+                },
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "Bus" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusBus)), StatusDescription("bus") },
@@ -197,10 +201,12 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyNoStopsFound, "Nessuna fermata trovata." },
 
                 { TransitWaitStatus.KeyStatusLine, "{0} in attesa | med. {1} | peggiore {2} | {3}" },
-                { TransitWaitStatus.KeyStatusLateSkipped, "{0} late skipped" },
+                { TransitWaitStatus.KeyStatusLateSkipped, "{0} late today" },
                 { TransitWaitStatus.KeyStatusSkipOff, "skip OFF" },
 
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} turisti/mese | {1} cittadini/mese | aggiornato {2}" },
+                { TransitWaitStatus.KeyStatusRunSoonerLine, "{0} today" },
+                { TransitWaitStatus.KeyStatusRunSoonerOff, "run sooner OFF" },
 
                 // Stats-to-log report strings
                 { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] Report statistiche richiesto, ma nessuna città è caricata." },
