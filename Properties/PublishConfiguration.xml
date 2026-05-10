@@ -10,7 +10,9 @@
 	<LongDescription>
 ## Faster public transit boarding
 
-YES - this mod is still useful with patch 1.5.7-1.5.8. The game patch added a fallback so stuck transit can move ~10 minutes after scheduled departure time.
+YES - this mod is still useful with patch 1.5.7-1.5.8.
+
+The game patch added a fallback so stuck transit can move ~10 minutes after scheduled departure time.
 That fallback does not stop late passengers from holding transit after departure time. A vehicle can still wait too long at a stop before vanilla finally forces it to move.
 
 Fast Boarding helps before that point with boarding/loading speeds and the ability to reduce many late passengers that prevent transit from leaving stops.
@@ -58,7 +60,9 @@ Some players report no issues with Smart Transportation + Fast boarding together
 - yenyang_________testing and code feedback
 - Neco1996________testing
 - MayorCheeks_____testing
-- elGaucho87______thumbnail straightening
+- gagaxm__________testing
+- Empiiey_________testing
+- elGaucho87______thumbnail straightener
 
 If you got this far, congrats, say hi, there is a senryu poem I wrote just for you in images. click Like button, it's hard, I know, and so tiny.
 
@@ -84,10 +88,14 @@ tags: boarding time, bus stop, slow transit, debunching, unbunching
 	<Dependency Id=""/>
 	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 	<ChangeLog>
-- add Italian and Polish
-- update all locale files to align with English
+- Add Run Sooner: Bus + Tram option.
+- Add Italian and Polish translations.
+- Update all locale files to align with English.
+- Set 3x as the recommended default and 5x as the maximum boarding-speed setting.
+- Improve compact status rows.
+- Improve Stats to Log report with clearer tester hints, worst stops, entity IDs, and late-group notes.
+- Improve verbose diagnostic logging for testing.
 - Set 3x as default, and 5x as maximum boarding-speed scaler.
-- internal: more info for stats report + verbose logging
 
 </ChangeLog>
 	<!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->
