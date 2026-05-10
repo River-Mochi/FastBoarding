@@ -67,7 +67,7 @@ namespace FastBoarding
                     "**Avg** = average wait time for those passengers.\n" +
                     "**Worst** stop = highest average wait at one stop.\n" +
                     "Worst stops are good places to inspect for traffic accidents, blocked/bugged stops, or need more vehicles assigned.\n" +
-                    $"**Late skipped** = solo late passengers skipped for all today by <{ToggleName}>.\n" +
+                    $"**Late skipped** = solo late passengers skipped today by <{ToggleName}>.\n" +
                     "Use <Stats to Log> for detailed report: stop names, entity IDs, and more.";
             }
 
@@ -127,14 +127,14 @@ namespace FastBoarding
                     "Groups are a small part of the crowd; most benefits are from skipping solo cims who are running late.\n" +
                     "Skipped late citizens are not deleted; they are naturally reassigned by the game."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "Cims Run Sooner for Buses & Trams" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "Cims Run Sooner: Buses + Trams" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
                     "Citizens who are <late> start <running sooner> to try to make it **before** departure time.\n" +
                     "Helps keep buses/trams on schedule.\n" +
                     "Only affects cims already assigned to a vehicle that is currently boarding.\n" +
-                    "Vanilla: only has cims start running at departure time which is too late to be effective.\n" +
-                    "Pairs well with <{ToggleName}> as it may reduce the cims that completely miss the transit and have to be reassigned.\n" +
-                    "Does not force boarding."
+                    "Vanilla only starts cims running at departure time, which can be too late to help.\n" +
+                    $"Pairs well with <{ToggleName}> because it may reduce how many cims miss the vehicle and need to be reassigned.\n" +
+                    "Does not force boarding or teleport citizens."
                 },
 
                 // Status overview
@@ -194,7 +194,7 @@ namespace FastBoarding
                     "You can delete old log files later.\n" +
                     "Note: <Stats to Log> is a point-in-time report plus today's late-skip counters; it is different than what is seen with verbose logs.\n" +
                     "Run verbose logging for 15-20 min if you want a timeline of what happened over time.\n" +
-                    "Just don't forget to turn it **OFF** again before normal gameplay."
+                    "Just don't forget to turn **OFF** verbose again before normal gameplay."
                 },
 
                 // Runtime status strings
@@ -216,9 +216,9 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportSettings, "Settings: {0}" },
                 { TransitWaitStatus.KeyReportNote, "Line hint comes from the highest-wait waypoint at that stop." },
                 { TransitWaitStatus.KeyReportTesterHintsHeader, "Tester hints" },
-                { TransitWaitStatus.KeyReportHintWorstStops, "Worst stops: inspect these first in-game or with Scene Explorer mod. Look for accidents, traffic, bad transit stop location, or a bugged stop." },
+                { TransitWaitStatus.KeyReportHintWorstStops, "Worst stops: inspect these first in-game or with Scene Explorer mod (find locations with entity ID). Look for traffic, bad transit stop location, or a bugged stop." },
                 { TransitWaitStatus.KeyReportHintSkippedCims, "Skipped solo cims: late passengers we skip to allow transit to leave. Later state should usually become 'has path' or 'assigned'. If it stays 'no path yet', inspect that cim entity after more time." },
-                { TransitWaitStatus.KeyReportHintLateGroups, "Late groups (families): purposely left alone so they stay together and follow vanilla behavior." },
+                { TransitWaitStatus.KeyReportHintLateGroups, "Late groups (families): purposely left alone so they stay together and follow vanilla behavior; they are few compared to many single travelers." },
                 { TransitWaitStatus.KeyReportFamilyHeader, "{0}" },
                 { TransitWaitStatus.KeyReportServedStops, "Served stops: {0}" },
                 { TransitWaitStatus.KeyReportStopsWithWaiting, "Stops with waiting passengers: {0}" },
