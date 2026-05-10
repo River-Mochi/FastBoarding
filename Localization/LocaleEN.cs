@@ -133,7 +133,7 @@ namespace FastBoarding
                     "Helps keep buses/trams on schedule.\n" +
                     "Only affects cims already assigned to a vehicle that is currently boarding.\n" +
                     "Vanilla: only has cims start running at departure time which is too late to be effective.\n" +
-                    "Pairs well with [Skip late cims] as it may reduce the cims that completely miss the transit and have to be reassigned.\n" +
+                    "Pairs well with <{ToggleName}> as it may reduce the cims that completely miss the transit and have to be reassigned.\n" +
                     "Does not force boarding."
                 },
 
@@ -218,7 +218,7 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportTesterHintsHeader, "Tester hints" },
                 { TransitWaitStatus.KeyReportHintWorstStops, "Worst stops: inspect these first in-game or with Scene Explorer mod. Look for accidents, traffic, bad transit stop location, or a bugged stop." },
                 { TransitWaitStatus.KeyReportHintSkippedCims, "Skipped solo cims: late passengers we skip to allow transit to leave. Later state should usually become 'has path' or 'assigned'. If it stays 'no path yet', inspect that cim entity after more time." },
-                { TransitWaitStatus.KeyReportHintLateGroups, "Late groups (families): intentionally not skipped. Usually this is 0;  High counts are clues for future safe group-travel support.these are usually LOW." },
+                { TransitWaitStatus.KeyReportHintLateGroups, "Late groups (families): purposely left alone so they stay together and follow vanilla behavior." },
                 { TransitWaitStatus.KeyReportFamilyHeader, "{0}" },
                 { TransitWaitStatus.KeyReportServedStops, "Served stops: {0}" },
                 { TransitWaitStatus.KeyReportStopsWithWaiting, "Stops with waiting passengers: {0}" },
@@ -235,7 +235,7 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportWorstLineWaypointAverage, "Worst line waypoint avg: {0} with {1} waiting" },
                 { TransitWaitStatus.KeyReportTopWorstStopsHeader, "Top {0} worst stops by average wait:" },
                 { TransitWaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | avg {2} | waiting {3} | stop entity {4} | waypoint entity {5} | line entity {6} | line hint {7}" },
-                { TransitWaitStatus.KeyReportLateGroups, "Late group passengers left alone: {0} passengers in {1} groups on {2} vehicles" },
+                { TransitWaitStatus.KeyReportLateGroups, "Late cims traveling as a group left alone: {0} passengers in {1} groups on {2} vehicles" },
                 { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "Skipped solo late cim examples" },
                 { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | passenger {2} | missed vehicle {3} | time {4} | now {5}" },
                 { TransitWaitStatus.KeyReportNone, "none" },
