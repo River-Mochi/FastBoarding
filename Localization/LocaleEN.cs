@@ -127,14 +127,14 @@ namespace FastBoarding
                     "Groups are a small part of the crowd; most benefits are from skipping solo cims who are running late.\n" +
                     "Skipped late citizens are not deleted; they are naturally reassigned by the game."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "Cims Run Sooner to Catch Buses" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "Cims Run Sooner for Buses & Trams" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
-                    "**Beta / testing**\n" +
-                    "Citizens who are late for the bus start **running sooner** to try to make it **before** departure time.\n" +
-                    "Helps keep buses on schedule.\n" +
-                    "Only affects cims already assigned to a bus that is currently boarding.\n" +
-                    "Vanilla only has cims start running at departure time which is too late.\n" +
-                    "Does not force boarding or affect other transit types."
+                    "Citizens who are <late> start <running sooner> to try to make it **before** departure time.\n" +
+                    "Helps keep buses/trams on schedule.\n" +
+                    "Only affects cims already assigned to a vehicle that is currently boarding.\n" +
+                    "Vanilla: only has cims start running at departure time which is too late to be effective.\n" +
+                    "Pairs well with [Skip late cims] as it may reduce the cims that completely miss the transit and have to be reassigned.\n" +
+                    "Does not force boarding."
                 },
 
                 // Status overview
@@ -145,7 +145,7 @@ namespace FastBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "Cims run sooner" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
-                    "Counts cims this in-game day that Fast Boarding told to run sooner so they can try to catch a bus before departure."
+                    "Counts all cims today that Fast Boarding told to run sooner so they can try to catch a bus/tram before departure."
                 },
 
                 // Status rows
@@ -178,7 +178,7 @@ namespace FastBoarding
 
                 // About
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "Mod" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "Display name of this mod." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "Display name of mod." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "Version" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "Current mod version." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
@@ -192,8 +192,8 @@ namespace FastBoarding
                     "**Do not enable for normal gameplay.**\n" +
                     "Leaving this on can decrease performance and create huge log files.\n" +
                     "You can delete old log files later.\n" +
-                    "Note: <Stats to Log> is a point-in-time report plus today's late-skip counters.\n" +
-                    "Run verbose logging for 15-30 min if you want a timeline of what happened over time.\n" +
+                    "Note: <Stats to Log> is a point-in-time report plus today's late-skip counters; it is different than what is seen with verbose logs.\n" +
+                    "Run verbose logging for 15-20 min if you want a timeline of what happened over time.\n" +
                     "Just don't forget to turn it **OFF** again before normal gameplay."
                 },
 
@@ -218,7 +218,7 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportTesterHintsHeader, "Tester hints" },
                 { TransitWaitStatus.KeyReportHintWorstStops, "Worst stops: inspect these first in-game or with Scene Explorer mod. Look for accidents, traffic, bad transit stop location, or a bugged stop." },
                 { TransitWaitStatus.KeyReportHintSkippedCims, "Skipped solo cims: late passengers we skip to allow transit to leave. Later state should usually become 'has path' or 'assigned'. If it stays 'no path yet', inspect that cim entity after more time." },
-                { TransitWaitStatus.KeyReportHintLateGroups, "Late groups: these are families/groups left to vanilla. High counts are clues for future safe group-travel support." },
+                { TransitWaitStatus.KeyReportHintLateGroups, "Late groups (families): intentionally not skipped. Usually this is 0;  High counts are clues for future safe group-travel support.these are usually LOW." },
                 { TransitWaitStatus.KeyReportFamilyHeader, "{0}" },
                 { TransitWaitStatus.KeyReportServedStops, "Served stops: {0}" },
                 { TransitWaitStatus.KeyReportStopsWithWaiting, "Stops with waiting passengers: {0}" },

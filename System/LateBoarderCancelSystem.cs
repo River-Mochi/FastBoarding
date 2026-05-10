@@ -130,6 +130,8 @@ namespace FastBoarding
             int shipCanceled = 0;
             int ferryCanceled = 0;
             int airCanceled = 0;
+            int busRunSoonerAssists = 0;
+            int tramRunSoonerAssists = 0;
             int busSampleCount = 0;
             int trainSampleCount = 0;
             int tramSampleCount = 0;
@@ -182,13 +184,23 @@ namespace FastBoarding
 
                     if (cimsRunSoonerToCatchBuses)
                     {
-                        runSoonerAssists += QueueBusPassengersRunSooner(
+                        int queuedRunSooner = QueueRoadTransitPassengersRunSooner(
                             ref ecb,
                             vehicleEntity,
                             transportType,
                             publicTransport,
                             frame,
                             latestDepartureFrame);
+                        runSoonerAssists += queuedRunSooner;
+
+                        if (transportType == TransportType.Bus)
+                        {
+                            busRunSoonerAssists += queuedRunSooner;
+                        }
+                        else if (transportType == TransportType.Tram)
+                        {
+                            tramRunSoonerAssists += queuedRunSooner;
+                        }
                     }
 
                     if (m_SimulationSystem == null ||
@@ -362,7 +374,8 @@ namespace FastBoarding
                     shipCanceled,
                     ferryCanceled,
                     airCanceled);
-                TransitWaitStatus.RecordRunSoonerAssists(World, TransportType.Bus, runSoonerAssists);
+                TransitWaitStatus.RecordRunSoonerAssists(World, TransportType.Bus, busRunSoonerAssists);
+                TransitWaitStatus.RecordRunSoonerAssists(World, TransportType.Tram, tramRunSoonerAssists);
 
                 if (sampledCanceledPassengers != null)
                 {

@@ -369,9 +369,9 @@ namespace FastBoarding
 
         private static string DescribeBehaviorForLog(
             bool skipLateSoloCim,
-            bool busRunSooner)
+            bool runSooner)
         {
-            return $"Options Settings: skipLateSoloCim={skipLateSoloCim}, busRunSooner={busRunSooner}";
+            return $"Options Settings: skipLateSoloCim={skipLateSoloCim}, runSooner={runSooner}";
         }
 
         public void RepairLoadedValues()

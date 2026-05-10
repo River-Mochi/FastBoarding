@@ -197,7 +197,7 @@ namespace FastBoarding
             m_LoggedActive = true;
             LogUtils.Info(
                 Mod.s_Log,
-                () => $"Boarding assist active: every {GetUpdateInterval(SystemUpdatePhase.GameSimulation)} frames, cap={MaxCancellationsPerUpdate} late solo cims/update, skipLateSoloCim={BoardingRuntimeSettings.CancelLateBoarders}, busRunSooner={BoardingRuntimeSettings.CimsRunSoonerToCatchBuses}");
+                () => $"Boarding assist active: every {GetUpdateInterval(SystemUpdatePhase.GameSimulation)} frames, cap={MaxCancellationsPerUpdate} late solo cims/update, skipLateSoloCim={BoardingRuntimeSettings.CancelLateBoarders}, runSooner={BoardingRuntimeSettings.CimsRunSoonerToCatchBuses}");
         }
 
         private void LogPassSummary(uint frame, PassStats stats, string reason)
@@ -231,13 +231,13 @@ namespace FastBoarding
             {
                 LogUtils.Info(
                     Mod.s_Log,
-                    () => $"Boarding assist paused: activeTool={activeTool}, pauses={m_SkippedForTool}, totalSkipped={m_TotalCanceled}, totalBusRunSooner={m_TotalRunSoonerAssists}");
+                    () => $"Boarding assist paused: activeTool={activeTool}, pauses={m_SkippedForTool}, totalSkipped={m_TotalCanceled}, totalRunSooner={m_TotalRunSoonerAssists}");
                 return;
             }
 
             LogUtils.Info(
                 Mod.s_Log,
-                () => $"Boarding assist: vehicles={stats.Vehicles}, passengersScanned={stats.Passengers}, lateSolo={stats.Candidates}, skipped={stats.Canceled}, busRunSooner={stats.RunSoonerAssists}, totalSkipped={m_TotalCanceled}, totalBusRunSooner={m_TotalRunSoonerAssists}");
+                () => $"Boarding assist: vehicles={stats.Vehicles}, passengersScanned={stats.Passengers}, lateSolo={stats.Candidates}, skipped={stats.Canceled}, runSooner={stats.RunSoonerAssists}, totalSkipped={m_TotalCanceled}, totalRunSooner={m_TotalRunSoonerAssists}");
         }
 
         private void TrackFollowUpSample(CanceledPassengerSample sample)

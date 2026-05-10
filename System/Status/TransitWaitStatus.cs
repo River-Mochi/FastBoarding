@@ -489,7 +489,7 @@ namespace FastBoarding
                 "Skipped solo cims: later state should usually become 'has path' or 'assigned'. If it stays 'no path yet', inspect that cim entity after more time."));
             sb.AppendLine("- " + Localize(
                 KeyReportHintLateGroups,
-                "Late groups: these are families/groups left to vanilla. High counts are clues for future safe group-travel support."));
+                ": families left to vanilla. High counts are clues for future safe group-travel support."));
         }
 
         internal static void RecordLateBoardersCanceled(World world, TransportType transportType, int count)
@@ -743,7 +743,7 @@ namespace FastBoarding
             AppendField(sb, "Late solo cims skipped", LocaleUtils.FormatN0(lateBoardersCanceledToday) + " today");
             AppendField(
                 sb,
-                "Late groups not skipped",
+                "Late groups (families) not skipped",
                 $"{LocaleUtils.FormatN0(family.LateGroupPassengers)} passengers | {LocaleUtils.FormatN0(family.LateGroupGroups)} groups | {LocaleUtils.FormatN0(family.LateGroupVehicles)} vehicles");
             AppendField(sb, "Follow-up outcomes (verbose)", FormatFollowUpOutcomes(followUpOutcomes));
 

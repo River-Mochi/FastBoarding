@@ -1,5 +1,5 @@
 // File: System/LateBoarderCancelSystem.Helpers.cs
-// Purpose: Helper methods for tool safety, passenger checks, bus run assists, and cancellation edits.
+// Purpose: Helper methods for tool safety, passenger checks, run assists, and cancellation edits.
 
 namespace FastBoarding
 {
@@ -19,8 +19,8 @@ namespace FastBoarding
     public partial class LateBoarderCancelSystem : GameSystemBase
     {
         // Vanilla sets HumanFlags.Run at departure time. This beta assist starts that
-        // same behavior a little earlier for bus passengers who are already assigned.
-        private const uint BusRunSoonerLeadFrames = 512u;
+        // same behavior a little earlier for road transit passengers who are already assigned.
+        private const uint RunSoonerLeadFrames = 512u;
 
         private bool IsGroupPassenger(Entity passenger)
         {
@@ -114,7 +114,7 @@ namespace FastBoarding
             return latestDepartureFrame;
         }
 
-        private int QueueBusPassengersRunSooner(
+        private int QueueRoadTransitPassengersRunSooner(
             ref EntityCommandBuffer ecb,
             Entity vehicleEntity,
             TransportType transportType,
@@ -123,10 +123,10 @@ namespace FastBoarding
             uint latestDepartureFrame)
         {
             if (!BoardingRuntimeSettings.CimsRunSoonerToCatchBuses ||
-                transportType != TransportType.Bus ||
+                (transportType != TransportType.Bus && transportType != TransportType.Tram) ||
                 latestDepartureFrame == 0 ||
                 frame >= latestDepartureFrame ||
-                latestDepartureFrame - frame > BusRunSoonerLeadFrames)
+                latestDepartureFrame - frame > RunSoonerLeadFrames)
             {
                 return 0;
             }
@@ -143,7 +143,7 @@ namespace FastBoarding
                 return 0;
             }
 
-            // Layout support is harmless for buses and keeps the helper safe if a future vehicle uses child cars.
+            // Layout support is needed for trams and harmless for buses.
             if (EntityManager.HasBuffer<LayoutElement>(vehicleEntity))
             {
                 int queued = 0;

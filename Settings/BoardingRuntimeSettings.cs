@@ -209,7 +209,7 @@ namespace FastBoarding
             return
                 $"bus={BusBoardingSpeedFactor}x, rail={RailBoardingSpeedFactor}x, " +
                 $"ship+ferry={WaterBoardingSpeedFactor}x, air={AirBoardingSpeedFactor}x, " +
-                $"skipLateSoloCim={CancelLateBoarders}, busRunSooner={CimsRunSoonerToCatchBuses}";
+                $"skipLateSoloCim={CancelLateBoarders}, runSooner={CimsRunSoonerToCatchBuses}";
         }
 
         public static string DescribeVerboseForLog(bool enabled)
