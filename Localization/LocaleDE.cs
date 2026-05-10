@@ -127,14 +127,15 @@ namespace FastBoarding
                     "Gruppen sind nur ein kleiner Teil der Menge; der meiste Nutzen kommt vom Überspringen verspäteter Solo-Cims.\n" +
                     "Übersprungene verspätete Bürger werden nicht gelöscht; das Spiel weist sie natürlich neu zu."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "Cims Run Sooner for Buses & Trams" },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "Cims laufen früher: Busse + Trams" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
-                    "Citizens who are <late> start <running sooner> to try to make it **before** departure time.\n" +
-                    "Helps keep buses/trams on schedule.\n" +
-                    "Only affects cims already assigned to a vehicle that is currently boarding.\n" +
-                    "Vanilla: only has cims start running at departure time which is too late to be effective.\n" +
-                    "Pairs well with [Skip late cims] as it may reduce the cims that completely miss the transit and have to be reassigned.\n" +
-                    "Does not force boarding."
+                    "Bürger, die <spät> sind, beginnen <früher zu laufen>, um es **vor** der Abfahrtszeit zu schaffen.\n" +
+                    "Hilft, Busse/Trams im Zeitplan zu halten.\n" +
+                    "Betrifft nur Cims, die bereits einem Fahrzeug zugewiesen sind, das gerade einsteigen lässt.\n" +
+                    "Vanilla lässt Cims erst zur Abfahrtszeit laufen, was zu spät sein kann.\n" +
+                    $"Passt gut zu <{ToggleName}>, weil es reduzieren kann, wie viele Cims das Fahrzeug verpassen und neu zugewiesen werden müssen.\n" +
+                    "Erzwingt kein Einsteigen und teleportiert keine Bürger."
                 },
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "Gesamtnutzung" },
@@ -143,9 +144,9 @@ namespace FastBoarding
                     "Die Aktualisierungszeit zeigt, wann dieser Status-Snapshot erstellt wurde (meist nach dem Öffnen des Optionenmenüs)."
                 },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "Cims run sooner" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "Cims laufen früher" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
-                    "Counts all cims today that Fast Boarding told to run sooner so they can try to catch a bus/tram before departure."
+                    "Zählt alle Cims, die Fast Boarding heute früher laufen ließ, damit sie versuchen können, vor der Abfahrt einen Bus/eine Tram zu erreichen."
                 },
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "Bus" },
@@ -191,8 +192,8 @@ namespace FastBoarding
                     "**Nicht für normales Spielen aktivieren.**\n" +
                     "Aktiviert lassen kann die Leistung senken und riesige Logdateien erzeugen.\n" +
                     "Alte Logdateien können später gelöscht werden.\n" +
-                    "Hinweis: <Stats ins Log> ist ein Zeitpunktbericht plus heutige Late-Skip-Zähler.\n" +
-                    "Lasse ausführliches Logging 15-30 Min. laufen, wenn eine Zeitleiste der Ereignisse benötigt wird.\n" +
+                    "Hinweis: <Stats ins Log> ist ein Zeitpunktbericht plus heutige Zähler für späte Sprünge; das ist etwas anderes als ausführliche Logs." +
+                    "Ausführliches Logging 15-20 Min. laufen lassen, wenn eine Zeitlinie der Ereignisse gebraucht wird." +
                     "Danach vor normalem Spielen wieder **OFF** schalten."
                 },
 
@@ -202,12 +203,12 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyNoStopsFound, "Keine Haltestellen gefunden." },
 
                 { TransitWaitStatus.KeyStatusLine, "{0} wartend | Ø {1} | schlimmste {2} | {3}" },
-                { TransitWaitStatus.KeyStatusLateSkipped, "{0} late today" },
+                { TransitWaitStatus.KeyStatusLateSkipped, "{0} spät heute" },
                 { TransitWaitStatus.KeyStatusSkipOff, "Skip AUS" },
 
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} Touristen/Monat | {1} Bürger/Monat | aktualisiert {2}" },
-                { TransitWaitStatus.KeyStatusRunSoonerLine, "{0} today" },
-                { TransitWaitStatus.KeyStatusRunSoonerOff, "run sooner OFF" },
+                { TransitWaitStatus.KeyStatusRunSoonerLine, "{0} heute" },
+                { TransitWaitStatus.KeyStatusRunSoonerOff, "früher laufen OFF" },
 
                 // Stats-to-log report strings
                 { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] Statistikbericht angefordert, aber keine Stadt ist geladen." },
@@ -215,9 +216,9 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportSettings, "Einstellungen: {0}" },
                 { TransitWaitStatus.KeyReportNote, "Der Linienhinweis stammt vom Waypoint mit der höchsten Wartezeit an dieser Haltestelle." },
                 { TransitWaitStatus.KeyReportTesterHintsHeader, "Testerhinweise" },
-                { TransitWaitStatus.KeyReportHintWorstStops, "Schlechteste Haltestellen: zuerst im Spiel oder mit dem Scene-Explorer-Mod prüfen. Suche nach Unfällen, Verkehr, schlechter Haltestellenposition oder verbuggter Haltestelle." },
+                { TransitWaitStatus.KeyReportHintWorstStops, "Schlimmste Halte: zuerst im Spiel oder mit Scene Explorer Mod prüfen (Orte über Entity-ID finden). Auf Verkehr, schlechte Haltestellenlage oder fehlerhafte Halte achten." },
                 { TransitWaitStatus.KeyReportHintSkippedCims, "Übersprungene Solo-Cims: verspätete Fahrgäste, die übersprungen werden, damit der Verkehr abfahren kann. Später sollte der Status meist 'has path' oder 'assigned' werden. Bleibt er bei 'no path yet', diese Cim-Entity nach mehr Zeit prüfen." },
-                { TransitWaitStatus.KeyReportHintLateGroups, "Verspätete Gruppen: Familien/Gruppen bleiben Vanilla überlassen. Hohe Zahlen sind Hinweise für zukünftige sichere Gruppenreise-Unterstützung." },
+                { TransitWaitStatus.KeyReportHintLateGroups, "Späte Gruppen (Familien): absichtlich vanilla überlassen, damit sie zusammen bleiben und vanilla Verhalten folgen; sie sind wenige im Vergleich zu vielen Einzelreisenden." },
                 { TransitWaitStatus.KeyReportFamilyHeader, "{0}" },
                 { TransitWaitStatus.KeyReportServedStops, "Bediente Haltestellen: {0}" },
                 { TransitWaitStatus.KeyReportStopsWithWaiting, "Haltestellen mit wartenden Fahrgästen: {0}" },
@@ -234,7 +235,7 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportWorstLineWaypointAverage, "Waypoint-Ø der schlechtesten Linie: {0} mit {1} wartend" },
                 { TransitWaitStatus.KeyReportTopWorstStopsHeader, "Top {0} schlechteste Haltestellen nach Ø-Wartezeit:" },
                 { TransitWaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | Ø {2} | wartend {3} | Haltestelle {4} | Waypoint {5} | Linie {6} | Hinweis {7}" },
-                { TransitWaitStatus.KeyReportLateGroups, "Verspätete Gruppenfahrgäste in Ruhe gelassen: {0} Fahrgäste in {1} Gruppen auf {2} Fahrzeugen" },
+                { TransitWaitStatus.KeyReportLateGroups, "Späte Cims in Gruppenreise in Ruhe gelassen: {0} Passagiere in {1} Gruppen auf {2} Fahrzeugen" },
                 { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "Beispiele übersprungener verspäteter Solo-Cims" },
                 { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | Fahrgast {2} | verpasstes Fahrzeug {3} | Zeit {4} | jetzt {5}" },
                 { TransitWaitStatus.KeyReportNone, "keine" },

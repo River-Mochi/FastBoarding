@@ -127,14 +127,15 @@ namespace FastBoarding
                     "グループは群衆の一部にすぎません。主な効果は、遅れて走っている単独 cim のスキップから得られます。\n" +
                     "スキップされた遅れた市民は削除されません。ゲームにより自然に再割り当てされます。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "Cims Run Sooner for Buses & Trams" },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "早めに走る: バス+トラム" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
-                    "Citizens who are <late> start <running sooner> to try to make it **before** departure time.\n" +
-                    "Helps keep buses/trams on schedule.\n" +
-                    "Only affects cims already assigned to a vehicle that is currently boarding.\n" +
-                    "Vanilla: only has cims start running at departure time which is too late to be effective.\n" +
-                    "Pairs well with [Skip late cims] as it may reduce the cims that completely miss the transit and have to be reassigned.\n" +
-                    "Does not force boarding."
+                    "<遅れている>市民が出発時刻**前**に間に合うよう、<早めに走り始め>ます。\n" +
+                    "バス/トラムの定時運行を助けます。\n" +
+                    "現在乗車中の車両にすでに割り当てられている cim だけに影響します。\n" +
+                    "vanilla では出発時刻になってから cim が走り始めるため、遅すぎる場合があります。\n" +
+                    $"<{ToggleName}> と相性がよく、車両を逃して再割り当てが必要になる cim を減らせる場合があります。\n" +
+                    "強制乗車や市民のテレポートは行いません。"
                 },
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "総利用状況" },
@@ -143,9 +144,9 @@ namespace FastBoarding
                     "更新時刻は、このステータス snapshot が取得された時刻です（通常はオプションメニューを開いた後）。"
                 },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "Cims run sooner" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "早めに走る cim" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
-                    "Counts all cims today that Fast Boarding told to run sooner so they can try to catch a bus/tram before departure."
+                    "Fast Boarding が今日、出発前にバス/トラムへ間に合うよう早めに走らせた cim の数です。"
                 },
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "バス" },
@@ -191,8 +192,8 @@ namespace FastBoarding
                     "**通常プレイでは有効にしないでください。**\n" +
                     "有効のままにすると、性能が下がり、巨大なログファイルが作成されることがあります。\n" +
                     "古いログファイルは後で削除できます。\n" +
-                    "注: <Statsをログへ> は、その時点のレポートと今日の late-skip カウンターです。\n" +
-                    "時間経過の流れを見たい場合は、詳細ログを15～30分実行してください。\n" +
+                    "注: <Statsをログへ> は、その時点のレポートと今日の late-skip カウンターです。詳細ログとは異なります。" +
+                    "時間経過の流れを見たい場合は、詳細ログを15～20分実行してください。" +
                     "通常プレイ前に **OFF** に戻すのを忘れないでください。"
                 },
 
@@ -202,12 +203,12 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyNoStopsFound, "停留所が見つかりません。" },
 
                 { TransitWaitStatus.KeyStatusLine, "{0} 待機 | 平均 {1} | 最悪 {2} | {3}" },
-                { TransitWaitStatus.KeyStatusLateSkipped, "{0} late today" },
+                { TransitWaitStatus.KeyStatusLateSkipped, "{0} 本日遅れ" },
                 { TransitWaitStatus.KeyStatusSkipOff, "スキップ OFF" },
 
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} 観光客/月 | {1} 市民/月 | 更新 {2}" },
-                { TransitWaitStatus.KeyStatusRunSoonerLine, "{0} today" },
-                { TransitWaitStatus.KeyStatusRunSoonerOff, "run sooner OFF" },
+                { TransitWaitStatus.KeyStatusRunSoonerLine, "{0} 本日" },
+                { TransitWaitStatus.KeyStatusRunSoonerOff, "早走りOFF" },
 
                 // Stats-to-log report strings
                 { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] 統計レポートが要求されましたが、都市が読み込まれていません。" },
@@ -215,9 +216,9 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportSettings, "設定: {0}" },
                 { TransitWaitStatus.KeyReportNote, "路線ヒントは、その停留所で最も待ち時間が高い waypoint から取得されます。" },
                 { TransitWaitStatus.KeyReportTesterHintsHeader, "テスター向けヒント" },
-                { TransitWaitStatus.KeyReportHintWorstStops, "最悪の停留所: まずゲーム内または Scene Explorer mod で確認してください。事故、交通、悪い停留所配置、バグった停留所を探します。" },
+                { TransitWaitStatus.KeyReportHintWorstStops, "最悪の停留所: まずゲーム内または Scene Explorer mod で確認してください（エンティティIDで場所を探せます）。交通、悪い停留所配置、バグった停留所を探します。" },
                 { TransitWaitStatus.KeyReportHintSkippedCims, "スキップされた単独 cim: 交通機関を出発させるためにスキップした遅れた乗客です。後の状態は通常 'has path' または 'assigned' になります。'no path yet' のままなら、時間を置いてその cim エンティティを確認してください。" },
-                { TransitWaitStatus.KeyReportHintLateGroups, "遅れたグループ: vanilla に任せた家族/グループです。数が多い場合は、将来の安全なグループ移動対応の手がかりになります。" },
+                { TransitWaitStatus.KeyReportHintLateGroups, "遅れたグループ（家族）: 一緒にいられるよう、意図的に vanilla に任せています。単独旅行者が多い中では少数です。" },
                 { TransitWaitStatus.KeyReportFamilyHeader, "{0}" },
                 { TransitWaitStatus.KeyReportServedStops, "提供中の停留所: {0}" },
                 { TransitWaitStatus.KeyReportStopsWithWaiting, "待機乗客がいる停留所: {0}" },
@@ -234,7 +235,7 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportWorstLineWaypointAverage, "最悪路線 waypoint 平均: {0}、待機 {1}" },
                 { TransitWaitStatus.KeyReportTopWorstStopsHeader, "平均待ち時間による最悪停留所 Top {0}:" },
                 { TransitWaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | 平均 {2} | 待機 {3} | 停留所 {4} | waypoint {5} | 路線 {6} | ヒント {7}" },
-                { TransitWaitStatus.KeyReportLateGroups, "スキップしなかった遅れグループ: {0} 人の乗客 / {1} グループ / {2} 台の車両" },   
+                { TransitWaitStatus.KeyReportLateGroups, "グループで移動中の遅れた cim はそのまま: {0} 人、{1} グループ、{2} 台の車両" },
                 { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "スキップされた遅れた単独 cim の例" },
                 { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | 乗客 {2} | 逃した車両 {3} | 時刻 {4} | 現在 {5}" },
                 { TransitWaitStatus.KeyReportNone, "なし" },

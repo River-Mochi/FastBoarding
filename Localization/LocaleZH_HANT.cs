@@ -127,14 +127,15 @@ namespace FastBoarding
                     "團體只占人群的一小部分；主要收益來自跳過遲到奔跑的單獨 cim。\n" +
                     "被跳過的遲到市民不會被刪除；遊戲會自然重新分配他們。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "Cims Run Sooner for Buses & Trams" },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "提早奔跑：公車+路面電車" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
-                    "Citizens who are <late> start <running sooner> to try to make it **before** departure time.\n" +
-                    "Helps keep buses/trams on schedule.\n" +
-                    "Only affects cims already assigned to a vehicle that is currently boarding.\n" +
-                    "Vanilla: only has cims start running at departure time which is too late to be effective.\n" +
-                    "Pairs well with [Skip late cims] as it may reduce the cims that completely miss the transit and have to be reassigned.\n" +
-                    "Does not force boarding."
+                    "<遲到>市民會<提早奔跑>，嘗試在發車時間**之前**趕到。\n" +
+                    "幫助公車/路面電車保持準點。\n" +
+                    "只影響已分配到目前正在上客車輛的市民。\n" +
+                    "原版只會在發車時間才讓市民開始奔跑，這可能已經太晚。\n" +
+                    $"和 <{ToggleName}> 搭配很好，因為它可能減少錯過車輛並需要重新分配的市民數量。\n" +
+                    "不會強制上車，也不會傳送市民。"
                 },
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "總使用量" },
@@ -143,9 +144,9 @@ namespace FastBoarding
                     "更新時間顯示此狀態快照的取得時間（通常是在進入選項選單後）。"
                 },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "Cims run sooner" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "市民提早奔跑" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
-                    "Counts all cims today that Fast Boarding told to run sooner so they can try to catch a bus/tram before departure."
+                    "統計今天 Fast Boarding 讓多少市民提早奔跑，嘗試在發車前趕上公車/路面電車。"
                 },
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "公車" },
@@ -192,7 +193,7 @@ namespace FastBoarding
                     "保持啟用可能降低效能並產生巨大的日誌檔。\n" +
                     "之後可以刪除舊日誌檔。\n" +
                     "注意：<統計寫入日誌> 是某一時刻的報告，加上今天的 late-skip 計數器。\n" +
-                    "如果需要一段時間內發生情況的時間線，請執行詳細日誌 15-30 分鐘。\n" +
+                    "如需查看事件時間軸，請執行詳細日誌 15-20 分鐘。" +
                     "正常遊玩前別忘了再次切回 **OFF**。"
                 },
 
@@ -202,12 +203,12 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyNoStopsFound, "未找到站點。" },
 
                 { TransitWaitStatus.KeyStatusLine, "{0} 等待 | 平均 {1} | 最差 {2} | {3}" },
-                { TransitWaitStatus.KeyStatusLateSkipped, "{0} late today" },
+                { TransitWaitStatus.KeyStatusLateSkipped, "{0} 今日遲到" },
                 { TransitWaitStatus.KeyStatusSkipOff, "跳過 OFF" },
 
                 { TransitWaitStatus.KeyStatusOverviewLine, "{0} 遊客/月 | {1} 市民/月 | 更新 {2}" },
-                { TransitWaitStatus.KeyStatusRunSoonerLine, "{0} today" },
-                { TransitWaitStatus.KeyStatusRunSoonerOff, "run sooner OFF" },
+                { TransitWaitStatus.KeyStatusRunSoonerLine, "{0} 今日" },
+                { TransitWaitStatus.KeyStatusRunSoonerOff, "提早奔跑OFF" },
 
                 // Stats-to-log report strings
                 { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] 已請求統計報告，但未載入城市。" },
@@ -215,9 +216,9 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportSettings, "設定: {0}" },
                 { TransitWaitStatus.KeyReportNote, "路線提示來自該站點等待最高的 waypoint。" },
                 { TransitWaitStatus.KeyReportTesterHintsHeader, "測試提示" },
-                { TransitWaitStatus.KeyReportHintWorstStops, "最差站點：先在遊戲中或用 Scene Explorer 模組檢查。尋找事故、交通、站點位置不佳或異常站點。" },
+                { TransitWaitStatus.KeyReportHintWorstStops, "最差站點：先在遊戲中或用 Scene Explorer 模組檢查（可用實體 ID 找位置）。查看交通阻塞、站點位置不佳或異常站點。" },
                 { TransitWaitStatus.KeyReportHintSkippedCims, "被跳過的單獨 cims：為讓交通工具發車而跳過的遲到乘客。之後狀態通常應變為 'has path' 或 'assigned'。如果仍是 'no path yet'，請過一段時間再檢查該 cim 實體。" },
-                { TransitWaitStatus.KeyReportHintLateGroups, "遲到團體：交給 vanilla 的家庭/團體。數量高是未來安全支援團體出行的線索。" },
+                { TransitWaitStatus.KeyReportHintLateGroups, "遲到群組（家庭）：故意交給原版處理，讓他們保持在一起並遵循原版行為；相比大量單獨乘客，他們數量較少。" },
                 { TransitWaitStatus.KeyReportFamilyHeader, "{0}" },
                 { TransitWaitStatus.KeyReportServedStops, "服務站點: {0}" },
                 { TransitWaitStatus.KeyReportStopsWithWaiting, "有等待乘客的站點: {0}" },
@@ -234,7 +235,7 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportWorstLineWaypointAverage, "最差路線 waypoint 平均: {0}，等待 {1}" },
                 { TransitWaitStatus.KeyReportTopWorstStopsHeader, "按平均等待排名的最差站點前 {0} 名:" },
                 { TransitWaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | 平均 {2} | 等待 {3} | 站點 {4} | waypoint {5} | 路線 {6} | 提示 {7}" },
-                { TransitWaitStatus.KeyReportLateGroups, "未處理的遲到團體乘客: {0} 名乘客，{1} 個團體，{2} 輛車" },
+                { TransitWaitStatus.KeyReportLateGroups, "結伴出行的遲到市民保持原樣：{0} 名乘客，{1} 個群組，涉及 {2} 輛車" },
                 { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "被跳過的單獨遲到 cim 範例" },
                 { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | 乘客 {2} | 錯過車輛 {3} | 時間 {4} | 現在 {5}" },
                 { TransitWaitStatus.KeyReportNone, "無" },

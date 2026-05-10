@@ -127,14 +127,15 @@ namespace FastBoarding
                     "그룹은 군중의 작은 부분입니다. 대부분의 효과는 늦게 뛰어오는 혼자 cim을 건너뛰는 데서 옵니다.\n" +
                     "건너뛴 늦은 시민은 삭제되지 않으며, 게임이 자연스럽게 다시 배정합니다."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "Cims Run Sooner for Buses & Trams" },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "더 일찍 달리기: 버스+트램" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
-                    "Citizens who are <late> start <running sooner> to try to make it **before** departure time.\n" +
-                    "Helps keep buses/trams on schedule.\n" +
-                    "Only affects cims already assigned to a vehicle that is currently boarding.\n" +
-                    "Vanilla: only has cims start running at departure time which is too late to be effective.\n" +
-                    "Pairs well with [Skip late cims] as it may reduce the cims that completely miss the transit and have to be reassigned.\n" +
-                    "Does not force boarding."
+                    "<늦은> 시민이 출발 시간 **전**에 도착해 보도록 <더 일찍 달리기> 시작합니다.\n" +
+                    "버스/트램이 일정대로 움직이는 데 도움을 줍니다.\n" +
+                    "현재 승차 중인 차량에 이미 배정된 cim에게만 적용됩니다.\n" +
+                    "바닐라는 출발 시간이 되어야 cim이 달리기 시작해서 너무 늦을 수 있습니다.\n" +
+                    $"<{ToggleName}>와 잘 맞으며, 차량을 놓쳐 다시 배정되어야 하는 cim 수를 줄일 수 있습니다.\n" +
+                    "강제 승차나 시민 텔레포트는 하지 않습니다."
                 },
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "전체 이용량" },
@@ -143,9 +144,9 @@ namespace FastBoarding
                     "업데이트 시간은 이 상태 스냅샷을 찍은 시각을 표시합니다(보통 옵션 메뉴에 들어간 뒤)."
                 },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "Cims run sooner" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "cim 더 일찍 달리기" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
-                    "Counts all cims today that Fast Boarding told to run sooner so they can try to catch a bus/tram before departure."
+                    "Fast Boarding이 오늘 출발 전에 버스/트램을 잡도록 더 일찍 달리게 한 cim 수입니다."
                 },
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "버스" },
@@ -192,7 +193,7 @@ namespace FastBoarding
                     "켜 둔 상태는 성능을 낮추고 거대한 로그 파일을 만들 수 있습니다.\n" +
                     "오래된 로그 파일은 나중에 삭제할 수 있습니다.\n" +
                     "참고: <Stats를 로그로>는 특정 시점 보고서와 오늘의 late-skip 카운터입니다.\n" +
-                    "시간 흐름을 보고 싶으면 자세한 로그를 15-30분 실행하세요.\n" +
+                    "시간 흐름을 보고 싶으면 자세한 로그를 15-20분 동안 실행하세요." +
                     "일반 플레이 전에 다시 **OFF**로 바꾸는 것을 잊지 마세요."
                 },
 
@@ -202,12 +203,12 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyNoStopsFound, "정류장을 찾지 못했습니다." },
 
                 { TransitWaitStatus.KeyStatusLine, "{0} 대기 | 평균 {1} | 최악 {2} | {3}" },
-                { TransitWaitStatus.KeyStatusLateSkipped, "{0} late today" },
+                { TransitWaitStatus.KeyStatusLateSkipped, "{0} 오늘 지각" },
                 { TransitWaitStatus.KeyStatusSkipOff, "스킵 OFF" },
 
                 { TransitWaitStatus.KeyStatusOverviewLine, "관광객 {0}/월 | 시민 {1}/월 | 업데이트 {2}" },
-                { TransitWaitStatus.KeyStatusRunSoonerLine, "{0} today" },
-                { TransitWaitStatus.KeyStatusRunSoonerOff, "run sooner OFF" },
+                { TransitWaitStatus.KeyStatusRunSoonerLine, "{0} 오늘" },
+                { TransitWaitStatus.KeyStatusRunSoonerOff, "일찍 달리기 OFF" },
 
                 // Stats-to-log report strings
                 { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] 통계 보고서가 요청되었지만 불러온 도시가 없습니다." },
@@ -215,9 +216,9 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportSettings, "설정: {0}" },
                 { TransitWaitStatus.KeyReportNote, "노선 힌트는 해당 정류장에서 대기 시간이 가장 높은 waypoint에서 가져옵니다." },
                 { TransitWaitStatus.KeyReportTesterHintsHeader, "테스터 힌트" },
-                { TransitWaitStatus.KeyReportHintWorstStops, "최악 정류장: 게임 안이나 Scene Explorer 모드로 먼저 확인하세요. 사고, 교통, 나쁜 정류장 위치, 버그난 정류장을 찾으세요." },
+                { TransitWaitStatus.KeyReportHintWorstStops, "최악 정류장: 먼저 게임 안이나 Scene Explorer 모드로 확인하세요(엔티티 ID로 위치 찾기). 교통, 나쁜 정류장 위치, 버그난 정류장을 확인하세요." },
                 { TransitWaitStatus.KeyReportHintSkippedCims, "건너뛴 혼자 cim: 대중교통이 출발할 수 있도록 건너뛴 늦은 승객입니다. 이후 상태는 보통 'has path' 또는 'assigned'가 되어야 합니다. 'no path yet'에 머물면 시간이 더 지난 뒤 해당 cim 엔티티를 확인하세요." },
-                { TransitWaitStatus.KeyReportHintLateGroups, "늦은 그룹: vanilla에 맡긴 가족/그룹입니다. 높은 수치는 향후 안전한 그룹 이동 지원을 위한 단서입니다." },
+                { TransitWaitStatus.KeyReportHintLateGroups, "늦은 그룹(가족): 함께 있도록 의도적으로 바닐라에 맡겼습니다. 많은 단독 승객에 비해 적은 편입니다." },
                 { TransitWaitStatus.KeyReportFamilyHeader, "{0}" },
                 { TransitWaitStatus.KeyReportServedStops, "운행 정류장: {0}" },
                 { TransitWaitStatus.KeyReportStopsWithWaiting, "대기 승객이 있는 정류장: {0}" },
@@ -234,7 +235,7 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyReportWorstLineWaypointAverage, "최악 노선 waypoint 평균: {0}, 대기 {1}" },
                 { TransitWaitStatus.KeyReportTopWorstStopsHeader, "평균 대기 기준 최악 정류장 Top {0}:" },
                 { TransitWaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | 평균 {2} | 대기 {3} | 정류장 {4} | waypoint {5} | 노선 {6} | 힌트 {7}" },
-                { TransitWaitStatus.KeyReportLateGroups, "건너뛰지 않은 늦은 그룹: 승객 {0}명 / 그룹 {1}개 / 차량 {2}대" },
+                { TransitWaitStatus.KeyReportLateGroups, "그룹으로 이동 중인 늦은 cim은 그대로 둠: 승객 {0}명, 그룹 {1}개, 차량 {2}대" },
                 { TransitWaitStatus.KeyReportLastSkippedSamplesHeader, "건너뛴 혼자 늦은 cim 예시" },
                 { TransitWaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | 승객 {2} | 놓친 차량 {3} | 시간 {4} | 현재 {5}" },
                 { TransitWaitStatus.KeyReportNone, "없음" },
