@@ -67,7 +67,7 @@ namespace FastBoarding
                     "**Śr.** = średni czas oczekiwania tych pasażerów.\n" +
                     "**Najgorszy** przystanek = najwyższy średni czas oczekiwania na jednym przystanku.\n" +
                     "Najgorsze przystanki warto sprawdzić pod kątem wypadków, zablokowanych/zbugowanych przystanków lub potrzeby przypisania większej liczby pojazdów.\n" +
-                    $"**Late skipped** = spóźnieni pasażerowie solo pominięci dziś przez <{ToggleName}>.\n" +
+                    $"**Spóźnieni dziś** = spóźnieni pasażerowie solo pominięci dziś przez <{ToggleName}>.\n" +
                     "Użyj <Statystyki do logu>, aby zapisać szczegółowy raport: nazwy przystanków, ID encji i więcej.";
             }
 

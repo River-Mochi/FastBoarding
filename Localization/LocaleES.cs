@@ -67,7 +67,7 @@ namespace FastBoarding
                     "**Media** = tiempo medio de espera de esos pasajeros.\n" +
                     "**Peor** parada = mayor espera media en una parada.\n" +
                     "Las peores paradas son buenos sitios para revisar accidentes, paradas bloqueadas/bugueadas o falta de vehículos asignados.\n" +
-                    $"**Late skipped** = pasajeros solo tarde omitidos hoy por <{ToggleName}>.\n" +
+                    $"**Tarde hoy** = pasajeros solitarios tarde omitidos hoy por <{ToggleName}>.\n" +
                     "Usa <Stats al log> para un informe detallado: nombres de paradas, IDs de entidades y más.";
             }
 

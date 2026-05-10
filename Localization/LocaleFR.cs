@@ -67,7 +67,7 @@ namespace FastBoarding
                     "**Moy.** = temps d’attente moyen de ces passagers.\n" +
                     "**Pire** arrêt = attente moyenne la plus élevée à un arrêt.\n" +
                     "Les pires arrêts sont de bons endroits à vérifier pour les accidents, arrêts bloqués/buggés ou besoin de véhicules supplémentaires.\n" +
-                    $"**Late skipped** = passagers solo en retard ignorés aujourd’hui par <{ToggleName}>.\n" +
+                    $"**En retard aujourd’hui** = passagers solo en retard ignorés aujourd’hui par <{ToggleName}>.\n" +
                     "Utilise <Stats vers log> pour un rapport détaillé : noms d’arrêts, ID d’entités et plus.";
             }
 

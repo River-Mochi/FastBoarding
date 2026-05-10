@@ -67,7 +67,7 @@ namespace FastBoarding
                     "**Media** = tempo medio di attesa di quei passeggeri.\n" +
                     "**Peggiore** fermata = attesa media più alta a una fermata.\n" +
                     "Le fermate peggiori sono buoni posti da controllare per incidenti, fermate bloccate/buggate o bisogno di più veicoli assegnati.\n" +
-                    $"**Late skipped** = passeggeri soli in ritardo saltati oggi da <{ToggleName}>.\n" +
+                    $"**In ritardo oggi** = passeggeri soli in ritardo saltati oggi da <{ToggleName}>.\n" +
                     "Usa <Stats nel log> per un report dettagliato: nomi fermate, ID entità e altro.";
             }
 

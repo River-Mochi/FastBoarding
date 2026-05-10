@@ -10,23 +10,18 @@
 	<LongDescription>
 ## Faster public transit boarding
 
-YES - this mod is still useful with patch 1.5.7-1.5.8.
+YES - this mod is still needed with patch 1.5.7-1.5.8.
 
-The game patch added a fallback so stuck transit can move ~10 minutes after scheduled departure time (still a long time).
-Fast Boarding helps before that point with boarding/loading speeds and tools to reduce many late passenger delays that literally prevent transit from leaving.
+Game patch added a fallback so stuck transit can move ~10 minutes after scheduled departure time (still a long time).
+Fast Boarding mod helps before that with improved boarding speeds and tools to reduce many late passenger delays that can still prevent transit from leaving.
 
-- Improve traffic, increase transit usage, reduce bunching of vehicles, and indirectly reduce car demand.
+- Improve traffic, increase transit usage, reduce bunching of vehicles.
 - The larger your city, the more this mod will help.
-- ✅ Speeds up normal public transit boarding/loading. You choose the speed.
-- ✅ Lets late solo passengers miss a vehicle after departure time passes so transit does not sit waiting for them.
+- ✅ Sliders to speeds up normal public transit boarding/loading. You choose the speed.
+- ✅ Lets late solo passengers miss a vehicle after departure time passes. Transit does not sit waiting for them.
 - ✅ Late Bus/tram passengers can run sooner so they may catch the vehicle in time.
 - Compact status info in Options menu, and a separate detailed [Stats to Log] report.
 
-
-### Boarding speed sliders:
-
-- Bus, Rail (train, tram, subway), Water (ship, ferry), Airplane
-- Higher values shorten dwell by increasing loading speed and adjusting the boarding-time estimate used by the game.
 
 ### Skip Late Passengers
 - ✅ When **Skip Late Passengers** is enabled, late solo cims who are still **not ready** even after **departure time** can miss that vehicle instead of making everyone wait.

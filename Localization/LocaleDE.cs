@@ -67,7 +67,7 @@ namespace FastBoarding
                     "**Ø** = durchschnittliche Wartezeit dieser Fahrgäste.\n" +
                     "**Schlechteste** Haltestelle = höchste durchschnittliche Wartezeit an einer Haltestelle.\n" +
                     "Schlechteste Haltestellen sind gute Orte zur Prüfung auf Unfälle, blockierte/verbuggte Haltestellen oder zu wenige zugewiesene Fahrzeuge.\n" +
-                    $"**Late skipped** = heute von <{ToggleName}> übersprungene verspätete Solo-Fahrgäste.\n" +
+                    $"**Spät heute** = heute von <{ToggleName}> übersprungene verspätete Solo-Fahrgäste.\n" +
                     "Nutze <Stats ins Log> für einen Detailbericht: Haltestellennamen, Entity-IDs und mehr.";
             }
 

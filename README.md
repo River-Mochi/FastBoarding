@@ -1,76 +1,40 @@
 ## Fast Boarding
 
-Fast Boarding is a transit mod for Cities Skylines 2.
+Fast Boarding helps public transport board faster without replacing the game's transport AI.
 
-It is focused on helping public transport board faster without replacing the game's whole transport AI systems.
+### What It Does
 
-### Uses two lighter-touch ideas:
+- Faster boarding/loading sliders for bus, rail, ship + ferry, and airplane.
+- `Skip Late Passengers`: solo cims who are still late after departure time can miss that vehicle instead of holding everyone.
+- `Cims Run Sooner: Buses + Trams`: assigned late bus/tram passengers start running before departure, so more of them can catch the ride.
+- Compact Options status for current waits, worst stops, `late today`, and run-sooner counts.
+- `Stats to Log` writes a detailed troubleshooting report with stop names, entity IDs, line hints, and worst stops.
 
-#### Sliders
-  - make normal boarding/loading faster through vanilla transit stop data (safe prefab change)
+### Safe Design
 
-#### Skip Late Passengers [x] toggle
-  - after vanilla departure frame,
-  - if a solo cim is still not *Ready*,
-  - let that cim miss this vehicle,
-  - remove them from the vehicle passenger buffer,
-  - let vanilla continue from there
+Fast Boarding does not use Harmony and does not replace vanilla transport systems.
 
-It uses a lighter-touch approach: tune the transit stops vanilla already uses,
-then optionally help with late passengers near departure time.
+- Sliders tune vanilla passenger stop data.
+- Skipped cims are not deleted; vanilla can reassign or reroute them.
+- Groups/families are left to vanilla to avoid splitting up the travelers (they can still slow down boarding, but are few compared to many single travelers).
+- Save-game safe and safe to remove anytime.
 
-### Current Features
+### Tips
 
-- Separate boarding-speed sliders for:
-  - Bus
-  - Rail: train, tram, subway
-  - Ship + ferry
-  - Airplane
-- `Skip Late Passengers` toggle
-- Status report for current waits, worst stops, and skipped cims (in Options menu to not affect city performance).
-- `Stats to Log` button with even more details for the curious
+- If a stop still has huge waits, use `Stats to Log` and inspect the worst stops for traffic, bad stop placement, or not enough vehicles.
+- Keep verbose logging OFF during normal gameplay; it is for testing. Leaving it on can cause performance issues and huge log file spam.
 
-### How It Works
+### Compatibility
 
-Fast Boarding changes the base game's `Game.Prefabs.TransportStopData` on passenger transport stop prefabs.
-
-It only changes:
-
-- `m_LoadingFactor`
-- `m_BoardingTime`
-
-Fast Boarding does not change `PublicTransport.m_DepartureFrame`, line schedules,
-vehicle counts, route counts, or the vanilla transport AI systems.
-
-At `1x`, untouched stops are left alone. At `2x-10x`, the mod reduces boarding/loading time so normal queues clear faster through vanilla systems.
-
-The optional `Skip Late Passengers` toggle watches vehicles that are already past their vanilla departure frame. 
-If a solo cim assigned to that vehicle is still *not ready*, the mod detaches that cim from the current vehicle and removes the missed vehicle leg from their current path. 
-The cim is not deleted; they simply miss that vehicle and vanilla systems continue from there.
-
-Groups/families travelling together are not skipped yet. They can still delay a vehicle like in vanilla game, (this needs more research/testing before changing it safely).
-
-### Compared to other boarding mod approaches
-
-Older boarding mods often solved the waiting problem inside the vehicle AI systems itself by disabling/replacing the vanilla road and train transport AI systems with Harmony patched copies.
-
-Fast Boarding takes a smaller no-Harmony route:
-
-- tunes the stop data vanilla already reads.
-- optionally lets late solo cims miss a vehicle after vanilla departure time.
-- works with the vanilla's own transport AI system files and does not replace it.
-
-### Notes
-
-- save-game safe and safe to remove.
-- `Skip Late Passengers` is still Beta, so test on a copy of a save first or disable it.
-- Verbose logging is for testers only and should stay OFF during normal gameplay.
+Use only one boarding-behavior mod at a time, if you use this mod, don't use All Aboard at the same time.
 
 ### Credits
 
-- River-Mochi____mod author
-- Inspiration and thanks to bcallender's All Aboard mod and Wayze's old InstantBoarding.
-- yenyang_______for testing and code feedback
-- Neco1996______for testing
-- MayorCheeks___for testing
-- elGaucho87____thumbnail straightener
+- River-Mochi: mod author
+- bcallender's All Aboard and Wayze's InstantBoarding: inspiration
+- yenyang: testing and code feedback
+- Neco1996: testing
+- MayorCheeks: testing
+- gagaxm: testing
+- Empiiey: testing
+- elGaucho87: thumbnail straightener
