@@ -32,15 +32,10 @@ namespace FastBoarding
             public int RunSoonerAssists { get; }
         }
 
-        private struct UnsafeNotReadyStats
+        private enum FollowUpSampleKind
         {
-            public int MissingData;
-
-            public int NoExactVehicleInPath;
-
-            public int Other;
-
-            public int Total => MissingData + NoExactVehicleInPath + Other;
+            SkippedLatePassenger,
+            RunSoonerPassenger,
         }
 
         private readonly struct CanceledPassengerSample
@@ -61,10 +56,17 @@ namespace FastBoarding
 
         private struct FollowUpSample
         {
-            public FollowUpSample(TransportType transportType, Entity vehicle, Entity passenger, uint frame, DateTime localTime)
+            public FollowUpSample(
+                FollowUpSampleKind kind,
+                TransportType transportType,
+                Entity vehicle,
+                Entity passenger,
+                uint frame,
+                DateTime localTime)
             {
                 Active = true;
                 Logged = false;
+                Kind = kind;
                 TransportType = transportType;
                 Vehicle = vehicle;
                 Passenger = passenger;
@@ -75,6 +77,8 @@ namespace FastBoarding
             public bool Active;
 
             public bool Logged;
+
+            public FollowUpSampleKind Kind;
 
             public TransportType TransportType;
 

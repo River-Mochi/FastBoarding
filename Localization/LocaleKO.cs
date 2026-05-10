@@ -127,7 +127,6 @@ namespace FastBoarding
                     "그룹은 군중의 작은 부분입니다. 대부분의 효과는 늦게 뛰어오는 혼자 cim을 건너뛰는 데서 옵니다.\n" +
                     "건너뛴 늦은 시민은 삭제되지 않으며, 게임이 자연스럽게 다시 배정합니다."
                 },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "더 일찍 달리기: 버스+트램" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
                     "<늦은> 시민이 출발 시간 **전**에 도착해 보도록 <더 일찍 달리기> 시작합니다.\n" +
@@ -137,17 +136,19 @@ namespace FastBoarding
                     $"<{ToggleName}>와 잘 맞으며, 차량을 놓쳐 다시 배정되어야 하는 cim 수를 줄일 수 있습니다.\n" +
                     "강제 승차나 시민 텔레포트는 하지 않습니다."
                 },
+
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "전체 이용량" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)),
                     "게임의 교통 정보 보기에서 가져온 월간 대중교통 이용량입니다.\n" +
                     "업데이트 시간은 이 상태 스냅샷을 찍은 시각을 표시합니다(보통 옵션 메뉴에 들어간 뒤)."
                 },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "cim 더 일찍 달리기" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
-                    "Fast Boarding이 오늘 출발 전에 버스/트램을 잡도록 더 일찍 달리게 한 cim 수입니다."
+                    "켜져 있으면 [x], 오늘 출발 전에 버스/트램을 잡으려고 **더 일찍 달리기 시작한** cim을 셉니다.\n" +
+                    "cim은 vanilla보다 512프레임 일찍 달립니다(실시간 약 2-8초 빠름, 게임 내 약 2분)."
                 },
+
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "버스" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusBus)), StatusDescription("버스") },
@@ -193,7 +194,7 @@ namespace FastBoarding
                     "켜 둔 상태는 성능을 낮추고 거대한 로그 파일을 만들 수 있습니다.\n" +
                     "오래된 로그 파일은 나중에 삭제할 수 있습니다.\n" +
                     "참고: <Stats를 로그로>는 특정 시점 보고서와 오늘의 late-skip 카운터입니다.\n" +
-                    "시간 흐름을 보고 싶으면 자세한 로그를 15-20분 동안 실행하세요." +
+                    "시간 흐름을 보고 싶으면 자세한 로그를 15-20분 동안 실행하세요.\n" +
                     "일반 플레이 전에 다시 **OFF**로 바꾸는 것을 잊지 마세요."
                 },
 

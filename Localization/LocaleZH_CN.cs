@@ -127,7 +127,6 @@ namespace FastBoarding
                     "团体只占人群的一小部分；主要收益来自跳过迟到奔跑的单独 cim。\n" +
                     "被跳过的迟到市民不会被删除；游戏会自然重新分配他们。"
                 },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "提前奔跑：公交+有轨电车" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
                     "<迟到>市民会<提前奔跑>，尝试在发车时间**之前**赶到。\n" +
@@ -137,17 +136,19 @@ namespace FastBoarding
                     $"和 <{ToggleName}> 配合很好，因为它可能减少错过车辆并需要重新分配的市民数量。\n" +
                     "不会强制上车，也不会传送市民。"
                 },
+
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "总使用量" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)),
                     "来自游戏交通信息视图的每月公共交通使用量。\n" +
                     "更新时间显示此状态快照的获取时间（通常是在进入选项菜单后）。"
                 },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "市民提前奔跑" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
-                    "统计今天 Fast Boarding 让多少市民提前奔跑，尝试在发车前赶上公交/有轨电车。"
+                    "启用 [x] 时，统计今天开始**提前奔跑**、尝试在发车前赶上公交/有轨电车的市民。\n" +
+                    "市民会比 vanilla 提前 512 帧奔跑（现实时间约提前 2-8 秒，游戏内约 2 分钟）。"
                 },
+
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "公交" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusBus)), StatusDescription("公交") },
@@ -193,7 +194,7 @@ namespace FastBoarding
                     "保持开启可能降低性能并生成巨大的日志文件。\n" +
                     "以后可以删除旧日志文件。\n" +
                     "注意：<统计写入日志> 是某一时刻的报告，加上今天的 late-skip 计数器。\n" +
-                    "如需查看事件时间线，请运行详细日志 15-20 分钟。" +
+                    "如需查看事件时间线，请运行详细日志 15-20 分钟。\n" +
                     "正常游玩前别忘了再次切回 **OFF**。"
                 },
 

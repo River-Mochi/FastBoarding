@@ -127,7 +127,6 @@ namespace FastBoarding
                     "Los grupos son una parte pequeña de la multitud; la mayor parte del beneficio viene de omitir cims solo que llegan tarde.\n" +
                     "Los ciudadanos tarde omitidos no se eliminan; el juego los reasigna de forma natural."
                 },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "Cims corren antes: buses + tranvías" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
                     "Los ciudadanos <tarde> empiezan a <correr antes> para intentar llegar **antes** de la hora de salida.\n" +
@@ -137,17 +136,19 @@ namespace FastBoarding
                     $"Funciona bien con <{ToggleName}> porque puede reducir cuántos cims pierden el vehículo y necesitan reasignarse.\n" +
                     "No fuerza el embarque ni teletransporta ciudadanos."
                 },
+
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "Uso total" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)),
                     "Uso mensual del transporte público desde la infovista Transporte del juego.\n" +
                     "La hora de actualización muestra cuándo se tomó este snapshot (normalmente al entrar en el menú Opciones)."
                 },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "Cims corren antes" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
-                    "Cuenta todos los cims que Fast Boarding hizo correr antes hoy para intentar alcanzar un bus/tranvía antes de la salida."
+                    "Si está activado [x], cuenta todos los cims (hoy) que empezaron a **correr antes** para intentar alcanzar un bus/tranvía antes de la salida.\n" +
+                    "Los cims corren 512 frames antes que en vanilla (~2-8 segundos antes en tiempo real, ~2 minutos en el juego)."
                 },
+
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "Bus" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusBus)), StatusDescription("bus") },
@@ -192,8 +193,8 @@ namespace FastBoarding
                     "**No lo actives para juego normal.**\n" +
                     "Dejarlo activado puede bajar el rendimiento y crear archivos log enormes.\n" +
                     "Puedes borrar los archivos log antiguos más tarde.\n" +
-                    "Nota: <Stats al log> es un informe puntual con los contadores de saltos tardíos de hoy; es distinto de los logs detallados." +
-                    "Ejecuta el log detallado durante 15-20 min si quieres una cronología de lo ocurrido." +
+                    "Nota: <Stats al log> es un informe puntual con los contadores de saltos tardíos de hoy; es distinto de los logs detallados.\n" +
+                    "Ejecuta el log detallado durante 15-20 min si quieres una cronología de lo ocurrido.\n" +
                     "No olvides volver a ponerlo en **OFF** antes de jugar normal."
                 },
 

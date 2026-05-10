@@ -127,7 +127,6 @@ namespace FastBoarding
                     "グループは群衆の一部にすぎません。主な効果は、遅れて走っている単独 cim のスキップから得られます。\n" +
                     "スキップされた遅れた市民は削除されません。ゲームにより自然に再割り当てされます。"
                 },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "早めに走る: バス+トラム" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
                     "<遅れている>市民が出発時刻**前**に間に合うよう、<早めに走り始め>ます。\n" +
@@ -137,17 +136,19 @@ namespace FastBoarding
                     $"<{ToggleName}> と相性がよく、車両を逃して再割り当てが必要になる cim を減らせる場合があります。\n" +
                     "強制乗車や市民のテレポートは行いません。"
                 },
+
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "総利用状況" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)),
                     "ゲームの交通インフォビューから取得した月間公共交通利用数。\n" +
                     "更新時刻は、このステータス snapshot が取得された時刻です（通常はオプションメニューを開いた後）。"
                 },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "早めに走る cim" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
-                    "Fast Boarding が今日、出発前にバス/トラムへ間に合うよう早めに走らせた cim の数です。"
+                    "有効 [x] の場合、今日、出発前にバス/トラムへ間に合うよう **早めに走り始めた** cim を数えます。\n" +
+                    "cim は vanilla より 512 フレーム早く走ります（実時間で約 2～8 秒早く、ゲーム内で約 2 分）。"
                 },
+
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "バス" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusBus)), StatusDescription("バス") },
@@ -192,8 +193,8 @@ namespace FastBoarding
                     "**通常プレイでは有効にしないでください。**\n" +
                     "有効のままにすると、性能が下がり、巨大なログファイルが作成されることがあります。\n" +
                     "古いログファイルは後で削除できます。\n" +
-                    "注: <Statsをログへ> は、その時点のレポートと今日の late-skip カウンターです。詳細ログとは異なります。" +
-                    "時間経過の流れを見たい場合は、詳細ログを15～20分実行してください。" +
+                    "注: <Statsをログへ> は、その時点のレポートと今日の late-skip カウンターです。詳細ログとは異なります。\n" +
+                    "時間経過の流れを見たい場合は、詳細ログを15～20分実行してください。\n" +
                     "通常プレイ前に **OFF** に戻すのを忘れないでください。"
                 },
 

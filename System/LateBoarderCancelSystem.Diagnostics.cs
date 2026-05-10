@@ -1,12 +1,11 @@
 // File: System/LateBoarderCancelSystem.Diagnostics.cs
-// Purpose: Verbose diagnostics, delayed follow-up samples, and boarding-hold probes.
+// Purpose: Verbose diagnostics and delayed follow-up samples.
 
 namespace FastBoarding
 {
     using Game;             // GameSystemBase
     using Game.Common;      // Deleted, Destroyed
     using Game.Creatures;   // CurrentVehicle, CreatureVehicleFlags
-    using Game.Routes;      // CurrentRoute
     using Game.Vehicles;    // PublicTransport, Passenger
     using System;           // DateTime
     using Unity.Entities;   // Entity
@@ -16,28 +15,20 @@ namespace FastBoarding
     {
         // Verbose summary throttles. 4096 frames is about 22.5 in-game minutes.
         private const uint DiagnosticFrameInterval = 4096;
-        private const uint BoardingHoldProbeFrameInterval = 4096;
 
         private const int MaxSampledCimsPerModePerUpdate = 3;
         private const int MaxSampledCimsPerUpdate = MaxSampledCimsPerModePerUpdate * 7;
+        private const int MaxRunSoonerFollowUpSamplesPerUpdate = 4;
         private const uint FollowUpDelayFrames = 2048; // ~11.25 in-game minutes.
         private const int MaxFollowUpSamples = 256;
         private const int MaxFollowUpLogsPerUpdate = 6;
-        private const int MaxBoardingHoldProbeLogsPerUpdate = 6;
 
         private uint m_LastDiagnosticFrame;
-
-        private uint m_LastBusBoardingHoldProbeFrame;
-        private uint m_LastTrainBoardingHoldProbeFrame;
-        private uint m_LastTramBoardingHoldProbeFrame;
-        private uint m_LastSubwayBoardingHoldProbeFrame;
-        private uint m_LastShipBoardingHoldProbeFrame;
-        private uint m_LastFerryBoardingHoldProbeFrame;
-        private uint m_LastAirBoardingHoldProbeFrame;
 
         private long m_TotalCanceled;
         private long m_TotalRunSoonerAssists;
         private static bool s_FollowUpLegendLogged;
+        private static bool s_RunSoonerFollowUpLegendLogged;
         private int m_SkippedForTool;
         private bool m_LoggedActive;
 
@@ -45,137 +36,6 @@ namespace FastBoarding
         private readonly FollowUpSample[] m_FollowUpSamples = new FollowUpSample[MaxFollowUpSamples];
         private int m_FollowUpCount;
         private int m_NextFollowUpSample;
-
-        private void TryLogBoardingHoldProbe(
-            uint frame,
-            Entity vehicleEntity,
-            TransportType transportType,
-            Game.Vehicles.PublicTransport publicTransport,
-            int passengerCount,
-            int readyCount,
-            int notReadyCount,
-            int groupNotReadyCount,
-            UnsafeNotReadyStats unsafeNotReadyStats,
-            int candidateCount,
-            string note,
-            ref int logsThisUpdate)
-        {
-            if (!ShouldLogDiagnostics())
-            {
-                return;
-            }
-
-            if (logsThisUpdate >= MaxBoardingHoldProbeLogsPerUpdate)
-            {
-                return;
-            }
-
-            // Keep one throttle per transit mode so busy bus/tram logs do not suppress train probes.
-            if (IsBoardingHoldProbeThrottled(transportType, frame))
-            {
-                return;
-            }
-
-            uint framesPastDeparture = frame >= publicTransport.m_DepartureFrame
-                ? frame - publicTransport.m_DepartureFrame
-                : 0u;
-
-            // Only log cases that can explain "vehicle is still boarding after departure".
-            bool lowUse = passengerCount <= 2;
-            bool noLateSoloCandidates = candidateCount == 0;
-            bool pastVanillaLongHold = framesPastDeparture >= 1800u;
-
-            if (!lowUse && !noLateSoloCandidates && !pastVanillaLongHold)
-            {
-                return;
-            }
-
-            logsThisUpdate++;
-            SetLastBoardingHoldProbeFrame(transportType, frame);
-
-            Entity route = Entity.Null;
-            if (EntityManager.HasComponent<CurrentRoute>(vehicleEntity))
-            {
-                route = EntityManager.GetComponentData<CurrentRoute>(vehicleEntity).m_Route;
-            }
-
-            string routeText = route == Entity.Null ? "none" : route.ToString();
-            string vehicleText = EntityText(vehicleEntity);
-            double gameMinutesPastDeparture = FramesToGameMinutes(framesPastDeparture);
-
-            LogUtils.Info(
-                Mod.s_Log,
-                () =>
-                    $"BoardingHoldProbe: mode={transportType}, vehicle={vehicleText}, route={routeText}, " +
-                    $"frame={frame}, departureFrame={publicTransport.m_DepartureFrame}, " +
-                    $"pastDepartureFrames={framesPastDeparture}, pastDepartureGameMin={gameMinutesPastDeparture:F1}, " +
-                    $"passengers={passengerCount}, ready={readyCount}, notReady={notReadyCount}, " +
-                    $"lateSoloCandidates={candidateCount}, groupNotReady={groupNotReadyCount}, unsafeNotReady={unsafeNotReadyStats.Total}, unsafeMissingData={unsafeNotReadyStats.MissingData}, unsafeNoExactVehicleInPath={unsafeNotReadyStats.NoExactVehicleInPath}, unsafeOther={unsafeNotReadyStats.Other}, " +
-                    $"maxBoardingDistance={publicTransport.m_MaxBoardingDistance}, minWaitingDistance={publicTransport.m_MinWaitingDistance}, " +
-                    $"state={publicTransport.m_State}, note={note}");
-        }
-
-        private bool IsBoardingHoldProbeThrottled(TransportType transportType, uint frame)
-        {
-            uint lastFrame = GetLastBoardingHoldProbeFrame(transportType);
-            return lastFrame != 0 &&
-                frame >= lastFrame &&
-                frame - lastFrame < BoardingHoldProbeFrameInterval;
-        }
-
-        private uint GetLastBoardingHoldProbeFrame(TransportType transportType)
-        {
-            switch (transportType)
-            {
-                case TransportType.Bus:
-                    return m_LastBusBoardingHoldProbeFrame;
-                case TransportType.Train:
-                    return m_LastTrainBoardingHoldProbeFrame;
-                case TransportType.Tram:
-                    return m_LastTramBoardingHoldProbeFrame;
-                case TransportType.Subway:
-                    return m_LastSubwayBoardingHoldProbeFrame;
-                case TransportType.Ship:
-                    return m_LastShipBoardingHoldProbeFrame;
-                case TransportType.Ferry:
-                    return m_LastFerryBoardingHoldProbeFrame;
-                case TransportType.Airplane:
-                    return m_LastAirBoardingHoldProbeFrame;
-                default:
-                    return m_LastBusBoardingHoldProbeFrame;
-            }
-        }
-
-        private void SetLastBoardingHoldProbeFrame(TransportType transportType, uint frame)
-        {
-            switch (transportType)
-            {
-                case TransportType.Bus:
-                    m_LastBusBoardingHoldProbeFrame = frame;
-                    break;
-                case TransportType.Train:
-                    m_LastTrainBoardingHoldProbeFrame = frame;
-                    break;
-                case TransportType.Tram:
-                    m_LastTramBoardingHoldProbeFrame = frame;
-                    break;
-                case TransportType.Subway:
-                    m_LastSubwayBoardingHoldProbeFrame = frame;
-                    break;
-                case TransportType.Ship:
-                    m_LastShipBoardingHoldProbeFrame = frame;
-                    break;
-                case TransportType.Ferry:
-                    m_LastFerryBoardingHoldProbeFrame = frame;
-                    break;
-                case TransportType.Airplane:
-                    m_LastAirBoardingHoldProbeFrame = frame;
-                    break;
-                default:
-                    m_LastBusBoardingHoldProbeFrame = frame;
-                    break;
-            }
-        }
 
         private static double FramesToGameMinutes(uint frames)
         {
@@ -250,7 +110,37 @@ namespace FastBoarding
             }
 
             m_FollowUpSamples[slot] =
-                new FollowUpSample(sample.TransportType, sample.Vehicle, sample.Passenger, frame, DateTime.Now);
+                new FollowUpSample(
+                    FollowUpSampleKind.SkippedLatePassenger,
+                    sample.TransportType,
+                    sample.Vehicle,
+                    sample.Passenger,
+                    frame,
+                    DateTime.Now);
+
+            if (m_FollowUpCount < m_FollowUpSamples.Length)
+            {
+                m_FollowUpCount++;
+            }
+        }
+
+        private void TrackRunSoonerFollowUpSample(TransportType transportType, Entity vehicle, Entity passenger)
+        {
+            uint frame = m_SimulationSystem?.frameIndex ?? 0;
+            int slot = FindFollowUpSampleSlot();
+            if (slot < 0)
+            {
+                return;
+            }
+
+            m_FollowUpSamples[slot] =
+                new FollowUpSample(
+                    FollowUpSampleKind.RunSoonerPassenger,
+                    transportType,
+                    vehicle,
+                    passenger,
+                    frame,
+                    DateTime.Now);
 
             if (m_FollowUpCount < m_FollowUpSamples.Length)
             {
@@ -309,7 +199,6 @@ namespace FastBoarding
                 sample.Active = false;
                 m_FollowUpSamples[i] = sample;
                 loggedThisUpdate++;
-                LogFollowUpLegendOnce();
 
                 DateTime followUpLocalTime = DateTime.Now;
                 TransitWaitStatusSystem.FollowUpSnapshot followUpSnapshot =
@@ -317,6 +206,18 @@ namespace FastBoarding
                         sample.Passenger,
                         sample.TransportType,
                         sample.Vehicle);
+
+                if (sample.Kind == FollowUpSampleKind.RunSoonerPassenger)
+                {
+                    LogRunSoonerFollowUpLegendOnce();
+                    LogUtils.Info(
+                        Mod.s_Log,
+                        () => $"Run Sooner Follow-up: {sample.TransportType} | cim={sample.Passenger} | target={sample.Vehicle} | ran={sample.LocalTime:HH:mm:ss} | followUp={followUpLocalTime:HH:mm:ss} | result={DescribeRunSoonerFollowUpState(followUpSnapshot, sample.Vehicle)}");
+
+                    continue;
+                }
+
+                LogFollowUpLegendOnce();
                 TransitWaitStatus.RecordLateBoarderFollowUp(
                     World,
                     sample.TransportType,
@@ -345,6 +246,19 @@ namespace FastBoarding
                 () => "Skip follow-up legend: state=same vehicle/different vehicle means assigned; has path means repathing or walking; no path yet means unresolved. next=stop/lane/waypoint/vehicle/target shows the cim's next path target. same vehicle entries include missed vehicle proof.");
         }
 
+        private static void LogRunSoonerFollowUpLegendOnce()
+        {
+            if (s_RunSoonerFollowUpLegendLogged)
+            {
+                return;
+            }
+
+            s_RunSoonerFollowUpLegendLogged = true;
+            LogUtils.Info(
+                Mod.s_Log,
+                () => "Run sooner follow-up legend: result=made same vehicle means the sampled runner caught the original bus/tram; different vehicle/has path means vanilla reassigned or is still routing; no path yet means unresolved. These are sampled verbose diagnostics, not every runner.");
+        }
+
         private static string EntityText(Entity entity)
         {
             return entity == Entity.Null ? "none" : entity.ToString();
@@ -370,6 +284,35 @@ namespace FastBoarding
                 }
 
                 return details;
+            }
+
+            if (snapshot.Outcome == TransitWaitStatusSystem.FollowUpOutcome.HasPathNotAssignedYet)
+            {
+                return AppendFollowUpTargetDetails("has path", snapshot);
+            }
+
+            return "no path yet";
+        }
+
+        private static string DescribeRunSoonerFollowUpState(
+            TransitWaitStatusSystem.FollowUpSnapshot snapshot,
+            Entity targetVehicle)
+        {
+            if (snapshot.CurrentVehicle != Entity.Null)
+            {
+                if (snapshot.CurrentVehicle == targetVehicle)
+                {
+                    bool ready = (snapshot.CurrentVehicleFlags & CreatureVehicleFlags.Ready) != 0;
+                    string sameVehicleResult = ready
+                        ? $"made same vehicle {snapshot.CurrentVehicleText}"
+                        : $"same vehicle not ready {snapshot.CurrentVehicleText}";
+
+                    return AppendFollowUpTargetDetails(sameVehicleResult, snapshot);
+                }
+
+                return AppendFollowUpTargetDetails(
+                    $"different vehicle {snapshot.CurrentVehicleText}",
+                    snapshot);
             }
 
             if (snapshot.Outcome == TransitWaitStatusSystem.FollowUpOutcome.HasPathNotAssignedYet)
@@ -537,14 +480,6 @@ namespace FastBoarding
             m_LoggedActive = false;
             m_FollowUpCount = 0;
             m_NextFollowUpSample = 0;
-
-            m_LastBusBoardingHoldProbeFrame = 0;
-            m_LastTrainBoardingHoldProbeFrame = 0;
-            m_LastTramBoardingHoldProbeFrame = 0;
-            m_LastSubwayBoardingHoldProbeFrame = 0;
-            m_LastShipBoardingHoldProbeFrame = 0;
-            m_LastFerryBoardingHoldProbeFrame = 0;
-            m_LastAirBoardingHoldProbeFrame = 0;
         }
     }
 }

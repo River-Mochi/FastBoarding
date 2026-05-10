@@ -20,9 +20,9 @@ namespace FastBoarding
     public partial class LateBoarderCancelSystem : GameSystemBase
     {
         // High-level flow:
-        // 1. Scan boarding vehicles after their vanilla departure frame.
-        // 2. Optionally detach safe solo late passengers whose remaining path still contains that exact vehicle.
-        // 3. Optionally set vanilla's Run flag before bus departure so assigned cims hurry sooner.
+        // 1. Scan vehicles while vanilla still has them in the boarding state.
+        // 2. Optionally set vanilla's Run flag shortly before bus/tram departure so assigned cims hurry sooner.
+        // 3. After departure, optionally detach safe solo late passengers whose remaining path still contains that exact vehicle.
         // 4. Optionally record delayed "what happened next?" samples for verbose diagnostics.
         // 2048/day means every 128 simulation frames (~42 game seconds); cancellation work is also capped below.
         public const int UpdatesPerDay = 2048;
@@ -49,7 +49,7 @@ namespace FastBoarding
             m_ToolSystem = World.GetOrCreateSystemManaged<ToolSystem>();
             m_DefaultToolSystem = World.GetOrCreateSystemManaged<DefaultToolSystem>();
 
-            // Passenger is intentionally not required so diagnostic probes can still explain empty holds.
+            // Passenger is not required because some multi-car layouts store passengers on child vehicles.
             m_VehicleQuery = SystemAPI.QueryBuilder()
                 .WithAll<Game.Vehicles.PublicTransport>()
                 .WithNone<Deleted, Destroyed, Temp, Overridden>()
@@ -132,6 +132,7 @@ namespace FastBoarding
             int airCanceled = 0;
             int busRunSoonerAssists = 0;
             int tramRunSoonerAssists = 0;
+            int sampledRunSoonerPassengerCount = 0;
             int busSampleCount = 0;
             int trainSampleCount = 0;
             int tramSampleCount = 0;
@@ -141,7 +142,6 @@ namespace FastBoarding
             int airSampleCount = 0;
             CanceledPassengerSample[]? sampledCanceledPassengers = null;
             int sampledCanceledPassengerCount = 0;
-            int boardingHoldProbeLogs = 0;
             uint frame = m_SimulationSystem?.frameIndex ?? 0;
             bool cancelLateBoarders = BoardingRuntimeSettings.CancelLateBoarders;
             bool cimsRunSoonerToCatchBuses = BoardingRuntimeSettings.CimsRunSoonerToCatchBuses;
@@ -190,7 +190,8 @@ namespace FastBoarding
                             transportType,
                             publicTransport,
                             frame,
-                            latestDepartureFrame);
+                            latestDepartureFrame,
+                            ref sampledRunSoonerPassengerCount);
                         runSoonerAssists += queuedRunSooner;
 
                         if (transportType == TransportType.Bus)
@@ -206,7 +207,7 @@ namespace FastBoarding
                     if (m_SimulationSystem == null ||
                         !IsPastDepartureFrames(latestDepartureFrame, frame))
                     {
-                        // Boarding assists only run after vanilla departure frames are met.
+                        // Late-passenger cancellation only runs after vanilla departure frames are met.
                         continue;
                     }
 
@@ -217,31 +218,12 @@ namespace FastBoarding
 
                     if (!hasPassengerBuffer || passengers.Length == 0)
                     {
-                        TryLogBoardingHoldProbe(
-                            frame,
-                            vehicleEntity,
-                            transportType,
-                            publicTransport,
-                            passengerCount: 0,
-                            readyCount: 0,
-                            notReadyCount: 0,
-                            groupNotReadyCount: 0,
-                            unsafeNotReadyStats: default,
-                            candidateCount: 0,
-                            note: "empty-past-departure",
-                            ref boardingHoldProbeLogs);
-
                         continue;
                     }
 
                     // Collect first, then mutate afterward, so the passenger buffer is not edited while scanned.
                     // Managed HashSet is short-lived main-thread scratch state; NativeHashSet adds allocator noise here.
                     var pendingCancellation = new HashSet<Entity>();
-                    int readyCount = 0;
-                    int notReadyCount = 0;
-                    int groupNotReadyCount = 0;
-                    UnsafeNotReadyStats unsafeNotReadyStats = default;
-                    int candidateCountForVehicle = 0;
 
                     for (var i = 0; i < passengers.Length; i++)
                     {
@@ -265,15 +247,11 @@ namespace FastBoarding
 
                         if ((currentVehicle.m_Flags & CreatureVehicleFlags.Ready) != 0)
                         {
-                            readyCount++;
                             continue;
                         }
 
-                        notReadyCount++;
-
                         if (IsGroupPassenger(passenger))
                         {
-                            groupNotReadyCount++;
                             continue;
                         }
 
@@ -282,29 +260,12 @@ namespace FastBoarding
                             continue;
                         }
 
-                        if (CanSafelyCancelPassenger(vehicleEntity, passenger, ref unsafeNotReadyStats))
+                        if (CanSafelyCancelPassenger(vehicleEntity, passenger))
                         {
                             pendingCancellation.Add(passenger);
                             candidates++;
-                            candidateCountForVehicle++;
                         }
                     }
-
-                    TryLogBoardingHoldProbe(
-                        frame,
-                        vehicleEntity,
-                        transportType,
-                        publicTransport,
-                        passengers.Length,
-                        readyCount,
-                        notReadyCount,
-                        groupNotReadyCount,
-                        unsafeNotReadyStats,
-                        candidateCountForVehicle,
-                        candidateCountForVehicle == 0
-                            ? "no-late-solo-candidates"
-                            : "late-solo-candidates",
-                        ref boardingHoldProbeLogs);
 
                     int canceledForVehicle = 0;
                     var canceledPassengers = new HashSet<Entity>();

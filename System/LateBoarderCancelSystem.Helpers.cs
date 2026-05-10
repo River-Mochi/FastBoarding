@@ -42,15 +42,8 @@ namespace FastBoarding
 
         private bool CanSafelyCancelPassenger(Entity vehicleEntity, Entity passenger)
         {
-            UnsafeNotReadyStats ignoredStats = default;
-            return CanSafelyCancelPassenger(vehicleEntity, passenger, ref ignoredStats);
-        }
-
-        private bool CanSafelyCancelPassenger(Entity vehicleEntity, Entity passenger, ref UnsafeNotReadyStats unsafeStats)
-        {
             if (IsGroupPassenger(passenger))
             {
-                unsafeStats.Other++;
                 return false;
             }
 
@@ -59,7 +52,6 @@ namespace FastBoarding
                 !EntityManager.HasComponent<PathOwner>(passenger) ||
                 !EntityManager.HasBuffer<PathElement>(passenger))
             {
-                unsafeStats.MissingData++;
                 return false;
             }
 
@@ -79,7 +71,6 @@ namespace FastBoarding
                 }
             }
 
-            unsafeStats.NoExactVehicleInPath++;
             return false;
         }
 
@@ -120,7 +111,8 @@ namespace FastBoarding
             TransportType transportType,
             Game.Vehicles.PublicTransport publicTransport,
             uint frame,
-            uint latestDepartureFrame)
+            uint latestDepartureFrame,
+            ref int sampledRunSoonerPassengers)
         {
             if (!BoardingRuntimeSettings.CimsRunSoonerToCatchBuses ||
                 (transportType != TransportType.Bus && transportType != TransportType.Tram) ||
@@ -150,16 +142,28 @@ namespace FastBoarding
                 DynamicBuffer<LayoutElement> layout = EntityManager.GetBuffer<LayoutElement>(vehicleEntity);
                 for (int i = 0; i < layout.Length; i++)
                 {
-                    queued += QueueRunForPassengersOnVehicle(ref ecb, layout[i].m_Vehicle);
+                    queued += QueueRunForPassengersOnVehicle(
+                        ref ecb,
+                        layout[i].m_Vehicle,
+                        transportType,
+                        ref sampledRunSoonerPassengers);
                 }
 
                 return queued;
             }
 
-            return QueueRunForPassengersOnVehicle(ref ecb, vehicleEntity);
+            return QueueRunForPassengersOnVehicle(
+                ref ecb,
+                vehicleEntity,
+                transportType,
+                ref sampledRunSoonerPassengers);
         }
 
-        private int QueueRunForPassengersOnVehicle(ref EntityCommandBuffer ecb, Entity vehicleEntity)
+        private int QueueRunForPassengersOnVehicle(
+            ref EntityCommandBuffer ecb,
+            Entity vehicleEntity,
+            TransportType transportType,
+            ref int sampledRunSoonerPassengers)
         {
             if (!EntityManager.Exists(vehicleEntity) ||
                 !EntityManager.HasBuffer<Passenger>(vehicleEntity))
@@ -199,6 +203,13 @@ namespace FastBoarding
                 human.m_Flags |= HumanFlags.Run;
                 ecb.SetComponent(passenger, human);
                 queued++;
+
+                if (sampledRunSoonerPassengers < MaxRunSoonerFollowUpSamplesPerUpdate &&
+                    ShouldLogDiagnostics())
+                {
+                    TrackRunSoonerFollowUpSample(transportType, vehicleEntity, passenger);
+                    sampledRunSoonerPassengers++;
+                }
             }
 
             return queued;

@@ -127,7 +127,6 @@ namespace FastBoarding
                     "Gruppen sind nur ein kleiner Teil der Menge; der meiste Nutzen kommt vom Überspringen verspäteter Solo-Cims.\n" +
                     "Übersprungene verspätete Bürger werden nicht gelöscht; das Spiel weist sie natürlich neu zu."
                 },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "Cims laufen früher: Busse + Trams" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
                     "Bürger, die <spät> sind, beginnen <früher zu laufen>, um es **vor** der Abfahrtszeit zu schaffen.\n" +
@@ -137,17 +136,19 @@ namespace FastBoarding
                     $"Passt gut zu <{ToggleName}>, weil es reduzieren kann, wie viele Cims das Fahrzeug verpassen und neu zugewiesen werden müssen.\n" +
                     "Erzwingt kein Einsteigen und teleportiert keine Bürger."
                 },
+
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "Gesamtnutzung" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)),
                     "Monatliche ÖPNV-Nutzung aus der Transport-Infoview des Spiels.\n" +
                     "Die Aktualisierungszeit zeigt, wann dieser Status-Snapshot erstellt wurde (meist nach dem Öffnen des Optionenmenüs)."
                 },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "Cims laufen früher" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
-                    "Zählt alle Cims, die Fast Boarding heute früher laufen ließ, damit sie versuchen können, vor der Abfahrt einen Bus/eine Tram zu erreichen."
+                    "Wenn aktiviert [x], zählt alle Cims (heute), die **früher laufen**, um Bus/Tram vor der Abfahrt zu erreichen.\n" +
+                    "Cims laufen 512 Frames früher als in Vanilla (~2-8 Sekunden früher in Echtzeit, ~2 Minuten im Spiel)."
                 },
+
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "Bus" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusBus)), StatusDescription("bus") },
@@ -192,8 +193,8 @@ namespace FastBoarding
                     "**Nicht für normales Spielen aktivieren.**\n" +
                     "Aktiviert lassen kann die Leistung senken und riesige Logdateien erzeugen.\n" +
                     "Alte Logdateien können später gelöscht werden.\n" +
-                    "Hinweis: <Stats ins Log> ist ein Zeitpunktbericht plus heutige Zähler für späte Sprünge; das ist etwas anderes als ausführliche Logs." +
-                    "Ausführliches Logging 15-20 Min. laufen lassen, wenn eine Zeitlinie der Ereignisse gebraucht wird." +
+                    "Hinweis: <Stats ins Log> ist ein Zeitpunktbericht plus heutige Zähler für späte Sprünge; das ist etwas anderes als ausführliche Logs.\n" +
+                    "Ausführliches Logging 15-20 Min. laufen lassen, wenn eine Zeitlinie der Ereignisse gebraucht wird.\n" +
                     "Danach vor normalem Spielen wieder **OFF** schalten."
                 },
 
