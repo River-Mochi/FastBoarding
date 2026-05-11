@@ -44,8 +44,7 @@ namespace FastBoarding
                     "<1x = vanilla>\n" +
                     extraLine +
                     $"Higher values reduce {transitName} boarding and loading time.\n" +
-                    "3x is the recommended default.\n" +
-                    "5x is the maximum.\n" +
+        
                     "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
                     $"Use [✓] <{ToggleName}> if you want late cims to miss the vehicle after departure time.\n" +
                     "Skipped late citizens are not deleted; vanilla will naturally reroute them.\n" +
@@ -121,20 +120,20 @@ namespace FastBoarding
                 // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
-                    "Late passengers who are still <not ready> after departure time are allowed to miss the vehicle.\n" +
-                    "Note: we only skip solo late citizens.\n" +
-                    "Groups/families travelling together that are late are <not skipped> and may still cause delays to transit like in vanilla.\n" +
-                    "Groups are a small part of the crowd; most benefits are from skipping solo cims who are running late.\n" +
-                    "Skipped late citizens are not deleted; they are naturally reassigned by the game."
+                    "<Late passengers> who are still <not ready> after <departure time> are allowed to miss the vehicle.\n" +
+                    "- Note: we only skip solo late citizens.\n" +
+                    "- Groups/families travelling together that are late are <not skipped> and may still cause delays to transit like in vanilla.\n" +
+                    "- Group travelers are a small number; most benefits are from skipping solo cims who are running late.\n" +
+                    "- Skipped late citizens are not deleted; they are naturally reassigned by the game."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "Cims Run Sooner: Buses + Trams" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
                     "Citizens who are <late> start <running sooner> to try to make it **before** departure time.\n" +
-                    "Helps keep buses/trams on schedule.\n" +
-                    "Only affects cims already assigned to a vehicle that is currently boarding.\n" +
-                    "Vanilla only starts cims running at departure time, which can be too late to help.\n" +
-                    $"Pairs well with <{ToggleName}> because it may reduce how many cims miss the vehicle and need to be reassigned.\n" +
-                    "Does not force boarding or teleport citizens."
+                    "- Helps keep buses/trams on schedule.\n" +
+                    "- Only affects cims already assigned to a vehicle that is currently boarding.\n" +
+                    "- Vanilla only starts cims running at departure time, which can be too late to help.\n" +
+                    $"- Pairs well with <{ToggleName}> because it may reduce how many cims miss the vehicle and need to be reassigned.\n" +
+                    "- Does not force boarding or teleport citizens."
                 },
 
                 // Status overview
