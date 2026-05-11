@@ -27,12 +27,12 @@ Fast Boarding helps before that by making boarding faster and reducing late-pass
 - The cim is not deleted. The game can naturally reassign them.
 - Groups/families traveling together are left to vanilla methods so they are not split up.
 
-### Run Sooner: Bus + Tram
+### Cims Run sooner: Bus + Tram
 
-- ✅ When **Cims Run Sooner: Bus + Tram** is ON, assigned but late passengers (bus/tram) can start running a little sooner.
+- ✅ When **Cims Run Sooner** is ON, the assigned but late passengers can start running a little sooner.
 - Vanilla starts cims running at departure time, which can be too late to help if they are not already near the stop.
 - Like real life, people start running from a block away, not just at the stop.
-- It reduces how many cims miss buses/trams and need to be reassigned later. Does not force boarding or teleport citizens.
+- It reduces how many cims need to be reassigned later. Currently only works for bus/trams; does not force boarding or teleport citizens.
 
 
 ### Status report included
