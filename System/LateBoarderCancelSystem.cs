@@ -7,6 +7,7 @@ namespace FastBoarding
     using Game;
     using Game.Common;
     using Game.Creatures;
+    using Game.Pathfind;
     using Game.SceneFlow;
     using Game.Simulation;
     using Game.Tools;
@@ -31,7 +32,15 @@ namespace FastBoarding
         // Higher caps process large crowds faster but can create larger one-frame edits.
         private const int MaxCancellationsPerUpdate = 128;
 
+        // Wait one boarding-assist interval after vanilla departure before trimming paths.
+        // This gives vanilla and other mods one extra assist interval to settle same-frame boarding edits.
+        private const uint LatePassengerCancelGraceFrames = 128u;
+
         private EntityQuery m_VehicleQuery;
+        private EntityQuery m_CurrentVehicleQuery;
+        private EntityQuery m_HumanResidentQuery;
+        private EntityQuery m_PassengerBufferQuery;
+        private EntityQuery m_PathBufferQuery;
         private SimulationSystem? m_SimulationSystem;
         private ToolSystem? m_ToolSystem;
         private DefaultToolSystem? m_DefaultToolSystem;
@@ -53,6 +62,20 @@ namespace FastBoarding
             m_VehicleQuery = SystemAPI.QueryBuilder()
                 .WithAll<Game.Vehicles.PublicTransport>()
                 .WithNone<Deleted, Destroyed, Temp, Overridden>()
+                .Build();
+
+            // These queries are only used to complete dependencies for data this system edits directly.
+            m_CurrentVehicleQuery = SystemAPI.QueryBuilder()
+                .WithAll<CurrentVehicle>()
+                .Build();
+            m_HumanResidentQuery = SystemAPI.QueryBuilder()
+                .WithAll<Human, Game.Creatures.Resident>()
+                .Build();
+            m_PassengerBufferQuery = SystemAPI.QueryBuilder()
+                .WithAll<Passenger>()
+                .Build();
+            m_PathBufferQuery = SystemAPI.QueryBuilder()
+                .WithAll<PathOwner, PathElement>()
                 .Build();
 
             RequireForUpdate(m_VehicleQuery);
@@ -149,8 +172,8 @@ namespace FastBoarding
             try
             {
                 // This pass reads vehicle/passenger data directly on the main thread.
-                // Safety: CompleteDependency waits for earlier ECS jobs touching the same data to finish first.
-                m_VehicleQuery.CompleteDependency();
+                // Safety: wait for earlier ECS jobs touching the same vehicle/passenger/path data first.
+                CompleteBoardingAssistDependencies();
                 vehicles = m_VehicleQuery.ToEntityArray(Allocator.Temp);
                 ecb = new EntityCommandBuffer(Allocator.Temp);
                 hasCommandBuffer = true;
@@ -205,9 +228,9 @@ namespace FastBoarding
                     }
 
                     if (m_SimulationSystem == null ||
-                        !IsPastDepartureFrames(latestDepartureFrame, frame))
+                        !IsPastLateCancelGraceFrame(latestDepartureFrame, frame))
                     {
-                        // Late-passenger cancellation only runs after vanilla departure frames are met.
+                        // Late-passenger cancellation waits a short grace after vanilla departure.
                         continue;
                     }
 
@@ -370,6 +393,15 @@ namespace FastBoarding
                     vehicles.Dispose();
                 }
             }
+        }
+
+        private void CompleteBoardingAssistDependencies()
+        {
+            m_VehicleQuery.CompleteDependency();
+            m_CurrentVehicleQuery.CompleteDependency();
+            m_HumanResidentQuery.CompleteDependency();
+            m_PassengerBufferQuery.CompleteDependency();
+            m_PathBufferQuery.CompleteDependency();
         }
 
         private static bool IsRealGameLoad(Purpose purpose, GameMode mode)

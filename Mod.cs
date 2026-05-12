@@ -76,9 +76,18 @@ namespace FastBoarding
 
             try
             {
-                // Stop tuning is one-shot; late-boarder cancel runs only while the option is enabled.
-                // These order constraints keep us close to vanilla movement/boarding timing.
+                // Stop tuning is one-shot; boarding assist runs only while a behavior option is enabled.
+                // Run after vanilla transport AI has decided whether the vehicle is still boarding, then
+                // before cim movement consumes the passenger/path edits.
                 updateSystem.UpdateBefore<TransportStopTuningSystem, TransportStopSystem>(
+                    SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateAfter<LateBoarderCancelSystem, TransportCarAISystem>(
+                    SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateAfter<LateBoarderCancelSystem, TransportTrainAISystem>(
+                    SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateAfter<LateBoarderCancelSystem, TransportWatercraftAISystem>(
+                    SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateAfter<LateBoarderCancelSystem, TransportAircraftAISystem>(
                     SystemUpdatePhase.GameSimulation);
                 updateSystem.UpdateAfter<LateBoarderCancelSystem, ResidentAISystem.Actions>(
                     SystemUpdatePhase.GameSimulation);
