@@ -168,6 +168,8 @@ namespace FastBoarding
             uint frame = m_SimulationSystem?.frameIndex ?? 0;
             bool cancelLateBoarders = BoardingRuntimeSettings.CancelLateBoarders;
             bool cimsRunSoonerToCatchBuses = BoardingRuntimeSettings.CimsRunSoonerToCatchBuses;
+            var pendingCancellation = new HashSet<Entity>();
+            var canceledPassengers = new HashSet<Entity>();
 
             try
             {
@@ -245,8 +247,8 @@ namespace FastBoarding
                     }
 
                     // Collect first, then mutate afterward, so the passenger buffer is not edited while scanned.
-                    // Managed HashSet is short-lived main-thread scratch state; NativeHashSet adds allocator noise here.
-                    var pendingCancellation = new HashSet<Entity>();
+                    // Reused managed sets avoid per-vehicle GC while staying simple for this main-thread pass.
+                    pendingCancellation.Clear();
 
                     for (var i = 0; i < passengers.Length; i++)
                     {
@@ -291,7 +293,7 @@ namespace FastBoarding
                     }
 
                     int canceledForVehicle = 0;
-                    var canceledPassengers = new HashSet<Entity>();
+                    canceledPassengers.Clear();
                     foreach (var passenger in pendingCancellation)
                     {
                         if (cancellationsThisUpdate >= MaxCancellationsPerUpdate)
