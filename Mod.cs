@@ -34,6 +34,8 @@ namespace FastBoarding
 
         public void OnLoad(UpdateSystem updateSystem)
         {
+            LogUtils.Configure(ModId);
+
             if (!s_BannerLogged)
             {
                 s_BannerLogged = true;
