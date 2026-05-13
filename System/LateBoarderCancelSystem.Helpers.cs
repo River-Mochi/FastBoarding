@@ -87,6 +87,13 @@ namespace FastBoarding
             return latestDepartureFrame != 0 && frame > latestDepartureFrame;
         }
 
+        private static bool IsPastLateCancelGraceFrame(uint latestDepartureFrame, uint frame)
+        {
+            return latestDepartureFrame != 0 &&
+                   frame >= latestDepartureFrame &&
+                   frame - latestDepartureFrame >= LatePassengerCancelGraceFrames;
+        }
+
         private uint GetLatestDepartureFrame(
             Entity vehicleEntity,
             Game.Vehicles.PublicTransport publicTransport)
