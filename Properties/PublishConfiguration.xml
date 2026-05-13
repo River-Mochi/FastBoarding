@@ -24,8 +24,8 @@ Fast Boarding helps before that by making boarding faster and reducing late-pass
 
 ### Skip Late Passengers
 - ✅ When **Skip Late Passengers** is enabled, late solo cims who are still **not ready** even after **departure time** can miss that vehicle instead of making everyone wait.
-- The cim is not deleted. The game can naturally reassign them.
-- Groups/families traveling together are left to vanilla methods so they are not split up.
+- The cim is not deleted and the game can naturally reassign them.
+- Future: Groups/families traveling together are left to vanilla methods so they are not split up (they are few in number and could still cause delays, more research needed before adding group handling).
 
 ### Cims Run sooner: Bus + Tram
 
@@ -85,7 +85,7 @@ tags: boarding time, bus stop, slow transit, debunching, unbunching
 	<!--Link to the forum post where the mod can be discussed-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/fast-boarding.1918695/"/>
 	<!--Version of the mod-->
-	<ModVersion Value="1.1.0"/>
+	<ModVersion Value="1.1.1"/>
 	<!--Recommended version of the base game to use the mod-->
 	<GameVersion Value="1.5.*"/>
 	<!--Dependency for the mod, can be set multiple times-->
@@ -94,11 +94,9 @@ tags: boarding time, bus stop, slow transit, debunching, unbunching
 	<ChangeLog>
 - Add Cims Run Sooner: Bus + Tram option.
 - Add Italian and Polish translations.
-- Update all locale files to align with English.
 - Set 3x as default, and 5x as maximum boarding-speed scaler.
-- Improve status report.
-- Improve Stats to Log report with clearer tester hints, worst stops, entity IDs, and late-group notes.
-- Improve verbose diagnostic logging for testers.
+- Internal: added better shared logging and safety delay for skip late passengers. 
+- No gameplay setting changes.
 </ChangeLog>
 	<!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->
 	<ExternalLink Type="github" Url="https://github.com/River-Mochi/FastBoarding"/>
