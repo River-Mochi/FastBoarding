@@ -1,6 +1,6 @@
 # Fast Boarding Internals
 
-Purpose: quick memory map for future maintenance. Keep brief, source-code oriented.
+Purpose: quick memory map for future maintenance.
 
 Core vanilla problem:
 - `m_DepartureFrame` is a planned departure gate, not a hard "leave now" cutoff.
